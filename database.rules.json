@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "groups": {
+      "$groupId": {
+        ".read": true,
+        ".write": true,
+        "participants": {
+          ".read": true,
+          ".write": true
+        }
+      }
+    }
+  }
+}
