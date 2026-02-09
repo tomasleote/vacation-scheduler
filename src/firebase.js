@@ -8,22 +8,30 @@ const firebaseConfig = {
   projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "vacation-scheduler-demo",
   storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "vacation-scheduler-demo.appspot.com",
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL || "https://vacation-scheduler-demo.firebaseio.com"
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL || `https://${process.env.REACT_APP_FIREBASE_PROJECT_ID || "vacation-scheduler-demo"}.firebaseio.com`
 };
+
+// Debug: Log config (remove in production)
+console.log("Firebase initialized with projectId:", firebaseConfig.projectId);
 
 const app = initializeApp(firebaseConfig);
 export const database = getDatabase(app);
 export const auth = getAuth(app);
 
 export const createGroup = async (groupData) => {
-  const groupId = Date.now().toString();
-  const groupRef = ref(database, `groups/${groupId}`);
-  await set(groupRef, {
-    ...groupData,
-    createdAt: new Date().toISOString(),
-    id: groupId
-  });
-  return groupId;
+  try {
+    const groupId = Date.now().toString();
+    const groupRef = ref(database, `groups/${groupId}`);
+    await set(groupRef, {
+      ...groupData,
+      createdAt: new Date().toISOString(),
+      id: groupId
+    });
+    return groupId;
+  } catch (error) {
+    console.error("Error creating group:", error);
+    throw new Error(`Failed to create group: ${error.message}`);
+  }
 };
 
 export const getGroup = async (groupId) => {
