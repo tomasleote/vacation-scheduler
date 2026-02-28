@@ -4,9 +4,8 @@
       "$groupId": {
         ".read": true,
         ".write": true,
-        "participants": {
-          ".read": true,
-          ".write": true
+        "adminTokenHash": {
+          ".write": "!data.exists()"
         }
       }
     }

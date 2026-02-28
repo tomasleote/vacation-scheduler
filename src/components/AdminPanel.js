@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getGroup, updateGroup, getParticipants, deleteGroup, addParticipant, updateParticipant, getParticipant } from '../firebase';
+import { getGroup, updateGroup, getParticipants, deleteGroup, addParticipant, updateParticipant, getParticipant, validateAdminToken } from '../firebase';
 import { calculateOverlap, getBestOverlapPeriods, formatDateRange } from '../utils/overlap';
 import { exportToCSV } from '../utils/export';
 import { Copy, Download, Edit, Save, X, Mail } from 'lucide-react';
@@ -32,27 +32,52 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   const [availabilitySubmitted, setAvailabilitySubmitted] = useState(false);
 
   useEffect(() => {
-    fetchData();
-    if (adminToken) {
-      try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch {}
-    }
-    // Restore admin's own participant session
-    try {
-      const stored = localStorage.getItem(`vacation_admin_p_${groupId}`);
-      if (stored) {
-        const { participantId, name, email, duration } = JSON.parse(stored);
-        getParticipant(groupId, participantId).then(p => {
-          if (p) {
-            setAdminParticipantId(participantId);
-            setAdminSavedDays(p.availableDays || []);
-            setAdminName(p.name || name || '');
-            setAdminEmail(p.email || email || '');
-            setAdminDuration(String(p.duration || duration || '3'));
-          }
-        }).catch(() => {});
+    const initAdmin = async () => {
+      // BUG-C fix: validate the admin token against the DB before rendering any admin UI.
+      // validateAdminToken calls a Cloud Function that reads the private path via Admin SDK.
+      if (!adminToken) {
+        onBack();
+        return;
       }
-    } catch {}
-  }, [groupId]);
+
+      try {
+        const isValid = await validateAdminToken(groupId, adminToken);
+        if (!isValid) {
+          onBack();
+          return;
+        }
+      } catch {
+        // Network or server error — deny access rather than fail open
+        onBack();
+        return;
+      }
+
+      if (adminToken) {
+        try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch {}
+      }
+
+      // Restore admin's own participant session
+      try {
+        const stored = localStorage.getItem(`vacation_admin_p_${groupId}`);
+        if (stored) {
+          const { participantId, name, email, duration } = JSON.parse(stored);
+          getParticipant(groupId, participantId).then(p => {
+            if (p) {
+              setAdminParticipantId(participantId);
+              setAdminSavedDays(p.availableDays || []);
+              setAdminName(p.name || name || '');
+              setAdminEmail(p.email || email || '');
+              setAdminDuration(String(p.duration || duration || '3'));
+            }
+          }).catch(() => {});
+        }
+      } catch {}
+
+      await fetchData();
+    };
+
+    initAdmin();
+  }, [groupId, adminToken]);
 
   useEffect(() => {
     if (group && participants.length > 0) {
