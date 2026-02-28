@@ -161,7 +161,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
   const monthName = monthYear.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col h-full relative pb-24">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col h-full relative">
       {/* --- DASHBOARD ROW --- */}
       <div className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-200 mb-6 shrink-0">
 
@@ -225,8 +225,8 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
               type="button"
               onClick={() => setBlockType('flexible')}
               className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${blockType === 'flexible'
-                  ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-black/5'
-                  : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-black/5'
+                : 'text-gray-500 hover:text-gray-700'
                 }`}
             >
               <Sparkles size={16} className={blockType === 'flexible' ? 'text-indigo-500' : 'text-gray-400'} />
@@ -236,8 +236,8 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
               type="button"
               onClick={() => setBlockType('custom')}
               className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${blockType !== 'flexible'
-                  ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-black/5'
-                  : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-black/5'
+                : 'text-gray-500 hover:text-gray-700'
                 }`}
             >
               <CalendarRange size={16} className={blockType !== 'flexible' ? 'text-indigo-500' : 'text-gray-400'} />
@@ -264,8 +264,16 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
             </button>
           </div>
 
+          {/* Save Details Only Pill */}
+          <button
+            type="button"
+            onClick={handleSaveDetails}
+            disabled={loading}
+            className="flex items-center justify-center shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-full transition-all border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50 h-[38px] my-auto"
+          >
+            {loading ? 'Saving...' : 'Save Details'}
+          </button>
         </div>
-
       </div>
       {/* --- END DASHBOARD ROW --- */}
 
@@ -342,24 +350,17 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
           </div>
         )}
 
-      </div>
-      {/* --- END CALENDAR GRID AREA --- */}
+        {/* Global Error Message */}
+        {error && (
+          <div className="mt-6 mb-2">
+            <p className="text-red-600 font-bold text-sm bg-red-50 border border-red-200 px-4 py-3 rounded-xl">
+              {error}
+            </p>
+          </div>
+        )}
 
-      {/* --- STICKY BOTTOM ACTION BAR --- */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-gray-200 z-50 flex justify-center gap-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
-        <div className="w-full max-w-4xl mx-auto flex flex-col sm:flex-row justify-end items-center gap-3">
-
-          {error && <p className="text-red-500 font-bold text-sm bg-red-50 border border-red-100 px-3 py-2 rounded-lg mr-auto">{error}</p>}
-
-          <button
-            type="button"
-            onClick={handleSaveDetails}
-            disabled={loading}
-            className="w-full sm:w-auto bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 font-bold py-3 px-6 rounded-xl transition-all shadow-sm focus:ring-2 focus:ring-gray-200 disabled:opacity-50"
-          >
-            {loading ? 'Saving...' : 'Save Details Only'}
-          </button>
-
+        {/* Submit Button */}
+        <div className="mt-6 flex justify-end">
           <button
             type="submit"
             disabled={loading || (selectedDays.length === 0 && savedDays.length === 0)}
@@ -368,11 +369,10 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
             <Calendar size={18} />
             {loading ? 'Submitting...' : 'Submit Availability'}
           </button>
-
         </div>
-      </div>
-      {/* --- END STICKY BOTTOM ACTION BAR --- */}
 
+      </div>
+      {/* --- END CALENDAR GRID AREA --- */}
     </form>
   );
 }

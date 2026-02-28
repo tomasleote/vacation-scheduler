@@ -225,7 +225,7 @@ describe('CalendarView interactions', () => {
       target: { value: 'Alice' }
     });
 
-    fireEvent.click(screen.getByText('Save Details Only'));
+    fireEvent.click(screen.getByText('Save Details'));
 
     await waitFor(() => {
       expect(mockSubmit).toHaveBeenCalledWith(
