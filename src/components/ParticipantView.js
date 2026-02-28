@@ -150,6 +150,9 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
 
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">{group.name}</h1>
+          {group.description && (
+            <p className="text-gray-600 mb-4 italic">{group.description}</p>
+          )}
           <p className="text-gray-600 mb-4">Select your available dates for the vacation</p>
           <div className="flex gap-4 text-sm text-gray-600 flex-wrap">
             <span>📅 {group.startDate} to {group.endDate}</span>

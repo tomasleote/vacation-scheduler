@@ -150,6 +150,7 @@ function HomePage({ onCreateGroup, onJoinGroup }) {
 
 function CreateGroupForm({ onSuccess, onCancel }) {
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
@@ -163,7 +164,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
 
     try {
       const { createGroup } = await import('./firebase');
-      const result = await createGroup({ name, startDate, endDate, adminEmail });
+      const result = await createGroup({ name, description, startDate, endDate, adminEmail });
       onSuccess(result);
     } catch (err) {
       setError(err.message);
@@ -183,6 +184,20 @@ function CreateGroupForm({ onSuccess, onCancel }) {
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="e.g., Summer Trip 2024"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Description (optional) {description.length}/500
+        </label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="e.g., Beach trip to Hawaii, hiking adventure, etc."
+          rows="2"
+          maxLength="500"
         />
       </div>
 

@@ -225,6 +225,9 @@ function AdminPanel({ groupId, adminToken, onBack }) {
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2">{group.name}</h2>
+              {group.description && (
+                <p className="text-gray-600 text-sm mb-3">{group.description}</p>
+              )}
               <div className="flex gap-4 text-sm text-gray-600 flex-wrap">
                 <span>📅 {group.startDate} to {group.endDate}</span>
                 <span>👥 {participants.length} participants</span>
@@ -301,6 +304,19 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                   value={editData.name}
                   onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description {(editData.description || '').length}/500
+                </label>
+                <textarea
+                  value={editData.description || ''}
+                  onChange={(e) => setEditData({ ...editData, description: e.target.value.slice(0, 500) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  rows="2"
+                  maxLength="500"
                 />
               </div>
 

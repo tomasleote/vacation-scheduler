@@ -150,14 +150,17 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Your Name *</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Your Name * {name.length}/30
+        </label>
         <input
           type="text"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value.slice(0, 30))}
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="Enter your name"
+          maxLength="30"
         />
       </div>
 
