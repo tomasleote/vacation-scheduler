@@ -1,19 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { getDatesBetween } from '../utils/overlap';
-import { Calendar } from 'lucide-react';
+import { Calendar, User, Mail, Clock, Sparkles, CalendarRange } from 'lucide-react';
 
 function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialName = '', initialEmail = '', initialDuration = '3' }) {
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
   const [duration, setDuration] = useState(initialDuration);
   const [blockType, setBlockType] = useState('flexible');
-  const [selectedDays, setSelectedDays] = useState([]);
+  const [selectedDays, setSelectedDays] = useState(savedDays || []);
   const [currentMonth, setCurrentMonth] = useState(new Date(startDate).getMonth());
   const [currentYear, setCurrentYear] = useState(new Date(startDate).getFullYear());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isDirty, setIsDirty] = useState(false);
+
+  // Sync savedDays from parent if they are fetched after initial mount or updated post-submit
+  // Only sync if there are no unsaved local changes to avoid clobbering user edits
+  useEffect(() => {
+    if (savedDays && !isDirty) {
+      setSelectedDays(savedDays);
+    }
+  }, [savedDays, isDirty]);
 
   const dateRange = getDatesBetween(startDate, endDate);
+
+  // Custom block size input state (if not flexible)
+  const [customBlockSize, setCustomBlockSize] = useState(() => {
+    return (initialDuration && initialDuration !== 'flexible') ? String(initialDuration) : '3';
+  });
+  const [localDuration, setLocalDuration] = useState(String(initialDuration));
   const start = new Date(startDate);
   const end = new Date(endDate);
 
@@ -34,15 +49,17 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
 
   const handleDayClick = (day) => {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    
+
     if (!isDateInRange(dateStr)) return;
 
+    setIsDirty(true);
+
     if (blockType === 'flexible') {
-      setSelectedDays(prev => 
+      setSelectedDays(prev =>
         prev.includes(dateStr) ? prev.filter(d => d !== dateStr) : [...prev, dateStr]
       );
     } else {
-      selectDayBlock(dateStr, parseInt(blockType));
+      selectDayBlock(dateStr, parseInt(customBlockSize));
     }
   };
 
@@ -75,7 +92,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
 
   const isDaySelected = (day) => {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return selectedDays.includes(dateStr) || savedDays.includes(dateStr);
+    return selectedDays.includes(dateStr);
   };
 
   const handleSubmit = async (e) => {
@@ -96,11 +113,11 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
       await onSubmit({
         name,
         email,
-        duration: parseInt(duration),
-        blockType,
+        duration: parseInt(localDuration),
+        blockType: blockType === 'flexible' ? 'flexible' : String(customBlockSize),
         selectedDays: selectedDays.sort()
       });
-      setSelectedDays([]);
+      setIsDirty(false);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -121,9 +138,9 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
       await onSubmit({
         name,
         email,
-        duration: parseInt(duration),
-        blockType,
-        selectedDays: []
+        duration: parseInt(localDuration),
+        blockType: blockType === 'flexible' ? 'flexible' : String(customBlockSize),
+        selectedDays: savedDays // "Save Details" doesn't submit days, so keep the existing ones
       });
     } catch (err) {
       setError(err.message);
@@ -135,7 +152,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
   const handlePrevMonth = () => {
     const newMonth = currentMonth === 0 ? 11 : currentMonth - 1;
     const newYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-    
+
     if (new Date(newYear, newMonth) >= new Date(start.getFullYear(), start.getMonth())) {
       setCurrentMonth(newMonth);
       setCurrentYear(newYear);
@@ -145,7 +162,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
   const handleNextMonth = () => {
     const newMonth = currentMonth === 11 ? 0 : currentMonth + 1;
     const newYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-    
+
     if (new Date(newYear, newMonth) <= new Date(end.getFullYear(), end.getMonth())) {
       setCurrentMonth(newMonth);
       setCurrentYear(newYear);
@@ -155,127 +172,147 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
   const monthName = monthYear.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Your Name * {name.length}/30
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value.slice(0, 30))}
-          required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          placeholder="Enter your name"
-          maxLength="30"
-        />
-      </div>
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col h-full relative">
+      {/* --- DASHBOARD ROW --- */}
+      <div className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-200 mb-6 shrink-0">
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email (optional)</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          placeholder="your@email.com"
-        />
-      </div>
+        <div className="flex flex-wrap items-center gap-3">
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">How long can you stay? *</label>
-        <select
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
-          <option value="1">1 day</option>
-          <option value="2">2 days</option>
-          <option value="3">3 days</option>
-          <option value="4">4 days</option>
-          <option value="5">5 days</option>
-          <option value="7">1 week</option>
-          <option value="10">10 days</option>
-        </select>
-      </div>
+          {/* Name Pill */}
+          <div className="relative group flex-1 min-w-[180px]">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <User size={16} className="text-gray-400 group-hover:text-indigo-500 transition-colors" />
+            </div>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value.slice(0, 30))}
+              required
+              className="w-full bg-gray-50 hover:bg-white text-gray-800 font-medium pl-10 pr-4 py-2.5 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+              placeholder="Your Name *"
+              maxLength="30"
+            />
+          </div>
 
-      <button
-        type="button"
-        onClick={handleSaveDetails}
-        disabled={loading}
-        className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:opacity-50"
-      >
-        {loading ? 'Saving...' : 'Save Details Only'}
-      </button>
+          {/* Email Pill */}
+          <div className="relative group flex-1 min-w-[180px]">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Mail size={16} className="text-gray-400 group-hover:text-indigo-500 transition-colors" />
+            </div>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-gray-50 hover:bg-white text-gray-800 font-medium pl-10 pr-4 py-2.5 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+              placeholder="Email (optional)"
+            />
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Selection Mode</label>
-        <div className="space-y-2">
-          <label className="flex items-center">
+          {/* Duration Pill */}
+          <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:bg-white transition-all shrink-0">
+            <Clock size={16} className="text-gray-400" />
             <input
-              type="radio"
-              value="flexible"
-              checked={blockType === 'flexible'}
-              onChange={(e) => setBlockType(e.target.value)}
-              className="mr-2"
+              type="number"
+              min="1"
+              max={dateRange.length}
+              value={localDuration}
+              onChange={(e) => setLocalDuration(e.target.value)}
+              onBlur={() => {
+                let val = parseInt(localDuration);
+                if (isNaN(val) || val < 1) val = 1;
+                if (val > dateRange.length) val = dateRange.length;
+                const strVal = String(val);
+                setLocalDuration(strVal);
+                setDuration(strVal);
+              }}
+              className="w-8 text-center bg-transparent font-bold text-gray-800 focus:outline-none p-0"
             />
-            <span>Flexible (pick individual days)</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="3"
-              checked={blockType === '3'}
-              onChange={(e) => setBlockType(e.target.value)}
-              className="mr-2"
-            />
-            <span>3-day block</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="4"
-              checked={blockType === '4'}
-              onChange={(e) => setBlockType(e.target.value)}
-              className="mr-2"
-            />
-            <span>4-day block</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              value="5"
-              checked={blockType === '5'}
-              onChange={(e) => setBlockType(e.target.value)}
-              className="mr-2"
-            />
-            <span>5-day block</span>
-          </label>
+            <span className="text-gray-600 font-medium pr-2 text-sm">days trip</span>
+          </div>
+
+          {/* Segmented Control - Selection Mode */}
+          <div className="flex items-center bg-gray-100 p-1 rounded-full border border-gray-200 shrink-0">
+            <button
+              type="button"
+              onClick={() => setBlockType('flexible')}
+              className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${blockType === 'flexible'
+                ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-black/5'
+                : 'text-gray-500 hover:text-gray-700'
+                }`}
+            >
+              <Sparkles size={16} className={blockType === 'flexible' ? 'text-indigo-500' : 'text-gray-400'} />
+              Flexible
+            </button>
+            <button
+              type="button"
+              onClick={() => setBlockType('custom')}
+              className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${blockType !== 'flexible'
+                ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-black/5'
+                : 'text-gray-500 hover:text-gray-700'
+                }`}
+            >
+              <CalendarRange size={16} className={blockType !== 'flexible' ? 'text-indigo-500' : 'text-gray-400'} />
+              Block
+
+              {/* Embedded Block Size Input */}
+              {blockType !== 'flexible' && (
+                <input
+                  type="number"
+                  min="1"
+                  max={dateRange.length}
+                  value={customBlockSize}
+                  onChange={(e) => setCustomBlockSize(e.target.value)}
+                  onBlur={() => {
+                    let val = parseInt(customBlockSize);
+                    if (isNaN(val) || val < 1) val = 1;
+                    if (val > dateRange.length) val = dateRange.length;
+                    setCustomBlockSize(String(val));
+                  }}
+                  onClick={(e) => e.stopPropagation()} // Prevent toggling the button when clicking the input
+                  className="w-8 text-center bg-indigo-50 font-bold text-indigo-900 focus:outline-none focus:ring-1 focus:ring-indigo-400 rounded-md p-0"
+                />
+              )}
+            </button>
+          </div>
+
+          {/* Save Details Only Pill */}
+          <button
+            type="button"
+            onClick={handleSaveDetails}
+            disabled={loading}
+            className="flex items-center justify-center shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-full transition-all border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50 h-[38px] my-auto"
+          >
+            {loading ? 'Saving...' : 'Save Details'}
+          </button>
         </div>
       </div>
+      {/* --- END DASHBOARD ROW --- */}
 
-      <div className="border-t pt-4">
-        <div className="flex justify-between items-center mb-4">
+      {/* --- CALENDAR GRID AREA --- */}
+      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-4 shrink-0">
+
+        {/* Month Navigation Row */}
+        <div className="flex justify-between items-center mb-6">
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-semibold"
+            className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 transition"
           >
             ← Prev
           </button>
-          <h3 className="text-lg font-bold text-gray-800">{monthName}</h3>
+          <h3 className="text-xl font-bold text-gray-800 tracking-tight">{monthName}</h3>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-semibold"
+            className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 transition"
           >
             Next →
           </button>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 mb-4">
+        <div className="grid grid-cols-7 gap-1 md:gap-2 mb-4">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className="text-center font-bold text-gray-600 text-xs p-2">
+            <div key={day} className="text-center font-bold text-gray-400 text-xs py-2 uppercase tracking-wide">
               {day}
             </div>
           ))}
@@ -284,7 +321,6 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
             const inRange = day ? isDateInRange(dateStr) : false;
             const selected = day ? isDaySelected(day) : false;
 
-            // BUG-K fix: add aria-label and data-testid to every day button
             const ariaLabel = day
               ? `${monthName}, day ${day}${selected ? ' (selected)' : ''}`
               : undefined;
@@ -301,10 +337,10 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
                 aria-label={ariaLabel}
                 data-testid={testId}
                 className={`
-                  aspect-square p-2 text-sm font-semibold rounded transition
+                  aspect-square p-2 text-sm md:text-base font-bold rounded-xl transition-all duration-200
                   ${!day ? 'bg-transparent' : ''}
-                  ${!inRange ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : ''}
-                  ${selected ? 'bg-indigo-600 text-white' : inRange ? 'bg-white border border-gray-300 hover:bg-indigo-50 text-gray-800' : ''}
+                  ${!inRange ? 'bg-gray-50 text-gray-300 cursor-not-allowed opacity-50' : ''}
+                  ${selected ? 'bg-indigo-600 text-white shadow-md transform scale-[1.02]' : inRange ? 'bg-white border-2 border-gray-100 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700' : ''}
                 `}
               >
                 {day}
@@ -313,30 +349,38 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
           })}
         </div>
 
-        {(selectedDays.length > 0 || savedDays.length > 0) && (
-          <div className="bg-indigo-50 p-3 rounded-lg mb-4">
-            {/* BUG-I & BUG-K fix: correct total shown = savedDays ∪ selectedDays; wrapped in data-testid */}
-            <p className="text-sm text-gray-700" data-testid="day-count">
-              <strong>{Array.from(new Set([...savedDays, ...selectedDays])).length}</strong> day{Array.from(new Set([...savedDays, ...selectedDays])).length !== 1 ? 's' : ''} selected
-              {savedDays.length > 0 && selectedDays.length > 0 && (
-                <span className="text-gray-500"> ({savedDays.length} saved + {selectedDays.filter(d => !savedDays.includes(d)).length} new)</span>
-              )}
+        {/* Dynamic Selection Counter */}
+        {selectedDays.length > 0 && (
+          <div className="bg-indigo-50 text-indigo-800 p-3 rounded-xl border border-indigo-100 mt-6 flex justify-center items-center gap-2 font-medium">
+            <span data-testid="day-count">
+              <strong>{selectedDays.length}</strong> day{selectedDays.length !== 1 ? 's' : ''} selected
+            </span>
+          </div>
+        )}
+
+        {/* Global Error Message */}
+        {error && (
+          <div className="mt-6 mb-2">
+            <p className="text-red-600 font-bold text-sm bg-red-50 border border-red-200 px-4 py-3 rounded-xl">
+              {error}
             </p>
           </div>
         )}
+
+        {/* Submit Button */}
+        <div className="mt-6 flex justify-end">
+          <button
+            type="submit"
+            disabled={loading || selectedDays.length === 0}
+            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 flex items-center justify-center gap-2 transform active:scale-95"
+          >
+            <Calendar size={18} />
+            {loading ? 'Submitting...' : 'Submit Availability'}
+          </button>
+        </div>
+
       </div>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-
-      {/* BUG-I fix: disabled only when there are truly no days at all (neither saved nor newly selected) */}
-      <button
-        type="submit"
-        disabled={loading || (selectedDays.length === 0 && savedDays.length === 0)}
-        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:opacity-50 flex items-center justify-center gap-2"
-      >
-        <Calendar size={18} />
-        {loading ? 'Submitting...' : 'Submit Availability'}
-      </button>
+      {/* --- END CALENDAR GRID AREA --- */}
     </form>
   );
 }

@@ -71,7 +71,9 @@ export const calculateOverlap = (participants, startDate, endDate, durationDays)
 };
 
 export const getBestOverlapPeriods = (overlaps, limit = 5) => {
-  return overlaps.slice(0, limit);
+  return overlaps
+    .filter(o => o.availabilityPercent > 0)
+    .slice(0, limit);
 };
 
 export const formatDateRange = (startDate, endDate) => {

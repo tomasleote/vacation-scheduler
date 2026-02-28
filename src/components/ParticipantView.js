@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { addParticipant, updateParticipant, getParticipant, subscribeToGroup, subscribeToParticipants } from '../firebase';
-import { getDatesBetween } from '../utils/overlap';
+import { getDatesBetween, calculateOverlap, getBestOverlapPeriods } from '../utils/overlap';
 
 import CalendarView from './CalendarView';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import SlidingOverlapCalendar from './SlidingOverlapCalendar';
+import { ChevronDown, ChevronUp, CalendarRange, Users } from 'lucide-react';
 
 function ParticipantView({ groupId, participantId: initialParticipantId, onBack }) {
   const [group, setGroup] = useState(null);
@@ -17,6 +18,8 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
   const [participantName, setParticipantName] = useState('');
   const [participantEmail, setParticipantEmail] = useState('');
   const [participantDuration, setParticipantDuration] = useState('3');
+  const [heatmapDuration, setHeatmapDuration] = useState('3');
+  const [overlaps, setOverlaps] = useState([]);
 
   useEffect(() => {
     if (!groupId) return;
@@ -59,13 +62,26 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
           setParticipantName(participant.name);
           setParticipantEmail(participant.email || '');
           setParticipantDuration(String(participant.duration || '3'));
+          setHeatmapDuration(String(participant.duration || '3'));
         }
       } catch { }
     };
     restore();
   }, [groupId, initialParticipantId]);
 
-
+  useEffect(() => {
+    if (group && participants.length > 0) {
+      const results = calculateOverlap(
+        participants,
+        group.startDate,
+        group.endDate,
+        parseInt(heatmapDuration || '3')
+      );
+      setOverlaps(results);
+    } else {
+      setOverlaps([]);
+    }
+  }, [group, participants, heatmapDuration]);
 
   const handleSubmit = async (formData) => {
     try {
@@ -83,23 +99,23 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
         return;
       }
 
-      const newDays = formData.selectedDays || [];
-      const mergedDays = newDays.length > 0
-        ? Array.from(new Set([...savedDays, ...newDays]))
-        : savedDays;
+      // The CalendarView now passes the entire desired array state.
+      // E.g., if a user unselects a previously saved day, formData.selectedDays simply won't include it. 
+      const finalDays = formData.selectedDays || [];
 
       if (!currentParticipantId) {
         const participantId = await addParticipant(groupId, {
           name: formData.name,
           email: formData.email,
           duration: formData.duration,
-          availableDays: mergedDays,
+          availableDays: finalDays,
           blockType: formData.blockType
         });
         setCurrentParticipantId(participantId);
         setParticipantName(formData.name);
         setParticipantEmail(formData.email || '');
         setParticipantDuration(String(formData.duration));
+        setHeatmapDuration(String(formData.duration));
 
         try {
           localStorage.setItem(
@@ -113,7 +129,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
         await updateParticipant(groupId, currentParticipantId, {
           name: formData.name,
           email: formData.email,
-          availableDays: mergedDays,
+          availableDays: finalDays,
           duration: formData.duration,
           blockType: formData.blockType
         });
@@ -122,7 +138,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
         setParticipantDuration(String(formData.duration));
       }
 
-      setSavedDays(mergedDays);
+      setSavedDays(finalDays);
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 3000);
     } catch (err) {
@@ -156,7 +172,6 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
     );
   }
 
-  const dateRange = getDatesBetween(group.startDate, group.endDate);
 
   return (
     <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -175,8 +190,8 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
           )}
           <p className="text-gray-600 mb-4">Select your available dates for the vacation</p>
           <div className="flex gap-4 text-sm text-gray-600 flex-wrap">
-            <span>📅 {group.startDate} to {group.endDate}</span>
-            <span>👥 {participants.length} people attending</span>
+            <span className="flex items-center gap-1.5"><CalendarRange size={16} className="text-gray-400" /> {group.startDate} to {group.endDate}</span>
+            <span className="flex items-center gap-1.5"><Users size={16} className="text-gray-400" /> {participants.length} people attending</span>
           </div>
         </div>
 
@@ -216,6 +231,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
                 />
               </div>
             )}
+
           </div>
 
           <div className="md:col-span-1">
@@ -237,6 +253,20 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
             </div>
           </div>
         </div>
+
+        {overlaps.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Current Group Availability</h2>
+            <SlidingOverlapCalendar
+              startDate={group.startDate}
+              endDate={group.endDate}
+              participants={participants}
+              duration={heatmapDuration || '3'}
+              overlaps={getBestOverlapPeriods(overlaps, 10)}
+              onDurationChange={setHeatmapDuration}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

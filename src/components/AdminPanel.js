@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getGroup, updateGroup, getParticipants, deleteGroup, addParticipant, updateParticipant, getParticipant, validateAdminToken, subscribeToGroup, subscribeToParticipants } from '../firebase';
 import { calculateOverlap, getBestOverlapPeriods, formatDateRange } from '../utils/overlap';
 import { exportToCSV } from '../utils/export';
-import { Copy, Download, Edit, Save, X, Mail } from 'lucide-react';
-import ResultsDisplay from './ResultsDisplay';
+import { CalendarRange, Users, Mail, Copy, CheckCircle2, ChevronDown, ChevronUp, Edit, X, Trash2, Download, Save } from 'lucide-react';
+import SlidingOverlapCalendar from './SlidingOverlapCalendar';
 import CalendarView from './CalendarView';
 
 function AdminPanel({ groupId, adminToken, onBack }) {
@@ -122,17 +122,14 @@ function AdminPanel({ groupId, adminToken, onBack }) {
 
   const handleAdminAvailability = async (formData) => {
     try {
-      const newDays = formData.selectedDays || [];
-      const mergedDays = newDays.length > 0
-        ? Array.from(new Set([...adminSavedDays, ...newDays]))
-        : adminSavedDays;
+      const finalDays = formData.selectedDays || [];
 
       if (!adminParticipantId) {
         const participantId = await addParticipant(groupId, {
           name: formData.name,
           email: formData.email,
           duration: formData.duration,
-          availableDays: mergedDays,
+          availableDays: finalDays,
           blockType: formData.blockType
         });
         setAdminParticipantId(participantId);
@@ -146,13 +143,13 @@ function AdminPanel({ groupId, adminToken, onBack }) {
         await updateParticipant(groupId, adminParticipantId, {
           name: formData.name,
           email: formData.email,
-          availableDays: mergedDays,
+          availableDays: finalDays,
           duration: formData.duration,
           blockType: formData.blockType
         });
       }
 
-      setAdminSavedDays(mergedDays);
+      setAdminSavedDays(finalDays);
       setAdminName(formData.name);
       setAdminEmail(formData.email || '');
       setAdminDuration(String(formData.duration));
@@ -268,9 +265,9 @@ function AdminPanel({ groupId, adminToken, onBack }) {
               {group.description && (
                 <p className="text-gray-600 text-sm mb-3">{group.description}</p>
               )}
-              <div className="flex gap-4 text-sm text-gray-600 flex-wrap">
-                <span>📅 {group.startDate} to {group.endDate}</span>
-                <span>👥 {participants.length} participants</span>
+              <div className="flex gap-4 text-sm text-gray-600 flex-wrap mt-1">
+                <span className="flex items-center gap-1.5"><CalendarRange size={16} className="text-gray-400" /> {group.startDate} to {group.endDate}</span>
+                <span className="flex items-center gap-1.5"><Users size={16} className="text-gray-400" /> {participants.length} participants</span>
               </div>
             </div>
             <button
@@ -330,7 +327,9 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                 </div>
               )}
               {group.adminEmail && (
-                <div className="text-gray-700 text-sm">📧 {group.adminEmail}</div>
+                <div className="text-gray-700 text-sm flex items-center gap-1.5 mt-2">
+                  <Mail size={16} className="text-gray-400" /> {group.adminEmail}
+                </div>
               )}
             </div>
           )}
@@ -429,23 +428,6 @@ function AdminPanel({ groupId, adminToken, onBack }) {
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="font-semibold text-gray-700 mb-4">Filter by Duration</h3>
-            <select
-              value={durationFilter}
-              onChange={(e) => setDurationFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="1">1 day</option>
-              <option value="2">2 days</option>
-              <option value="3">3 days</option>
-              <option value="4">4 days</option>
-              <option value="5">5 days</option>
-              <option value="7">1 week</option>
-              <option value="10">10 days</option>
-            </select>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="font-semibold text-gray-700 mb-4">Statistics</h3>
             <div className="space-y-2 text-sm">
               <p>Total participants: <span className="font-bold">{participants.length}</span></p>
@@ -535,7 +517,14 @@ function AdminPanel({ groupId, adminToken, onBack }) {
         </div>
 
         {overlaps.length > 0 && (
-          <ResultsDisplay overlaps={getBestOverlapPeriods(overlaps, 10)} />
+          <SlidingOverlapCalendar
+            startDate={group.startDate}
+            endDate={group.endDate}
+            participants={participants}
+            duration={durationFilter}
+            overlaps={overlaps}
+            onDurationChange={setDurationFilter}
+          />
         )}
       </div>
     </div>

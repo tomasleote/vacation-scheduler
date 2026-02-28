@@ -28,9 +28,9 @@ const renderCalendar = (overrides = {}) => {
 describe('CalendarView rendering', () => {
   test('renders name, email, and duration fields', () => {
     renderCalendar();
-    expect(screen.getByPlaceholderText('Enter your name')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('your@email.com')).toBeInTheDocument();
-    expect(screen.getByText('How long can you stay? *')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Your Name *')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Email (optional)')).toBeInTheDocument();
+    expect(screen.getByText('days trip')).toBeInTheDocument();
   });
 
   test('renders day-of-week headers', () => {
@@ -49,9 +49,8 @@ describe('CalendarView rendering', () => {
 
   test('renders block type selection modes', () => {
     renderCalendar();
-    expect(screen.getByText('Flexible (pick individual days)')).toBeInTheDocument();
-    expect(screen.getByText('3-day block')).toBeInTheDocument();
-    expect(screen.getByText('5-day block')).toBeInTheDocument();
+    expect(screen.getByText('Flexible')).toBeInTheDocument();
+    expect(screen.getByText('Block')).toBeInTheDocument();
   });
 
   test('pre-fills initial values', () => {
@@ -60,15 +59,15 @@ describe('CalendarView rendering', () => {
       initialEmail: 'alice@example.com',
       initialDuration: '5'
     });
-    expect(screen.getByPlaceholderText('Enter your name')).toHaveValue('Alice');
-    expect(screen.getByPlaceholderText('your@email.com')).toHaveValue('alice@example.com');
+    expect(screen.getByPlaceholderText('Your Name *')).toHaveValue('Alice');
+    expect(screen.getByPlaceholderText('Email (optional)')).toHaveValue('alice@example.com');
   });
 });
 
 describe('CalendarView interactions', () => {
   test('name input enforces 30 character limit', () => {
     renderCalendar();
-    const nameInput = screen.getByPlaceholderText('Enter your name');
+    const nameInput = screen.getByPlaceholderText('Your Name *');
     const longName = 'A'.repeat(50);
     fireEvent.change(nameInput, { target: { value: longName } });
     expect(nameInput.value.length).toBeLessThanOrEqual(30);
@@ -92,7 +91,7 @@ describe('CalendarView interactions', () => {
     renderCalendar();
 
     // Fill in name but don't select days
-    const nameInput = screen.getByPlaceholderText('Enter your name');
+    const nameInput = screen.getByPlaceholderText('Your Name *');
     fireEvent.change(nameInput, { target: { value: 'Alice' } });
 
     // Use fireEvent.submit on the form directly to bypass disabled-button constraint.
@@ -138,9 +137,13 @@ describe('CalendarView interactions', () => {
       endDate: '2024-06-30'
     });
 
-    // Switch to 3-day block mode
-    const blockRadio = screen.getByText('3-day block');
+    // Switch to custom block mode and make it 3 days
+    const blockRadio = screen.getByText('Block');
     fireEvent.click(blockRadio);
+
+    // The second number input on the page is the custom block size
+    const numberInputs = screen.getAllByRole('spinbutton');
+    fireEvent.change(numberInputs[1], { target: { value: '3' } });
 
     // Click day 10
     fireEvent.click(screen.getByTestId('day-2024-06-10'));
@@ -151,6 +154,70 @@ describe('CalendarView interactions', () => {
     expect(screen.getByTestId('day-2024-06-12').className).toContain('bg-indigo-600');
   });
 
+  test('block mode gracefully handles selecting days near the end of the month boundary', () => {
+    // If a user selects a block of 5 days, but clicks the 28th of a 30-day month, it should safely cap at the 30th without exploding.
+    renderCalendar({
+      startDate: '2024-06-01',
+      endDate: '2024-06-30'
+    });
+
+    fireEvent.click(screen.getByText('Block'));
+    const numberInputs = screen.getAllByRole('spinbutton');
+    fireEvent.change(numberInputs[1], { target: { value: '5' } }); // 5 days
+
+    fireEvent.click(screen.getByTestId('day-2024-06-28'));
+
+    // Should only select 28, 29, 30. Should not crash.
+    expect(screen.getByTestId('day-2024-06-28').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-29').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-30').className).toContain('bg-indigo-600');
+  });
+
+  test('custom block input safely bounds invalid duration lengths', () => {
+    // Tests the numeric pill logic to ensure it maxes out safely and falls back on invalid inputs.
+    renderCalendar();
+
+    fireEvent.click(screen.getByText('Block'));
+    const numberInputs = screen.getAllByRole('spinbutton');
+    const customBlockInput = numberInputs[1];
+
+    // Attempting a negative boundary limits gracefully
+    fireEvent.change(customBlockInput, { target: { value: '-5' } });
+    fireEvent.blur(customBlockInput);
+    expect(customBlockInput).toHaveValue(1);
+
+    // Attempting an extreme upper boundary
+    fireEvent.change(customBlockInput, { target: { value: '999' } });
+    fireEvent.blur(customBlockInput);
+    expect(customBlockInput).toHaveValue(30); // Max length of June
+  });
+
+  test('handles state transfer from Block mode back to Flexible smoothly', () => {
+    renderCalendar();
+
+    // Select 3 days in Block mode
+    fireEvent.click(screen.getByText('Block'));
+    const numberInputs = screen.getAllByRole('spinbutton');
+    fireEvent.change(numberInputs[1], { target: { value: '3' } });
+    fireEvent.click(screen.getByTestId('day-2024-06-10'));
+
+    expect(screen.getByTestId('day-2024-06-12').className).toContain('bg-indigo-600');
+
+    // Switch back to Flexible
+    fireEvent.click(screen.getByText('Flexible'));
+
+    // The days should still be selected
+    expect(screen.getByTestId('day-2024-06-12').className).toContain('bg-indigo-600');
+
+    // But now we can unclick just one
+    fireEvent.click(screen.getByTestId('day-2024-06-12'));
+    expect(screen.getByTestId('day-2024-06-12').className).not.toContain('bg-indigo-600');
+    // Day 10 and 11 should remain selected
+    expect(screen.getByTestId('day-2024-06-11').className).toContain('bg-indigo-600');
+  });
+
+
+
   test('saved days appear as selected', () => {
     renderCalendar({
       savedDays: ['2024-06-15', '2024-06-16']
@@ -158,6 +225,28 @@ describe('CalendarView interactions', () => {
 
     expect(screen.getByTestId('day-2024-06-15').className).toContain('bg-indigo-600');
     expect(screen.getByTestId('day-2024-06-16').className).toContain('bg-indigo-600');
+  });
+
+  test('saved days can be dynamically unselected', () => {
+    // Verifies that the new state unification logic allows turning off previously submitted dates.
+    renderCalendar({
+      savedDays: ['2024-06-15', '2024-06-16']
+    });
+
+    const savedDayBtn = screen.getByTestId('day-2024-06-15');
+
+    // Day should initially be selected because it's a saved day
+    expect(savedDayBtn.className).toContain('bg-indigo-600');
+
+    // Click to unselect
+    fireEvent.click(savedDayBtn);
+
+    // Day should no longer have the selected coloring
+    expect(savedDayBtn.className).not.toContain('bg-indigo-600');
+
+    // The counter should also decrement down to 1
+    const counter = screen.getByTestId('day-count');
+    expect(counter.textContent).toMatch(/1/);
   });
 
   test('shows day count including saved and new days', () => {
@@ -193,7 +282,7 @@ describe('CalendarView interactions', () => {
     renderCalendar({ onSubmit: mockSubmit });
 
     // Fill name
-    fireEvent.change(screen.getByPlaceholderText('Enter your name'), {
+    fireEvent.change(screen.getByPlaceholderText('Your Name *'), {
       target: { value: 'Alice' }
     });
 
@@ -218,11 +307,11 @@ describe('CalendarView interactions', () => {
     const mockSubmit = jest.fn(() => Promise.resolve());
     renderCalendar({ onSubmit: mockSubmit });
 
-    fireEvent.change(screen.getByPlaceholderText('Enter your name'), {
+    fireEvent.change(screen.getByPlaceholderText('Your Name *'), {
       target: { value: 'Alice' }
     });
 
-    fireEvent.click(screen.getByText('Save Details Only'));
+    fireEvent.click(screen.getByText('Save Details'));
 
     await waitFor(() => {
       expect(mockSubmit).toHaveBeenCalledWith(
@@ -303,7 +392,9 @@ describe('CalendarView edge cases', () => {
     });
 
     // Switch to 5-day block
-    fireEvent.click(screen.getByText('5-day block'));
+    fireEvent.click(screen.getByText('Block'));
+    const numberInputs = screen.getAllByRole('spinbutton');
+    fireEvent.change(numberInputs[1], { target: { value: '5' } });
 
     // Click day 3 - block would go 3,4,5 (only 3 days since range ends at 5)
     fireEvent.click(screen.getByTestId('day-2024-06-03'));
@@ -320,7 +411,9 @@ describe('CalendarView edge cases', () => {
     });
 
     // Switch to 5-day block mode
-    fireEvent.click(screen.getByText('5-day block'));
+    fireEvent.click(screen.getByText('Block'));
+    const numberInputs = screen.getAllByRole('spinbutton');
+    fireEvent.change(numberInputs[1], { target: { value: '5' } });
 
     // Click day 10 - should only select 10, 11, 12 (within range)
     fireEvent.click(screen.getByTestId('day-2024-06-10'));
@@ -338,7 +431,9 @@ describe('CalendarView edge cases', () => {
     });
 
     // Switch to 3-day block
-    fireEvent.click(screen.getByText('3-day block'));
+    fireEvent.click(screen.getByText('Block'));
+    const numberInputs = screen.getAllByRole('spinbutton');
+    fireEvent.change(numberInputs[1], { target: { value: '3' } });
 
     // Click day 10 — selects 10, 11, 12
     fireEvent.click(screen.getByTestId('day-2024-06-10'));
