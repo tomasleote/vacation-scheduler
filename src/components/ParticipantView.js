@@ -172,7 +172,6 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
     );
   }
 
-  const dateRange = getDatesBetween(group.startDate, group.endDate);
 
   return (
     <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-blue-50 to-indigo-100">
