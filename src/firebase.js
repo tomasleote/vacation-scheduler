@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, set, get, update, remove, child } from 'firebase/database';
+import { getDatabase, ref, set, get, update, remove, child, runTransaction, onValue, off } from 'firebase/database';
 
 
 const firebaseConfig = {
@@ -28,6 +28,17 @@ const hashAdminToken = async (token) => {
 
 export const createGroup = async (groupData) => {
   try {
+    // Hardening: validate and sanitize inputs
+    const name = String(groupData.name || '').trim().slice(0, 100);
+    const description = String(groupData.description || '').trim().slice(0, 1000);
+    const startDate = String(groupData.startDate || '').slice(0, 10);
+    const endDate = String(groupData.endDate || '').slice(0, 10);
+    const adminEmail = String(groupData.adminEmail || '').trim().slice(0, 255);
+
+    if (!name || !startDate || !endDate) {
+      throw new Error('Name, start date, and end date are required.');
+    }
+
     const groupId = crypto.randomUUID();
     const adminToken = crypto.randomUUID();
     const adminTokenHash = await hashAdminToken(adminToken);
@@ -38,7 +49,11 @@ export const createGroup = async (groupData) => {
     // Store the hash of the admin token, never the raw token itself.
     // The hash is safe to be public: SHA-256 of a UUID is computationally irreversible.
     await set(groupRef, {
-      ...groupData,
+      name,
+      description,
+      startDate,
+      endDate,
+      adminEmail,
       createdAt: new Date().toISOString(),
       id: groupId,
       adminTokenHash
@@ -73,33 +88,86 @@ export const updateGroup = async (groupId, updates) => {
 };
 
 export const addParticipant = async (groupId, participantData) => {
-  const existing = await getParticipants(groupId);
-  const normalizedNew = participantData.name.trim().toLowerCase();
-  if (existing.some(p => p.name.trim().toLowerCase() === normalizedNew)) {
+  // Hardening: validate and sanitize inputs
+  const name = String(participantData.name || '').trim().slice(0, 100);
+  if (!name) throw new Error('A participant name is required.');
+
+  const email = String(participantData.email || '').trim().slice(0, 255);
+  const duration = parseInt(participantData.duration, 10) || 3;
+  const blockType = String(participantData.blockType || 'flexible').slice(0, 50);
+
+  let availableDays = Array.isArray(participantData.availableDays) ? participantData.availableDays : [];
+  // Cap at max 365 days, slice strings to prevent massive payloads
+  availableDays = availableDays.slice(0, 365).map(d => String(d).slice(0, 10));
+
+  const participantId = crypto.randomUUID();
+  const normalizedNew = name.toLowerCase();
+
+  const participantsRef = ref(database, `groups/${groupId}/participants`);
+
+  // Concurrency check: Ensure no race conditions for participant names
+  const transactionResult = await runTransaction(participantsRef, (currentParticipants) => {
+    if (!currentParticipants) {
+      currentParticipants = {};
+    }
+    const existing = Object.values(currentParticipants);
+    if (existing.some(p => p.name && p.name.trim().toLowerCase() === normalizedNew)) {
+      return; // Return undefined to abort transaction
+    }
+
+    currentParticipants[participantId] = {
+      name,
+      email,
+      duration,
+      blockType,
+      availableDays,
+      id: participantId,
+      createdAt: new Date().toISOString()
+    };
+    return currentParticipants;
+  });
+
+  if (!transactionResult.committed) {
     throw new Error('A participant with this name already exists. Please choose another name.');
   }
 
-  const participantId = crypto.randomUUID();
-  const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
-  await set(participantRef, {
-    ...participantData,
-    id: participantId,
-    createdAt: new Date().toISOString()
-  });
   return participantId;
 };
 
 export const updateParticipant = async (groupId, participantId, updates) => {
-  if (updates.name !== undefined) {
-    const existing = await getParticipants(groupId);
-    const normalizedNew = updates.name.trim().toLowerCase();
-    if (existing.some(p => p.name.trim().toLowerCase() === normalizedNew && p.id !== participantId)) {
-      throw new Error('A participant with this name already exists. Please choose another name.');
-    }
+  // Hardening
+  const safeUpdates = { ...updates };
+  if (safeUpdates.name !== undefined) safeUpdates.name = String(safeUpdates.name).trim().slice(0, 100);
+  if (safeUpdates.email !== undefined) safeUpdates.email = String(safeUpdates.email).trim().slice(0, 255);
+  if (safeUpdates.duration !== undefined) safeUpdates.duration = parseInt(safeUpdates.duration, 10) || 3;
+  if (safeUpdates.blockType !== undefined) safeUpdates.blockType = String(safeUpdates.blockType).slice(0, 50);
+  if (Array.isArray(safeUpdates.availableDays)) {
+    safeUpdates.availableDays = safeUpdates.availableDays.slice(0, 365).map(d => String(d).slice(0, 10));
   }
 
-  const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
-  await update(participantRef, updates);
+  if (safeUpdates.name !== undefined) {
+    const normalizedNew = safeUpdates.name.toLowerCase();
+    const participantsRef = ref(database, `groups/${groupId}/participants`);
+
+    const transactionResult = await runTransaction(participantsRef, (currentParticipants) => {
+      if (!currentParticipants) return currentParticipants;
+      const existing = Object.values(currentParticipants);
+      if (existing.some(p => p.name && p.name.trim().toLowerCase() === normalizedNew && p.id !== participantId)) {
+        return; // Abort
+      }
+      if (currentParticipants[participantId]) {
+        currentParticipants[participantId] = { ...currentParticipants[participantId], ...safeUpdates };
+      }
+      return currentParticipants;
+    });
+
+    if (!transactionResult.committed) {
+      throw new Error('A participant with this name already exists. Please choose another name.');
+    }
+  } else {
+    const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
+    await update(participantRef, safeUpdates);
+  }
 };
 
 export const getParticipant = async (groupId, participantId) => {
@@ -122,4 +190,25 @@ export const deleteGroup = async (groupId) => {
 export const deleteParticipant = async (groupId, participantId) => {
   const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
   await remove(participantRef);
+};
+
+// Real-time subscribers
+export const subscribeToGroup = (groupId, callback) => {
+  const groupRef = ref(database, `groups/${groupId}`);
+  const listener = onValue(groupRef, (snapshot) => {
+    callback(snapshot.exists() ? snapshot.val() : null);
+  }, (error) => {
+    console.error("Group sync error:", error);
+  });
+  return () => off(groupRef, 'value', listener);
+};
+
+export const subscribeToParticipants = (groupId, callback) => {
+  const participantRef = ref(database, `groups/${groupId}/participants`);
+  const listener = onValue(participantRef, (snapshot) => {
+    callback(snapshot.exists() ? Object.values(snapshot.val()) : []);
+  }, (error) => {
+    console.error("Participants sync error:", error);
+  });
+  return () => off(participantRef, 'value', listener);
 };

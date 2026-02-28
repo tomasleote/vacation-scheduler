@@ -23,6 +23,7 @@ const mockGet = jest.fn();
 const mockUpdate = jest.fn(() => Promise.resolve());
 const mockRemove = jest.fn(() => Promise.resolve());
 const mockRef = jest.fn(() => 'mock-ref');
+const mockRunTransaction = jest.fn();
 
 jest.mock('firebase/database', () => ({
   getDatabase: jest.fn(() => ({})),
@@ -31,6 +32,9 @@ jest.mock('firebase/database', () => ({
   get: (...args) => mockGet(...args),
   update: (...args) => mockUpdate(...args),
   remove: (...args) => mockRemove(...args),
+  runTransaction: (...args) => mockRunTransaction(...args),
+  onValue: jest.fn(),
+  off: jest.fn(),
   child: jest.fn()
 }));
 
@@ -90,7 +94,7 @@ describe('createGroup', () => {
   test('throws on Firebase error', async () => {
     mockSet.mockRejectedValueOnce(new Error('Firebase error'));
 
-    await expect(createGroup({ name: 'Fail' })).rejects.toThrow('Failed to create group');
+    await expect(createGroup({ name: 'Fail', startDate: '2024-06-01', endDate: '2024-06-15' })).rejects.toThrow('Failed to create group');
   });
 });
 
@@ -118,11 +122,8 @@ describe('getGroup', () => {
 
 describe('addParticipant', () => {
   test('adds participant with generated ID', async () => {
-    // Mock getParticipants returning empty (no duplicates)
-    mockGet.mockResolvedValue({
-      exists: () => false,
-      val: () => null
-    });
+    // Mock runTransaction to commit successfully
+    mockRunTransaction.mockResolvedValueOnce({ committed: true });
 
     const result = await addParticipant('group1', {
       name: 'Alice',
@@ -132,16 +133,12 @@ describe('addParticipant', () => {
     });
 
     expect(result).toBe('test-group-uuid');
-    expect(mockSet).toHaveBeenCalled();
+    expect(mockRunTransaction).toHaveBeenCalled();
   });
 
   test('rejects duplicate participant names (case-insensitive)', async () => {
-    mockGet.mockResolvedValue({
-      exists: () => true,
-      val: () => ({
-        p1: { name: 'Alice', id: 'p1' }
-      })
-    });
+    // Mock runTransaction failing to commit
+    mockRunTransaction.mockResolvedValueOnce({ committed: false });
 
     await expect(
       addParticipant('group1', { name: 'alice', email: '', duration: 3 })
@@ -149,41 +146,24 @@ describe('addParticipant', () => {
   });
 
   test('rejects duplicate names with whitespace differences', async () => {
-    mockGet.mockResolvedValue({
-      exists: () => true,
-      val: () => ({
-        p1: { name: '  Alice  ', id: 'p1' }
-      })
-    });
+    mockRunTransaction.mockResolvedValueOnce({ committed: false });
 
     await expect(
-      addParticipant('group1', { name: 'Alice', email: '', duration: 3 })
+      addParticipant('group1', { name: '  Alice  ', email: '', duration: 3 })
     ).rejects.toThrow('already exists');
   });
 });
 
 describe('updateParticipant', () => {
   test('updates participant data', async () => {
-    // Mock getParticipants to allow name change (no conflict)
-    mockGet.mockResolvedValue({
-      exists: () => true,
-      val: () => ({
-        p1: { name: 'Alice', id: 'p1' }
-      })
-    });
+    mockRunTransaction.mockResolvedValueOnce({ committed: true });
 
     await updateParticipant('group1', 'p1', { name: 'Alice Updated' });
-    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockRunTransaction).toHaveBeenCalled();
   });
 
   test('rejects name change to existing name', async () => {
-    mockGet.mockResolvedValue({
-      exists: () => true,
-      val: () => ({
-        p1: { name: 'Alice', id: 'p1' },
-        p2: { name: 'Bob', id: 'p2' }
-      })
-    });
+    mockRunTransaction.mockResolvedValueOnce({ committed: false });
 
     await expect(
       updateParticipant('group1', 'p1', { name: 'Bob' })
@@ -191,12 +171,7 @@ describe('updateParticipant', () => {
   });
 
   test('allows keeping same name on update', async () => {
-    mockGet.mockResolvedValue({
-      exists: () => true,
-      val: () => ({
-        p1: { name: 'Alice', id: 'p1' }
-      })
-    });
+    mockRunTransaction.mockResolvedValueOnce({ committed: true });
 
     // Same participant updating their own name (no change) should work
     await expect(
@@ -204,9 +179,9 @@ describe('updateParticipant', () => {
     ).resolves.not.toThrow();
   });
 
-  test('skips duplicate check when name not in updates', async () => {
+  test('skips transaction check when name not in updates', async () => {
     await updateParticipant('group1', 'p1', { duration: 5 });
-    // Should not call getParticipants (mockGet not called for participants)
+    // Should call standard update when only other fields change
     expect(mockUpdate).toHaveBeenCalled();
   });
 });
@@ -254,10 +229,10 @@ describe('Group ID generation', () => {
   test('uses crypto.randomUUID() for secure IDs', async () => {
     mockRandomUUID.mockReset();
     mockRandomUUID.mockReturnValueOnce('secure-uuid-1').mockReturnValueOnce('secure-admin-1');
-    const result1 = await createGroup({ name: 'G1' });
+    const result1 = await createGroup({ name: 'G1', startDate: '2024-06-01', endDate: '2024-06-15' });
 
     mockRandomUUID.mockReturnValueOnce('secure-uuid-2').mockReturnValueOnce('secure-admin-2');
-    const result2 = await createGroup({ name: 'G2' });
+    const result2 = await createGroup({ name: 'G2', startDate: '2024-06-01', endDate: '2024-06-15' });
 
     expect(result1.groupId).toBe('secure-uuid-1');
     expect(result2.groupId).toBe('secure-uuid-2');
@@ -267,7 +242,7 @@ describe('Group ID generation', () => {
 
 describe('Admin token security', () => {
   test('raw adminToken is NOT stored in the group document', async () => {
-    await createGroup({ name: 'SecTest' });
+    await createGroup({ name: 'SecTest', startDate: '2024-06-01', endDate: '2024-06-15' });
 
     const groupData = mockSet.mock.calls[0][1];
     // BUG-B fix: raw token absent — only its irreversible SHA-256 hash is stored
@@ -275,7 +250,7 @@ describe('Admin token security', () => {
   });
 
   test('adminTokenHash (SHA-256 digest) is stored instead of raw token', async () => {
-    await createGroup({ name: 'SecTest' });
+    await createGroup({ name: 'SecTest', startDate: '2024-06-01', endDate: '2024-06-15' });
 
     const groupData = mockSet.mock.calls[0][1];
     expect(groupData.adminTokenHash).toBe(MOCK_HASH);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getGroup, updateGroup, getParticipants, deleteGroup, addParticipant, updateParticipant, getParticipant, validateAdminToken } from '../firebase';
+import { getGroup, updateGroup, getParticipants, deleteGroup, addParticipant, updateParticipant, getParticipant, validateAdminToken, subscribeToGroup, subscribeToParticipants } from '../firebase';
 import { calculateOverlap, getBestOverlapPeriods, formatDateRange } from '../utils/overlap';
 import { exportToCSV } from '../utils/export';
 import { Copy, Download, Edit, Save, X, Mail } from 'lucide-react';
@@ -32,9 +32,11 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   const [availabilitySubmitted, setAvailabilitySubmitted] = useState(false);
 
   useEffect(() => {
+    let unsubGroup = () => { };
+    let unsubParts = () => { };
+    let isMounted = true;
+
     const initAdmin = async () => {
-      // BUG-C fix: validate the admin token against the DB before rendering any admin UI.
-      // validateAdminToken calls a Cloud Function that reads the private path via Admin SDK.
       if (!adminToken) {
         onBack();
         return;
@@ -47,22 +49,22 @@ function AdminPanel({ groupId, adminToken, onBack }) {
           return;
         }
       } catch {
-        // Network or server error — deny access rather than fail open
         onBack();
         return;
       }
+
+      if (!isMounted) return;
 
       if (adminToken) {
         try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch { }
       }
 
-      // Restore admin's own participant session
       try {
         const stored = localStorage.getItem(`vacation_admin_p_${groupId}`);
         if (stored) {
           const { participantId, name, email, duration } = JSON.parse(stored);
           getParticipant(groupId, participantId).then(p => {
-            if (p) {
+            if (p && isMounted) {
               setAdminParticipantId(participantId);
               setAdminSavedDays(p.availableDays || []);
               setAdminName(p.name || name || '');
@@ -73,10 +75,37 @@ function AdminPanel({ groupId, adminToken, onBack }) {
         }
       } catch { }
 
-      await fetchData();
+      let initialLoads = 2;
+      const onLoad = () => {
+        initialLoads--;
+        if (initialLoads <= 0 && isMounted) setLoading(false);
+      };
+
+      unsubGroup = subscribeToGroup(groupId, (data) => {
+        if (!isMounted) return;
+        if (!data) setError('Group not found');
+        else {
+          setGroup(data);
+          setEditData(prev => Object.keys(prev).length === 0 ? data : prev);
+        }
+        onLoad();
+      });
+
+      unsubParts = subscribeToParticipants(groupId, (data) => {
+        if (!isMounted) return;
+        setParticipants(data || []);
+        onLoad();
+      });
     };
 
+    setLoading(true);
     initAdmin();
+
+    return () => {
+      isMounted = false;
+      unsubGroup();
+      unsubParts();
+    };
   }, [groupId, adminToken]);
 
   useEffect(() => {
@@ -90,27 +119,6 @@ function AdminPanel({ groupId, adminToken, onBack }) {
       setOverlaps(results);
     }
   }, [group, participants, durationFilter]);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const groupData = await getGroup(groupId);
-      const participantsData = await getParticipants(groupId);
-
-      if (!groupData) {
-        setError('Group not found');
-        return;
-      }
-
-      setGroup(groupData);
-      setEditData(groupData);
-      setParticipants(participantsData || []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAdminAvailability = async (formData) => {
     try {
@@ -149,7 +157,6 @@ function AdminPanel({ groupId, adminToken, onBack }) {
       setAdminEmail(formData.email || '');
       setAdminDuration(String(formData.duration));
       setAvailabilitySubmitted(true);
-      await fetchData();
       setTimeout(() => setAvailabilitySubmitted(false), 3000);
     } catch (err) {
       setError(err.message);
@@ -177,8 +184,12 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   };
 
   const handleExport = () => {
-    if (group && participants.length > 0) {
-      exportToCSV(group, participants, overlaps);
+    try {
+      if (group && participants.length > 0) {
+        exportToCSV(group, participants, overlaps);
+      }
+    } catch (err) {
+      setError('Failed to export CSV: ' + err.message);
     }
   };
 

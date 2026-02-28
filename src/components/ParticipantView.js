@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getGroup, addParticipant, updateParticipant, getParticipants, getParticipant } from '../firebase';
+import { addParticipant, updateParticipant, getParticipant, subscribeToGroup, subscribeToParticipants } from '../firebase';
 import { getDatesBetween } from '../utils/overlap';
 
 import CalendarView from './CalendarView';
@@ -19,7 +19,33 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
   const [participantDuration, setParticipantDuration] = useState('3');
 
   useEffect(() => {
-    fetchData();
+    if (!groupId) return;
+
+    setLoading(true);
+    let initialLoads = 2;
+    const onLoad = () => {
+      initialLoads--;
+      if (initialLoads <= 0) setLoading(false);
+    };
+
+    const unsubGroup = subscribeToGroup(groupId, (data) => {
+      if (!data) {
+        setError('Group not found');
+      } else {
+        setGroup(data);
+      }
+      onLoad();
+    });
+
+    const unsubParts = subscribeToParticipants(groupId, (data) => {
+      setParticipants(data || []);
+      onLoad();
+    });
+
+    return () => {
+      unsubGroup();
+      unsubParts();
+    };
   }, [groupId]);
 
   useEffect(() => {
@@ -39,31 +65,15 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
     restore();
   }, [groupId, initialParticipantId]);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const groupData = await getGroup(groupId);
-      const participantsData = await getParticipants(groupId);
 
-      if (!groupData) {
-        setError('Group not found');
-        return;
-      }
-
-      setGroup(groupData);
-      setParticipants(participantsData || []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (formData) => {
     try {
       setLoading(true);
       setError('');
 
+      // The participants state is already updated via a real-time listener (subscribeToParticipants).
+      // This ensures the `participants` array is always current for checks like duplication.
       const normalizedName = formData.name.trim().toLowerCase();
       const isDuplicate = participants.some(
         p => p.name.trim().toLowerCase() === normalizedName && p.id !== currentParticipantId
@@ -114,7 +124,6 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
 
       setSavedDays(mergedDays);
       setSubmitted(true);
-      await fetchData();
       setTimeout(() => setSubmitted(false), 3000);
     } catch (err) {
       setError(err.message);
