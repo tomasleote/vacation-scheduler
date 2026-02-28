@@ -124,6 +124,15 @@ function AdminPanel({ groupId, adminToken, onBack }) {
     try {
       const finalDays = formData.selectedDays || [];
 
+      // Duplicate name check
+      const normalizedName = formData.name.trim().toLowerCase();
+      const isDuplicate = participants.some(
+        p => p.name.trim().toLowerCase() === normalizedName && p.id !== adminParticipantId
+      );
+      if (isDuplicate) {
+        throw new Error('A participant with this name already exists. Please choose another name.');
+      }
+
       if (!adminParticipantId) {
         const participantId = await addParticipant(groupId, {
           name: formData.name,

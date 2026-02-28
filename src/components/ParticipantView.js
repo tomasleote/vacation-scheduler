@@ -95,8 +95,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
         p => p.name.trim().toLowerCase() === normalizedName && p.id !== currentParticipantId
       );
       if (isDuplicate) {
-        setError('A participant with this name already exists. Please choose another name.');
-        return;
+        throw new Error('A participant with this name already exists. Please choose another name.');
       }
 
       // The CalendarView now passes the entire desired array state.
