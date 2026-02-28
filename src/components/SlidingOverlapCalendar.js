@@ -217,6 +217,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                 <div key={i} className="relative aspect-square">
                                     {day ? (
                                         <button
+                                            data-testid={dateStr ? `day-${dateStr}` : undefined}
                                             onMouseEnter={() => inRange && wouldBeValidBlock && !lockedDate && setHoveredDate(dateStr)}
                                             onMouseLeave={() => !lockedDate && setHoveredDate(null)}
                                             onClick={() => day && handleDayClick(dateStr)}

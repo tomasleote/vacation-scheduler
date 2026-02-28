@@ -154,6 +154,70 @@ describe('CalendarView interactions', () => {
     expect(screen.getByTestId('day-2024-06-12').className).toContain('bg-indigo-600');
   });
 
+  test('block mode gracefully handles selecting days near the end of the month boundary', () => {
+    // If a user selects a block of 5 days, but clicks the 28th of a 30-day month, it should safely cap at the 30th without exploding.
+    renderCalendar({
+      startDate: '2024-06-01',
+      endDate: '2024-06-30'
+    });
+
+    fireEvent.click(screen.getByText('Block'));
+    const numberInputs = screen.getAllByRole('spinbutton');
+    fireEvent.change(numberInputs[1], { target: { value: '5' } }); // 5 days
+
+    fireEvent.click(screen.getByTestId('day-2024-06-28'));
+
+    // Should only select 28, 29, 30. Should not crash.
+    expect(screen.getByTestId('day-2024-06-28').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-29').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-30').className).toContain('bg-indigo-600');
+  });
+
+  test('custom block input safely bounds invalid duration lengths', () => {
+    // Tests the numeric pill logic to ensure it maxes out safely and falls back on invalid inputs.
+    renderCalendar();
+
+    fireEvent.click(screen.getByText('Block'));
+    const numberInputs = screen.getAllByRole('spinbutton');
+    const customBlockInput = numberInputs[1];
+
+    // Attempting a negative boundary limits gracefully
+    fireEvent.change(customBlockInput, { target: { value: '-5' } });
+    fireEvent.blur(customBlockInput);
+    expect(customBlockInput).toHaveValue(1);
+
+    // Attempting an extreme upper boundary
+    fireEvent.change(customBlockInput, { target: { value: '999' } });
+    fireEvent.blur(customBlockInput);
+    expect(customBlockInput).toHaveValue(30); // Max length of June
+  });
+
+  test('handles state transfer from Block mode back to Flexible smoothly', () => {
+    renderCalendar();
+
+    // Select 3 days in Block mode
+    fireEvent.click(screen.getByText('Block'));
+    const numberInputs = screen.getAllByRole('spinbutton');
+    fireEvent.change(numberInputs[1], { target: { value: '3' } });
+    fireEvent.click(screen.getByTestId('day-2024-06-10'));
+
+    expect(screen.getByTestId('day-2024-06-12').className).toContain('bg-indigo-600');
+
+    // Switch back to Flexible
+    fireEvent.click(screen.getByText('Flexible'));
+
+    // The days should still be selected
+    expect(screen.getByTestId('day-2024-06-12').className).toContain('bg-indigo-600');
+
+    // But now we can unclick just one
+    fireEvent.click(screen.getByTestId('day-2024-06-12'));
+    expect(screen.getByTestId('day-2024-06-12').className).not.toContain('bg-indigo-600');
+    // Day 10 and 11 should remain selected
+    expect(screen.getByTestId('day-2024-06-11').className).toContain('bg-indigo-600');
+  });
+
+
+
   test('saved days appear as selected', () => {
     renderCalendar({
       savedDays: ['2024-06-15', '2024-06-16']
