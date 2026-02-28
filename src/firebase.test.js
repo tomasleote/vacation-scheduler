@@ -5,6 +5,10 @@
  * we mock the Firebase modules to test our application logic in isolation.
  */
 
+// Polyfill TextEncoder for JSDOM
+const { TextEncoder } = require('util');
+global.TextEncoder = TextEncoder;
+
 // Mock Firebase modules before importing
 jest.mock('firebase/app', () => ({
   initializeApp: jest.fn(() => ({}))
@@ -32,9 +36,11 @@ jest.mock('firebase/database', () => ({
 
 // Mock crypto: randomUUID + subtle.digest (used by hashAdminToken)
 // digest always returns 32 bytes of 0xab → hex hash = 'ab'.repeat(32)
+// randomUUID cycles through values to provide unique IDs for groupId and adminToken
+const mockRandomUUID = jest.fn();
 Object.defineProperty(global, 'crypto', {
   value: {
-    randomUUID: jest.fn(() => 'test-uuid-1234'),
+    randomUUID: mockRandomUUID,
     subtle: {
       digest: jest.fn().mockResolvedValue(new Uint8Array(32).fill(0xab).buffer)
     }
@@ -47,19 +53,23 @@ const { createGroup, getGroup, validateAdminToken, addParticipant, updatePartici
 
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
-});
+  // Ensure digest always returns the array buffer, even if reset
+  global.crypto.subtle.digest = jest.fn().mockResolvedValue(new Uint8Array(32).fill(0xab).buffer);
 
-afterEach(() => {
-  jest.restoreAllMocks();
+  // createGroup calls randomUUID twice: first for groupId, then for adminToken
+  // addParticipant calls it once for participantId
+  mockRandomUUID
+    .mockReturnValueOnce('test-group-uuid')
+    .mockReturnValueOnce('test-admin-token-uuid')
+    .mockReturnValue('test-uuid-fallback');
 });
 
 describe('createGroup', () => {
   test('creates group with generated ID and admin token', async () => {
     const result = await createGroup({ name: 'Test Group', startDate: '2024-06-01', endDate: '2024-06-15' });
 
-    expect(result.groupId).toBe('1700000000000');
-    expect(result.adminToken).toBe('test-uuid-1234');
+    expect(result.groupId).toBe('test-group-uuid');
+    expect(result.adminToken).toBe('test-admin-token-uuid');
     // One set() call: group data with hash included
     expect(mockSet).toHaveBeenCalledTimes(1);
   });
@@ -71,7 +81,7 @@ describe('createGroup', () => {
     expect(groupData.name).toBe('Trip');
     expect(groupData.description).toBe('Beach');
     expect(groupData.createdAt).toBeDefined();
-    expect(groupData.id).toBe('1700000000000');
+    expect(groupData.id).toBe('test-group-uuid');
     // Raw adminToken must NOT be stored — only its SHA-256 hash
     expect(groupData.adminToken).toBeUndefined();
     expect(groupData.adminTokenHash).toBe(MOCK_HASH);
@@ -121,7 +131,7 @@ describe('addParticipant', () => {
       availableDays: ['2024-06-01']
     });
 
-    expect(result).toBe('1700000000000');
+    expect(result).toBe('test-group-uuid');
     expect(mockSet).toHaveBeenCalled();
   });
 
@@ -241,16 +251,17 @@ describe('deleteParticipant', () => {
 });
 
 describe('Group ID generation', () => {
-  test('uses Date.now() - IDs are sequential timestamps', async () => {
-    // First call
-    jest.spyOn(Date, 'now').mockReturnValue(1700000000000);
+  test('uses crypto.randomUUID() for secure IDs', async () => {
+    mockRandomUUID.mockReset();
+    mockRandomUUID.mockReturnValueOnce('secure-uuid-1').mockReturnValueOnce('secure-admin-1');
     const result1 = await createGroup({ name: 'G1' });
 
-    // Second call at same millisecond
+    mockRandomUUID.mockReturnValueOnce('secure-uuid-2').mockReturnValueOnce('secure-admin-2');
     const result2 = await createGroup({ name: 'G2' });
 
-    // Both will have the same ID! This is a collision risk.
-    expect(result1.groupId).toBe(result2.groupId);
+    expect(result1.groupId).toBe('secure-uuid-1');
+    expect(result2.groupId).toBe('secure-uuid-2');
+    expect(result1.groupId).not.toBe(result2.groupId);
   });
 });
 

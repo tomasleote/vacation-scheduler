@@ -55,6 +55,8 @@ function App() {
   const handleCreateGroup = ({ groupId, adminToken }) => {
     setGroupId(groupId);
     setAdminToken(adminToken);
+    // Persist token immediately so it survives page refresh before entering admin panel
+    try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch {}
     setCurrentPage('created');
   };
 

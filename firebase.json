@@ -8,6 +8,10 @@
     ],
     "rewrites": [
       {
+        "source": "/api/send-reminder",
+        "function": "sendReminder"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

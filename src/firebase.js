@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, set, get, update, remove, child } from 'firebase/database';
-import { getAuth } from 'firebase/auth';
+
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "AIzaSyDemoKey123456789",
@@ -11,12 +11,10 @@ const firebaseConfig = {
   databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL || `https://${process.env.REACT_APP_FIREBASE_PROJECT_ID || "vacation-scheduler-demo"}.firebaseio.com`
 };
 
-// Debug: Log config (remove in production)
-console.log("Firebase initialized with projectId:", firebaseConfig.projectId);
+
 
 const app = initializeApp(firebaseConfig);
 export const database = getDatabase(app);
-export const auth = getAuth(app);
 
 // Produces a hex-encoded SHA-256 digest of a token using the browser's Web Crypto API.
 // The raw adminToken never enters the database — only this irreversible hash does.
@@ -30,9 +28,12 @@ const hashAdminToken = async (token) => {
 
 export const createGroup = async (groupData) => {
   try {
-    const groupId = Date.now().toString();
+    const groupId = crypto.randomUUID();
     const adminToken = crypto.randomUUID();
     const adminTokenHash = await hashAdminToken(adminToken);
+    if (!adminTokenHash) {
+      throw new Error('Failed to generate admin token hash');
+    }
     const groupRef = ref(database, `groups/${groupId}`);
     // Store the hash of the admin token, never the raw token itself.
     // The hash is safe to be public: SHA-256 of a UUID is computationally irreversible.
@@ -65,8 +66,10 @@ export const getGroup = async (groupId) => {
 };
 
 export const updateGroup = async (groupId, updates) => {
+  // Never allow adminTokenHash to be overwritten through regular updates
+  const { adminTokenHash, ...safeUpdates } = updates;
   const groupRef = ref(database, `groups/${groupId}`);
-  await update(groupRef, updates);
+  await update(groupRef, safeUpdates);
 };
 
 export const addParticipant = async (groupId, participantData) => {
@@ -76,7 +79,7 @@ export const addParticipant = async (groupId, participantData) => {
     throw new Error('A participant with this name already exists. Please choose another name.');
   }
 
-  const participantId = Date.now().toString();
+  const participantId = crypto.randomUUID();
   const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
   await set(participantRef, {
     ...participantData,

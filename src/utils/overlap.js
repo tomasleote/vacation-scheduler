@@ -1,4 +1,6 @@
 export const calculateOverlap = (participants, startDate, endDate, durationDays) => {
+  if (!participants?.length) return [];
+
   const start = new Date(startDate);
   const end = new Date(endDate);
   const totalDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;

@@ -50,18 +50,25 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
     const blockStart = new Date(startDateStr);
     const blockDates = [];
 
+    // BUG-J fix: no break — iterate the full window and only include in-range dates
+    // (clamps naturally to the allowed range without stopping at the first gap)
     for (let i = 0; i < blockSize; i++) {
       const d = new Date(blockStart);
       d.setDate(d.getDate() + i);
       const dateStr = d.toISOString().split('T')[0];
       if (isDateInRange(dateStr)) {
         blockDates.push(dateStr);
-      } else {
-        break;
       }
     }
 
-    setSelectedDays(prev => Array.from(new Set([...prev, ...blockDates])));
+    // BUG-H fix: toggle — if every date in the block is already selected, deselect all of them
+    setSelectedDays(prev => {
+      const allSelected = blockDates.length > 0 && blockDates.every(d => prev.includes(d));
+      if (allSelected) {
+        return prev.filter(d => !blockDates.includes(d));
+      }
+      return Array.from(new Set([...prev, ...blockDates]));
+    });
   };
 
   const isDateInRange = (dateStr) => dateRange.includes(dateStr);
@@ -148,7 +155,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
   const monthName = monthYear.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Your Name * {name.length}/30
@@ -277,12 +284,22 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
             const inRange = day ? isDateInRange(dateStr) : false;
             const selected = day ? isDaySelected(day) : false;
 
+            // BUG-K fix: add aria-label and data-testid to every day button
+            const ariaLabel = day
+              ? `${monthName}, day ${day}${selected ? ' (selected)' : ''}`
+              : undefined;
+            const testId = day
+              ? `day-${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+              : undefined;
+
             return (
               <button
                 key={i}
                 type="button"
                 onClick={() => day && handleDayClick(day)}
                 disabled={!inRange}
+                aria-label={ariaLabel}
+                data-testid={testId}
                 className={`
                   aspect-square p-2 text-sm font-semibold rounded transition
                   ${!day ? 'bg-transparent' : ''}
@@ -298,7 +315,8 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
 
         {(selectedDays.length > 0 || savedDays.length > 0) && (
           <div className="bg-indigo-50 p-3 rounded-lg mb-4">
-            <p className="text-sm text-gray-700">
+            {/* BUG-I & BUG-K fix: correct total shown = savedDays ∪ selectedDays; wrapped in data-testid */}
+            <p className="text-sm text-gray-700" data-testid="day-count">
               <strong>{Array.from(new Set([...savedDays, ...selectedDays])).length}</strong> day{Array.from(new Set([...savedDays, ...selectedDays])).length !== 1 ? 's' : ''} selected
               {savedDays.length > 0 && selectedDays.length > 0 && (
                 <span className="text-gray-500"> ({savedDays.length} saved + {selectedDays.filter(d => !savedDays.includes(d)).length} new)</span>
@@ -310,9 +328,10 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
+      {/* BUG-I fix: disabled only when there are truly no days at all (neither saved nor newly selected) */}
       <button
         type="submit"
-        disabled={loading || selectedDays.length === 0}
+        disabled={loading || (selectedDays.length === 0 && savedDays.length === 0)}
         className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:opacity-50 flex items-center justify-center gap-2"
       >
         <Calendar size={18} />

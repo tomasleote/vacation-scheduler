@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getGroup, addParticipant, updateParticipant, getParticipants, getParticipant } from '../firebase';
 import { getDatesBetween } from '../utils/overlap';
-import ParticipantForm from './ParticipantForm';
+
 import CalendarView from './CalendarView';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -34,7 +34,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
           setParticipantEmail(participant.email || '');
           setParticipantDuration(String(participant.duration || '3'));
         }
-      } catch {}
+      } catch { }
     };
     restore();
   }, [groupId, initialParticipantId]);
@@ -44,7 +44,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
       setLoading(true);
       const groupData = await getGroup(groupId);
       const participantsData = await getParticipants(groupId);
-      
+
       if (!groupData) {
         setError('Group not found');
         return;
@@ -96,7 +96,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
             `vacation_p_${groupId}`,
             JSON.stringify({ participantId, name: formData.name })
           );
-        } catch {}
+        } catch { }
 
         window.history.replaceState({}, '', `?group=${groupId}&p=${participantId}`);
       } else {

@@ -53,7 +53,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
       }
 
       if (adminToken) {
-        try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch {}
+        try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch { }
       }
 
       // Restore admin's own participant session
@@ -69,9 +69,9 @@ function AdminPanel({ groupId, adminToken, onBack }) {
               setAdminEmail(p.email || email || '');
               setAdminDuration(String(p.duration || duration || '3'));
             }
-          }).catch(() => {});
+          }).catch(() => { });
         }
-      } catch {}
+      } catch { }
 
       await fetchData();
     };
@@ -96,7 +96,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
       setLoading(true);
       const groupData = await getGroup(groupId);
       const participantsData = await getParticipants(groupId);
-      
+
       if (!groupData) {
         setError('Group not found');
         return;
@@ -133,7 +133,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
             `vacation_admin_p_${groupId}`,
             JSON.stringify({ participantId, name: formData.name, email: formData.email, duration: formData.duration })
           );
-        } catch {}
+        } catch { }
       } else {
         await updateParticipant(groupId, adminParticipantId, {
           name: formData.name,
@@ -184,7 +184,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
 
   const handleSendReminder = async () => {
     try {
-      await fetch('/api/send-reminder', {
+      const response = await fetch('/api/send-reminder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -195,8 +195,12 @@ function AdminPanel({ groupId, adminToken, onBack }) {
           daysRemaining: Math.ceil((new Date(group.startDate) - new Date()) / (1000 * 60 * 60 * 24))
         })
       });
-      setEmailSent(true);
-      setTimeout(() => setEmailSent(false), 3000);
+      if (response.ok) {
+        setEmailSent(true);
+        setTimeout(() => setEmailSent(false), 3000);
+      } else {
+        setError('Failed to send reminder');
+      }
     } catch (err) {
       setError('Failed to send reminder');
     }

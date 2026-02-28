@@ -57,6 +57,16 @@ describe('calculateOverlap', () => {
     expect(result).toEqual([]);
   });
 
+  test('returns empty when participants is null', () => {
+    const result = calculateOverlap(null, '2024-06-01', '2024-06-10', 3);
+    expect(result).toEqual([]);
+  });
+
+  test('returns empty when participants is undefined', () => {
+    const result = calculateOverlap(undefined, '2024-06-01', '2024-06-10', 3);
+    expect(result).toEqual([]);
+  });
+
   test('calculates 100% overlap when all participants available for entire range', () => {
     const participants = [
       makeParticipant('Alice', ['2024-06-01', '2024-06-02', '2024-06-03']),
