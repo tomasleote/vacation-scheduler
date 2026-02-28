@@ -48,6 +48,12 @@ export const updateGroup = async (groupId, updates) => {
 };
 
 export const addParticipant = async (groupId, participantData) => {
+  const existing = await getParticipants(groupId);
+  const normalizedNew = participantData.name.trim().toLowerCase();
+  if (existing.some(p => p.name.trim().toLowerCase() === normalizedNew)) {
+    throw new Error('A participant with this name already exists. Please choose another name.');
+  }
+
   const participantId = Date.now().toString();
   const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
   await set(participantRef, {
@@ -59,6 +65,14 @@ export const addParticipant = async (groupId, participantData) => {
 };
 
 export const updateParticipant = async (groupId, participantId, updates) => {
+  if (updates.name !== undefined) {
+    const existing = await getParticipants(groupId);
+    const normalizedNew = updates.name.trim().toLowerCase();
+    if (existing.some(p => p.name.trim().toLowerCase() === normalizedNew && p.id !== participantId)) {
+      throw new Error('A participant with this name already exists. Please choose another name.');
+    }
+  }
+
   const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
   await update(participantRef, updates);
 };

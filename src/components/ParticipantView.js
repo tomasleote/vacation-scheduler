@@ -62,6 +62,17 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
   const handleSubmit = async (formData) => {
     try {
       setLoading(true);
+      setError('');
+
+      const normalizedName = formData.name.trim().toLowerCase();
+      const isDuplicate = participants.some(
+        p => p.name.trim().toLowerCase() === normalizedName && p.id !== currentParticipantId
+      );
+      if (isDuplicate) {
+        setError('A participant with this name already exists. Please choose another name.');
+        return;
+      }
+
       const newDays = formData.selectedDays || [];
       const mergedDays = newDays.length > 0
         ? Array.from(new Set([...savedDays, ...newDays]))
