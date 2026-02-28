@@ -150,7 +150,17 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                 min="1"
                                 max={dateRange.length}
                                 value={localDuration}
-                                onChange={(e) => setLocalDuration(e.target.value)}
+                                onChange={(e) => {
+                                    const valStr = e.target.value;
+                                    setLocalDuration(valStr);
+
+                                    // Apply dynamically if it's a valid number
+                                    let val = parseInt(valStr);
+                                    if (!isNaN(val) && val >= 1) {
+                                        if (val > dateRange.length) val = dateRange.length;
+                                        onDurationChange(String(val));
+                                    }
+                                }}
                                 onBlur={() => {
                                     let val = parseInt(localDuration);
                                     if (isNaN(val) || val < 1) val = 1;
