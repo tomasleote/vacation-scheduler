@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { getDatesBetween, formatDateRange } from '../utils/overlap';
-import { Calendar as CalendarIcon, Users, UserX, TrendingUp } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, Edit2, Play, ChevronLeft, ChevronRight, XIcon, PartyPopper, UserX, TrendingUp } from 'lucide-react';
 
 function SlidingOverlapCalendar({ startDate, endDate, participants, duration, overlaps, onDurationChange }) {
     const [currentMonth, setCurrentMonth] = useState(new Date(startDate).getMonth());
@@ -327,8 +327,8 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                         })}
                                     </div>
                                 ) : (
-                                    <p className="text-sm text-green-600 font-bold bg-green-50 px-3 py-2 rounded-lg border border-green-200 text-center">
-                                        🎉 Everyone can make it!
+                                    <p className="flex items-center justify-center gap-2 text-sm text-green-600 font-bold bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                                        <PartyPopper size={18} /> Everyone can make it!
                                     </p>
                                 )}
                             </div>

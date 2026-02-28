@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Lightbulb } from 'lucide-react';
 
 function ResultsDisplay({ overlaps }) {
   if (!overlaps || overlaps.length === 0) {
@@ -22,10 +22,10 @@ function ResultsDisplay({ overlaps }) {
         {overlaps.map((overlap, i) => {
           const startDate = new Date(overlap.startDate);
           const endDate = new Date(overlap.endDate);
-          const formatDate = (d) => d.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric' 
+          const formatDate = (d) => d.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
           });
 
           return (
@@ -58,8 +58,9 @@ function ResultsDisplay({ overlaps }) {
       </div>
 
       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-sm text-blue-900">
-          💡 <strong>Tip:</strong> The highest percentage means the most people are available for that period.
+        <p className="text-sm text-blue-900 flex items-start gap-2">
+          <Lightbulb size={16} className="mt-0.5 shrink-0" />
+          <span><strong>Tip:</strong> The highest percentage means the most people are available for that period.</span>
         </p>
       </div>
     </div>

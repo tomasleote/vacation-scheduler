@@ -4,7 +4,7 @@ import { getDatesBetween, calculateOverlap, getBestOverlapPeriods } from '../uti
 
 import CalendarView from './CalendarView';
 import SlidingOverlapCalendar from './SlidingOverlapCalendar';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, CalendarRange, Users } from 'lucide-react';
 
 function ParticipantView({ groupId, participantId: initialParticipantId, onBack }) {
   const [group, setGroup] = useState(null);
@@ -192,8 +192,8 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
           )}
           <p className="text-gray-600 mb-4">Select your available dates for the vacation</p>
           <div className="flex gap-4 text-sm text-gray-600 flex-wrap">
-            <span>📅 {group.startDate} to {group.endDate}</span>
-            <span>👥 {participants.length} people attending</span>
+            <span className="flex items-center gap-1.5"><CalendarRange size={16} className="text-gray-400" /> {group.startDate} to {group.endDate}</span>
+            <span className="flex items-center gap-1.5"><Users size={16} className="text-gray-400" /> {participants.length} people attending</span>
           </div>
         </div>
 
