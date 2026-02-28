@@ -122,17 +122,14 @@ function AdminPanel({ groupId, adminToken, onBack }) {
 
   const handleAdminAvailability = async (formData) => {
     try {
-      const newDays = formData.selectedDays || [];
-      const mergedDays = newDays.length > 0
-        ? Array.from(new Set([...adminSavedDays, ...newDays]))
-        : adminSavedDays;
+      const finalDays = formData.selectedDays || [];
 
       if (!adminParticipantId) {
         const participantId = await addParticipant(groupId, {
           name: formData.name,
           email: formData.email,
           duration: formData.duration,
-          availableDays: mergedDays,
+          availableDays: finalDays,
           blockType: formData.blockType
         });
         setAdminParticipantId(participantId);
@@ -146,13 +143,13 @@ function AdminPanel({ groupId, adminToken, onBack }) {
         await updateParticipant(groupId, adminParticipantId, {
           name: formData.name,
           email: formData.email,
-          availableDays: mergedDays,
+          availableDays: finalDays,
           duration: formData.duration,
           blockType: formData.blockType
         });
       }
 
-      setAdminSavedDays(mergedDays);
+      setAdminSavedDays(finalDays);
       setAdminName(formData.name);
       setAdminEmail(formData.email || '');
       setAdminDuration(String(formData.duration));

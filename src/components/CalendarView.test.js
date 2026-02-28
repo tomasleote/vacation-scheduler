@@ -227,6 +227,28 @@ describe('CalendarView interactions', () => {
     expect(screen.getByTestId('day-2024-06-16').className).toContain('bg-indigo-600');
   });
 
+  test('saved days can be dynamically unselected', () => {
+    // Verifies that the new state unification logic allows turning off previously submitted dates.
+    renderCalendar({
+      savedDays: ['2024-06-15', '2024-06-16']
+    });
+
+    const savedDayBtn = screen.getByTestId('day-2024-06-15');
+
+    // Day should initially be selected because it's a saved day
+    expect(savedDayBtn.className).toContain('bg-indigo-600');
+
+    // Click to unselect
+    fireEvent.click(savedDayBtn);
+
+    // Day should no longer have the selected coloring
+    expect(savedDayBtn.className).not.toContain('bg-indigo-600');
+
+    // The counter should also decrement down to 1
+    const counter = screen.getByTestId('day-count');
+    expect(counter.textContent).toMatch(/1/);
+  });
+
   test('shows day count including saved and new days', () => {
     renderCalendar({
       savedDays: ['2024-06-15']

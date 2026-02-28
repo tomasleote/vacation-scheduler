@@ -7,11 +7,18 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
   const [email, setEmail] = useState(initialEmail);
   const [duration, setDuration] = useState(initialDuration);
   const [blockType, setBlockType] = useState('flexible');
-  const [selectedDays, setSelectedDays] = useState([]);
+  const [selectedDays, setSelectedDays] = useState(savedDays || []);
   const [currentMonth, setCurrentMonth] = useState(new Date(startDate).getMonth());
   const [currentYear, setCurrentYear] = useState(new Date(startDate).getFullYear());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Sync savedDays from parent if they are fetched after initial mount or updated post-submit
+  useEffect(() => {
+    if (savedDays) {
+      setSelectedDays(savedDays);
+    }
+  }, [savedDays]);
 
   const dateRange = getDatesBetween(startDate, endDate);
 
@@ -81,7 +88,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
 
   const isDaySelected = (day) => {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return selectedDays.includes(dateStr) || savedDays.includes(dateStr);
+    return selectedDays.includes(dateStr);
   };
 
   const handleSubmit = async (e) => {
@@ -106,7 +113,6 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
         blockType: blockType === 'flexible' ? 'flexible' : String(customBlockSize),
         selectedDays: selectedDays.sort()
       });
-      setSelectedDays([]);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -129,7 +135,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
         email,
         duration: parseInt(localDuration),
         blockType: blockType === 'flexible' ? 'flexible' : String(customBlockSize),
-        selectedDays: []
+        selectedDays: savedDays // "Save Details" doesn't submit days, so keep the existing ones
       });
     } catch (err) {
       setError(err.message);
@@ -339,14 +345,11 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
         </div>
 
         {/* Dynamic Selection Counter */}
-        {(selectedDays.length > 0 || savedDays.length > 0) && (
+        {selectedDays.length > 0 && (
           <div className="bg-indigo-50 text-indigo-800 p-3 rounded-xl border border-indigo-100 mt-6 flex justify-center items-center gap-2 font-medium">
             <span data-testid="day-count">
-              <strong>{Array.from(new Set([...savedDays, ...selectedDays])).length}</strong> day{Array.from(new Set([...savedDays, ...selectedDays])).length !== 1 ? 's' : ''} selected
+              <strong>{selectedDays.length}</strong> day{selectedDays.length !== 1 ? 's' : ''} selected
             </span>
-            {savedDays.length > 0 && selectedDays.length > 0 && (
-              <span className="text-indigo-500 text-sm"> ({savedDays.length} saved + {selectedDays.filter(d => !savedDays.includes(d)).length} new)</span>
-            )}
           </div>
         )}
 
@@ -363,7 +366,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
         <div className="mt-6 flex justify-end">
           <button
             type="submit"
-            disabled={loading || (selectedDays.length === 0 && savedDays.length === 0)}
+            disabled={loading || selectedDays.length === 0}
             className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 flex items-center justify-center gap-2 transform active:scale-95"
           >
             <Calendar size={18} />

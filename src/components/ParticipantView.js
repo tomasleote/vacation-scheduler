@@ -99,17 +99,16 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
         return;
       }
 
-      const newDays = formData.selectedDays || [];
-      const mergedDays = newDays.length > 0
-        ? Array.from(new Set([...savedDays, ...newDays]))
-        : savedDays;
+      // The CalendarView now passes the entire desired array state.
+      // E.g., if a user unselects a previously saved day, formData.selectedDays simply won't include it. 
+      const finalDays = formData.selectedDays || [];
 
       if (!currentParticipantId) {
         const participantId = await addParticipant(groupId, {
           name: formData.name,
           email: formData.email,
           duration: formData.duration,
-          availableDays: mergedDays,
+          availableDays: finalDays,
           blockType: formData.blockType
         });
         setCurrentParticipantId(participantId);
@@ -130,7 +129,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
         await updateParticipant(groupId, currentParticipantId, {
           name: formData.name,
           email: formData.email,
-          availableDays: mergedDays,
+          availableDays: finalDays,
           duration: formData.duration,
           blockType: formData.blockType
         });
@@ -139,7 +138,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
         setParticipantDuration(String(formData.duration));
       }
 
-      setSavedDays(mergedDays);
+      setSavedDays(finalDays);
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 3000);
     } catch (err) {
