@@ -415,7 +415,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                     </button>
                                 ))}
 
-                                <p className="text-xs text-center text-gray-400 mt-6 mt-auto">
+                                <p className="text-xs text-center text-gray-400 mt-auto">
                                     Hover over the calendar to explore other options.
                                 </p>
                             </div>
