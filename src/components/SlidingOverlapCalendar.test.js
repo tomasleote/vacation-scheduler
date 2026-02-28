@@ -97,4 +97,18 @@ describe('SlidingOverlapCalendar Edge Cases', () => {
         expect(screen.getByText('Missing 1 day')).toBeInTheDocument();
     });
 
+    test('shows empty state when no overlaps are found', () => {
+        render(
+            <SlidingOverlapCalendar
+                {...mockDateRange}
+                participants={mockParticipants}
+                duration="3"
+                overlaps={[]}
+            />
+        );
+
+        expect(screen.getByText('No matches found')).toBeInTheDocument();
+        expect(screen.getByText(/Try lowering the duration/)).toBeInTheDocument();
+    });
+
 });

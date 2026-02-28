@@ -222,6 +222,18 @@ describe('getBestOverlapPeriods', () => {
     const result = getBestOverlapPeriods([], 5);
     expect(result).toEqual([]);
   });
+
+  test('filters out zero availability periods', () => {
+    const overlaps = [
+      { availabilityPercent: 100 },
+      { availabilityPercent: 50 },
+      { availabilityPercent: 0 },
+      { availabilityPercent: 0 }
+    ];
+    const result = getBestOverlapPeriods(overlaps, 5);
+    expect(result.length).toBe(2);
+    expect(result.every(o => o.availabilityPercent > 0)).toBe(true);
+  });
 });
 
 describe('formatDateRange', () => {
