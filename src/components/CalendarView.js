@@ -61,7 +61,7 @@ function CalendarView({ startDate, endDate, onSubmit }) {
       }
     }
 
-    setSelectedDays(blockDates);
+    setSelectedDays(prev => Array.from(new Set([...prev, ...blockDates])));
   };
 
   const isDateInRange = (dateStr) => dateRange.includes(dateStr);
@@ -177,10 +177,7 @@ function CalendarView({ startDate, endDate, onSubmit }) {
               type="radio"
               value="flexible"
               checked={blockType === 'flexible'}
-              onChange={(e) => {
-                setBlockType(e.target.value);
-                setSelectedDays([]);
-              }}
+              onChange={(e) => setBlockType(e.target.value)}
               className="mr-2"
             />
             <span>Flexible (pick individual days)</span>
@@ -190,10 +187,7 @@ function CalendarView({ startDate, endDate, onSubmit }) {
               type="radio"
               value="3"
               checked={blockType === '3'}
-              onChange={(e) => {
-                setBlockType(e.target.value);
-                setSelectedDays([]);
-              }}
+              onChange={(e) => setBlockType(e.target.value)}
               className="mr-2"
             />
             <span>3-day block</span>
@@ -203,10 +197,7 @@ function CalendarView({ startDate, endDate, onSubmit }) {
               type="radio"
               value="4"
               checked={blockType === '4'}
-              onChange={(e) => {
-                setBlockType(e.target.value);
-                setSelectedDays([]);
-              }}
+              onChange={(e) => setBlockType(e.target.value)}
               className="mr-2"
             />
             <span>4-day block</span>
@@ -216,10 +207,7 @@ function CalendarView({ startDate, endDate, onSubmit }) {
               type="radio"
               value="5"
               checked={blockType === '5'}
-              onChange={(e) => {
-                setBlockType(e.target.value);
-                setSelectedDays([]);
-              }}
+              onChange={(e) => setBlockType(e.target.value)}
               className="mr-2"
             />
             <span>5-day block</span>
