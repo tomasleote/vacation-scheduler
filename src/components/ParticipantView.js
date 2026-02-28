@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { addParticipant, updateParticipant, getParticipant, subscribeToGroup, subscribeToParticipants } from '../firebase';
-import { getDatesBetween } from '../utils/overlap';
+import { getDatesBetween, calculateOverlap, getBestOverlapPeriods } from '../utils/overlap';
 
 import CalendarView from './CalendarView';
+import SlidingOverlapCalendar from './SlidingOverlapCalendar';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 function ParticipantView({ groupId, participantId: initialParticipantId, onBack }) {
@@ -17,6 +18,8 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
   const [participantName, setParticipantName] = useState('');
   const [participantEmail, setParticipantEmail] = useState('');
   const [participantDuration, setParticipantDuration] = useState('3');
+  const [heatmapDuration, setHeatmapDuration] = useState('3');
+  const [overlaps, setOverlaps] = useState([]);
 
   useEffect(() => {
     if (!groupId) return;
@@ -59,13 +62,26 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
           setParticipantName(participant.name);
           setParticipantEmail(participant.email || '');
           setParticipantDuration(String(participant.duration || '3'));
+          setHeatmapDuration(String(participant.duration || '3'));
         }
       } catch { }
     };
     restore();
   }, [groupId, initialParticipantId]);
 
-
+  useEffect(() => {
+    if (group && participants.length > 0) {
+      const results = calculateOverlap(
+        participants,
+        group.startDate,
+        group.endDate,
+        parseInt(heatmapDuration || '3')
+      );
+      setOverlaps(results);
+    } else {
+      setOverlaps([]);
+    }
+  }, [group, participants, heatmapDuration]);
 
   const handleSubmit = async (formData) => {
     try {
@@ -100,6 +116,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
         setParticipantName(formData.name);
         setParticipantEmail(formData.email || '');
         setParticipantDuration(String(formData.duration));
+        setHeatmapDuration(String(formData.duration));
 
         try {
           localStorage.setItem(
@@ -216,6 +233,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
                 />
               </div>
             )}
+
           </div>
 
           <div className="md:col-span-1">
@@ -237,6 +255,20 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
             </div>
           </div>
         </div>
+
+        {overlaps.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Current Group Availability</h2>
+            <SlidingOverlapCalendar
+              startDate={group.startDate}
+              endDate={group.endDate}
+              participants={participants}
+              duration={heatmapDuration || '3'}
+              overlaps={getBestOverlapPeriods(overlaps, 10)}
+              onDurationChange={setHeatmapDuration}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
