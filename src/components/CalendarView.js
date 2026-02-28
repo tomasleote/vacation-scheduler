@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { getDatesBetween } from '../utils/overlap';
 import { Calendar } from 'lucide-react';
 
-function CalendarView({ startDate, endDate, onSubmit }) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [duration, setDuration] = useState('3');
+function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialName = '', initialEmail = '', initialDuration = '3' }) {
+  const [name, setName] = useState(initialName);
+  const [email, setEmail] = useState(initialEmail);
+  const [duration, setDuration] = useState(initialDuration);
   const [blockType, setBlockType] = useState('flexible');
   const [selectedDays, setSelectedDays] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date(startDate).getMonth());
@@ -68,12 +68,12 @@ function CalendarView({ startDate, endDate, onSubmit }) {
 
   const isDaySelected = (day) => {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return selectedDays.includes(dateStr);
+    return selectedDays.includes(dateStr) || savedDays.includes(dateStr);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       setError('Please enter your name');
       return;
@@ -93,11 +93,31 @@ function CalendarView({ startDate, endDate, onSubmit }) {
         blockType,
         selectedDays: selectedDays.sort()
       });
-      setName('');
-      setEmail('');
       setSelectedDays([]);
-      setDuration('3');
-      setBlockType('flexible');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveDetails = async (e) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await onSubmit({
+        name,
+        email,
+        duration: parseInt(duration),
+        blockType,
+        selectedDays: []
+      });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -168,6 +188,15 @@ function CalendarView({ startDate, endDate, onSubmit }) {
           <option value="10">10 days</option>
         </select>
       </div>
+
+      <button
+        type="button"
+        onClick={handleSaveDetails}
+        disabled={loading}
+        className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition disabled:opacity-50"
+      >
+        {loading ? 'Saving...' : 'Save Details Only'}
+      </button>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Selection Mode</label>
@@ -264,10 +293,13 @@ function CalendarView({ startDate, endDate, onSubmit }) {
           })}
         </div>
 
-        {selectedDays.length > 0 && (
+        {(selectedDays.length > 0 || savedDays.length > 0) && (
           <div className="bg-indigo-50 p-3 rounded-lg mb-4">
             <p className="text-sm text-gray-700">
-              <strong>{selectedDays.length}</strong> day{selectedDays.length !== 1 ? 's' : ''} selected
+              <strong>{Array.from(new Set([...savedDays, ...selectedDays])).length}</strong> day{Array.from(new Set([...savedDays, ...selectedDays])).length !== 1 ? 's' : ''} selected
+              {savedDays.length > 0 && selectedDays.length > 0 && (
+                <span className="text-gray-500"> ({savedDays.length} saved + {selectedDays.filter(d => !savedDays.includes(d)).length} new)</span>
+              )}
             </p>
           </div>
         )}

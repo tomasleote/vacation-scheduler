@@ -1,24 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { getGroup, updateGroup, getParticipants, deleteGroup } from '../firebase';
+import { getGroup, updateGroup, getParticipants, deleteGroup, addParticipant, updateParticipant, getParticipant } from '../firebase';
 import { calculateOverlap, getBestOverlapPeriods, formatDateRange } from '../utils/overlap';
 import { exportToCSV } from '../utils/export';
 import { Copy, Download, Edit, Save, X, Mail } from 'lucide-react';
 import ResultsDisplay from './ResultsDisplay';
+import CalendarView from './CalendarView';
 
-function AdminPanel({ groupId, onBack }) {
+function AdminPanel({ groupId, adminToken, onBack }) {
   const [group, setGroup] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState({});
-  const [copied, setCopied] = useState(false);
   const [durationFilter, setDurationFilter] = useState('3');
   const [overlaps, setOverlaps] = useState([]);
   const [emailSent, setEmailSent] = useState(false);
 
+  const baseUrl = window.location.origin;
+  const participantLink = `${baseUrl}?group=${groupId}`;
+  const adminLink = adminToken ? `${baseUrl}?group=${groupId}&admin=${adminToken}` : null;
+  const [copiedPLink, setCopiedPLink] = useState(false);
+  const [copiedALink, setCopiedALink] = useState(false);
+
+  const [adminParticipantId, setAdminParticipantId] = useState(null);
+  const [adminSavedDays, setAdminSavedDays] = useState([]);
+  const [adminName, setAdminName] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminDuration, setAdminDuration] = useState('3');
+  const [showAvailability, setShowAvailability] = useState(false);
+  const [availabilitySubmitted, setAvailabilitySubmitted] = useState(false);
+
   useEffect(() => {
     fetchData();
+    if (adminToken) {
+      try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch {}
+    }
+    // Restore admin's own participant session
+    try {
+      const stored = localStorage.getItem(`vacation_admin_p_${groupId}`);
+      if (stored) {
+        const { participantId, name, email, duration } = JSON.parse(stored);
+        getParticipant(groupId, participantId).then(p => {
+          if (p) {
+            setAdminParticipantId(participantId);
+            setAdminSavedDays(p.availableDays || []);
+            setAdminName(p.name || name || '');
+            setAdminEmail(p.email || email || '');
+            setAdminDuration(String(p.duration || duration || '3'));
+          }
+        }).catch(() => {});
+      }
+    } catch {}
   }, [groupId]);
 
   useEffect(() => {
@@ -54,10 +87,48 @@ function AdminPanel({ groupId, onBack }) {
     }
   };
 
-  const handleCopyId = () => {
-    navigator.clipboard.writeText(groupId);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleAdminAvailability = async (formData) => {
+    try {
+      const newDays = formData.selectedDays || [];
+      const mergedDays = newDays.length > 0
+        ? Array.from(new Set([...adminSavedDays, ...newDays]))
+        : adminSavedDays;
+
+      if (!adminParticipantId) {
+        const participantId = await addParticipant(groupId, {
+          name: formData.name,
+          email: formData.email,
+          duration: formData.duration,
+          availableDays: mergedDays,
+          blockType: formData.blockType
+        });
+        setAdminParticipantId(participantId);
+        try {
+          localStorage.setItem(
+            `vacation_admin_p_${groupId}`,
+            JSON.stringify({ participantId, name: formData.name, email: formData.email, duration: formData.duration })
+          );
+        } catch {}
+      } else {
+        await updateParticipant(groupId, adminParticipantId, {
+          name: formData.name,
+          email: formData.email,
+          availableDays: mergedDays,
+          duration: formData.duration,
+          blockType: formData.blockType
+        });
+      }
+
+      setAdminSavedDays(mergedDays);
+      setAdminName(formData.name);
+      setAdminEmail(formData.email || '');
+      setAdminDuration(String(formData.duration));
+      setAvailabilitySubmitted(true);
+      await fetchData();
+      setTimeout(() => setAvailabilitySubmitted(false), 3000);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const handleSaveEdit = async () => {
@@ -168,19 +239,56 @@ function AdminPanel({ groupId, onBack }) {
           </div>
 
           {!editing && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-700">Group ID: <code className="bg-gray-100 px-2 py-1 rounded text-sm">{groupId}</code></span>
-                <button
-                  onClick={handleCopyId}
-                  className="text-indigo-600 hover:text-indigo-700"
-                  title="Copy to clipboard"
-                >
-                  <Copy size={18} />
-                </button>
-                {copied && <span className="text-green-600 text-sm">Copied!</span>}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  Participant link (share this):
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    readOnly
+                    value={participantLink}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"
+                  />
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(participantLink);
+                      setCopiedPLink(true);
+                      setTimeout(() => setCopiedPLink(false), 2000);
+                    }}
+                    className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold"
+                  >
+                    {copiedPLink ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
               </div>
-              {group.adminEmail && <div className="text-gray-700">📧 Admin: {group.adminEmail}</div>}
+              {adminLink && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Your admin link (keep private):
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      readOnly
+                      value={adminLink}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(adminLink);
+                        setCopiedALink(true);
+                        setTimeout(() => setCopiedALink(false), 2000);
+                      }}
+                      className="px-3 py-2 bg-gray-700 text-white rounded-lg text-sm font-semibold"
+                    >
+                      {copiedALink ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+              {group.adminEmail && (
+                <div className="text-gray-700 text-sm">📧 {group.adminEmail}</div>
+              )}
             </div>
           )}
 
@@ -317,13 +425,57 @@ function AdminPanel({ groupId, onBack }) {
                 {participants.length === 0 && (
                   <tr>
                     <td colSpan="4" className="px-4 py-4 text-center text-gray-500">
-                      No participants yet. Share the group ID: <code className="bg-gray-100 px-2 py-1 rounded">{groupId}</code>
+                      No participants yet. Share the participant link above!
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold text-gray-800">
+              {adminParticipantId ? `Your Availability (${adminName})` : 'Add Your Availability'}
+            </h3>
+            <button
+              onClick={() => setShowAvailability(s => !s)}
+              className="text-indigo-600 hover:text-indigo-700 text-sm font-semibold"
+            >
+              {showAvailability ? 'Hide' : adminParticipantId ? 'Update' : 'Add'}
+            </button>
+          </div>
+
+          {adminParticipantId && !showAvailability && (
+            <p className="text-gray-500 text-sm">
+              {adminSavedDays.length} day{adminSavedDays.length !== 1 ? 's' : ''} selected. Click "Update" to change.
+            </p>
+          )}
+
+          {!adminParticipantId && !showAvailability && (
+            <p className="text-gray-500 text-sm">
+              As the organizer, add your own availability so it's included in the overlap results.
+            </p>
+          )}
+
+          {availabilitySubmitted && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+              Your availability has been saved!
+            </div>
+          )}
+
+          {showAvailability && (
+            <CalendarView
+              startDate={group.startDate}
+              endDate={group.endDate}
+              onSubmit={handleAdminAvailability}
+              savedDays={adminSavedDays}
+              initialName={adminName}
+              initialEmail={adminEmail}
+              initialDuration={adminDuration}
+            />
+          )}
         </div>
 
         {overlaps.length > 0 && (

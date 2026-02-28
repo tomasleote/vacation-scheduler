@@ -21,13 +21,15 @@ export const auth = getAuth(app);
 export const createGroup = async (groupData) => {
   try {
     const groupId = Date.now().toString();
+    const adminToken = crypto.randomUUID();
     const groupRef = ref(database, `groups/${groupId}`);
     await set(groupRef, {
       ...groupData,
       createdAt: new Date().toISOString(),
-      id: groupId
+      id: groupId,
+      adminToken
     });
-    return groupId;
+    return { groupId, adminToken };
   } catch (error) {
     console.error("Error creating group:", error);
     throw new Error(`Failed to create group: ${error.message}`);
@@ -54,6 +56,17 @@ export const addParticipant = async (groupId, participantData) => {
     createdAt: new Date().toISOString()
   });
   return participantId;
+};
+
+export const updateParticipant = async (groupId, participantId, updates) => {
+  const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
+  await update(participantRef, updates);
+};
+
+export const getParticipant = async (groupId, participantId) => {
+  const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
+  const snapshot = await get(participantRef);
+  return snapshot.exists() ? snapshot.val() : null;
 };
 
 export const getParticipants = async (groupId) => {
