@@ -12,13 +12,15 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
   const [currentYear, setCurrentYear] = useState(new Date(startDate).getFullYear());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isDirty, setIsDirty] = useState(false);
 
   // Sync savedDays from parent if they are fetched after initial mount or updated post-submit
+  // Only sync if there are no unsaved local changes to avoid clobbering user edits
   useEffect(() => {
-    if (savedDays) {
+    if (savedDays && !isDirty) {
       setSelectedDays(savedDays);
     }
-  }, [savedDays]);
+  }, [savedDays, isDirty]);
 
   const dateRange = getDatesBetween(startDate, endDate);
 
@@ -49,6 +51,8 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
     if (!isDateInRange(dateStr)) return;
+
+    setIsDirty(true);
 
     if (blockType === 'flexible') {
       setSelectedDays(prev =>
@@ -113,6 +117,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
         blockType: blockType === 'flexible' ? 'flexible' : String(customBlockSize),
         selectedDays: selectedDays.sort()
       });
+      setIsDirty(false);
     } catch (err) {
       setError(err.message);
     } finally {
