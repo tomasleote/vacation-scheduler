@@ -2,11 +2,13 @@ import React from 'react';
 import { TrendingUp, Lightbulb } from 'lucide-react';
 
 function ResultsDisplay({ overlaps }) {
-  if (!overlaps || overlaps.length === 0) {
+  const topFilteredOverlaps = overlaps ? overlaps.filter(o => o.availabilityPercent > 50).slice(0, 5) : [];
+
+  if (topFilteredOverlaps.length === 0) {
     return (
       <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
         <h3 className="text-xl font-bold text-gray-50 mb-4">Top Overlap Periods</h3>
-        <p className="text-gray-400">No matching periods found. More participants needed.</p>
+        <p className="text-gray-400">No matches &gt; 50% found. Try lowering the duration or getting more participants to respond.</p>
       </div>
     );
   }
@@ -19,7 +21,7 @@ function ResultsDisplay({ overlaps }) {
       </h3>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {overlaps.map((overlap, i) => {
+        {topFilteredOverlaps.map((overlap, i) => {
           const startDate = new Date(overlap.startDate);
           const endDate = new Date(overlap.endDate);
           const formatDate = (d) => d.toLocaleDateString('en-US', {

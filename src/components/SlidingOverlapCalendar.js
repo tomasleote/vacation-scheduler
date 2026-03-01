@@ -364,67 +364,75 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                     </div>
                 ) : (
 
-                    /* State 2: No block is highlighted, show Top 3 Rankings */
+                    /* State 2: No block is highlighted, show Top Rankings */
                     <div className="h-full flex flex-col">
                         <h4 className="flex items-center gap-2 text-lg font-bold text-gray-50 mb-6 pb-4 border-b border-dark-700">
                             <TrendingUp size={20} className="text-blue-400" />
                             Top Overlap Periods
                         </h4>
 
-                        {!overlaps || overlaps.length === 0 ? (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-dark-800 rounded-xl border border-dashed border-dark-700">
-                                <CalendarIcon size={48} className="text-gray-600 mb-4" />
-                                <p className="text-gray-300 font-medium mb-1">No matches found</p>
-                                <p className="text-sm text-gray-500">Try lowering the duration or getting more participants to respond.</p>
-                            </div>
-                        ) : (
-                            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-                                {overlaps.slice(0, 3).map((overlap, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => {
-                                            // Navigate calendar to this month and lock it
-                                            const overlapStart = new Date(overlap.startDate);
-                                            setCurrentMonth(overlapStart.getMonth());
-                                            setCurrentYear(overlapStart.getFullYear());
-                                            setLockedDate(overlapStart.toISOString().split('T')[0]);
-                                        }}
-                                        className={`w-full text-left bg-dark-800 border rounded-xl p-4 transition-all duration-200
-                      ${i === 0 ? 'border-2 border-blue-500/50 shadow-md hover:border-blue-400' : 'border-dark-700 hover:border-dark-700 hover:shadow-sm'}
-                    `}
-                                    >
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div className="flex items-center gap-2">
-                                                <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold
-                          ${i === 0 ? 'bg-blue-500 text-white' : 'bg-dark-700 text-gray-300'}
-                        `}>
-                                                    {i + 1}
-                                                </span>
-                                                <span className="font-bold text-gray-50">
-                                                    {formatDateRange(overlap.startDate, overlap.endDate)}
+                        {(() => {
+                            const topFilteredOverlaps = overlaps ? overlaps.filter(o => o.availabilityPercent > 50).slice(0, 5) : [];
+
+                            if (topFilteredOverlaps.length === 0) {
+                                return (
+                                    <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-dark-800 rounded-xl border border-dashed border-dark-700">
+                                        <CalendarIcon size={48} className="text-gray-600 mb-4" />
+                                        <p className="text-gray-300 font-medium mb-1">No matches &gt; 50% found</p>
+                                        <p className="text-sm text-gray-500">Try lowering the duration or getting more participants to respond.</p>
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+                                    {topFilteredOverlaps.map((overlap, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => {
+                                                // Navigate calendar to this month and lock it
+                                                const overlapStart = new Date(overlap.startDate);
+                                                setCurrentMonth(overlapStart.getMonth());
+                                                setCurrentYear(overlapStart.getFullYear());
+                                                setLockedDate(overlapStart.toISOString().split('T')[0]);
+                                            }}
+                                            className={`w-full text-left bg-dark-800 border rounded-xl p-4 transition-all duration-200
+                                                ${i === 0 ? 'border-2 border-blue-500/50 shadow-md hover:border-blue-400' : 'border-dark-700 hover:border-dark-700 hover:shadow-sm'}
+                                            `}
+                                        >
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold
+                                                        ${i === 0 ? 'bg-blue-500 text-white' : 'bg-dark-700 text-gray-300'}
+                                                    `}>
+                                                        {i + 1}
+                                                    </span>
+                                                    <span className="font-bold text-gray-50">
+                                                        {formatDateRange(overlap.startDate, overlap.endDate)}
+                                                    </span>
+                                                </div>
+                                                <span className="text-sm font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
+                                                    {overlap.availabilityPercent}%
                                                 </span>
                                             </div>
-                                            <span className="text-sm font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
-                                                {overlap.availabilityPercent}%
-                                            </span>
-                                        </div>
 
-                                        <div className="flex items-center gap-4 text-xs text-gray-400 ml-8">
-                                            <span className="flex items-center gap-1"><Users size={12} /> {overlap.availableCount} of {overlap.totalParticipants} available</span>
-                                        </div>
-                                    </button>
-                                ))}
+                                            <div className="flex items-center gap-4 text-xs text-gray-400 ml-8">
+                                                <span className="flex items-center gap-1"><Users size={12} /> {overlap.availableCount} of {overlap.totalParticipants} available</span>
+                                            </div>
+                                        </button>
+                                    ))}
 
-                                <p className="text-xs text-center text-gray-500 mt-auto">
-                                    Hover over the calendar to explore other options.
-                                </p>
-                            </div>
-                        )}
+                                    <p className="text-xs text-center text-gray-500 mt-auto pt-4">
+                                        Hover over the calendar to explore other options.
+                                    </p>
+                                </div>
+                            );
+                        })()}
                     </div>
                 )}
             </div>
         </div>
     );
-}
+};
 
 export default SlidingOverlapCalendar;
