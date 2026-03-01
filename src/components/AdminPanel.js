@@ -226,7 +226,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-600">Loading...</div>
+        <div className="text-xl text-gray-400">Loading...</div>
       </div>
     );
   }
@@ -234,11 +234,11 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   if (!group) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md">
-          <p className="text-red-600 mb-4">{error || 'Group not found'}</p>
+        <div className="bg-dark-900 rounded-xl border border-dark-700 p-8 max-w-md">
+          <p className="text-rose-400 mb-4">{error || 'Group not found'}</p>
           <button
             onClick={onBack}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg"
+            className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg"
           >
             Go Home
           </button>
@@ -247,41 +247,43 @@ function AdminPanel({ groupId, adminToken, onBack }) {
     );
   }
 
+  const inputClass = "w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-gray-50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors";
+
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-start mb-8">
           <button
             onClick={onBack}
-            className="text-indigo-600 hover:text-indigo-700 font-semibold"
+            className="text-blue-400 hover:text-blue-300 font-semibold"
           >
             ← Back to Home
           </button>
-          <h1 className="text-3xl font-bold text-gray-800 flex-1 text-center">Admin Panel</h1>
+          <h1 className="text-3xl font-bold text-gray-50 flex-1 text-center">Admin Panel</h1>
           <div className="w-20"></div>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="bg-dark-900 rounded-xl border border-dark-700 p-6 mb-8">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">{group.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-50 mb-2">{group.name}</h2>
               {group.description && (
-                <p className="text-gray-600 text-sm mb-3">{group.description}</p>
+                <p className="text-gray-400 text-sm mb-3">{group.description}</p>
               )}
-              <div className="flex gap-4 text-sm text-gray-600 flex-wrap mt-1">
-                <span className="flex items-center gap-1.5"><CalendarRange size={16} className="text-gray-400" /> {group.startDate} to {group.endDate}</span>
-                <span className="flex items-center gap-1.5"><Users size={16} className="text-gray-400" /> {participants.length} participants</span>
+              <div className="flex gap-4 text-sm text-gray-400 flex-wrap mt-1">
+                <span className="flex items-center gap-1.5"><CalendarRange size={16} className="text-gray-500" /> {group.startDate} to {group.endDate}</span>
+                <span className="flex items-center gap-1.5"><Users size={16} className="text-gray-500" /> {participants.length} participants</span>
               </div>
             </div>
             <button
               onClick={() => setEditing(!editing)}
-              className="text-indigo-600 hover:text-indigo-700"
+              className="text-blue-400 hover:text-blue-300"
             >
               {editing ? <X size={24} /> : <Edit size={24} />}
             </button>
@@ -290,14 +292,14 @@ function AdminPanel({ groupId, adminToken, onBack }) {
           {!editing && (
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium text-gray-400 mb-1">
                   Participant link (share this):
                 </label>
                 <div className="flex gap-2">
                   <input
                     readOnly
                     value={participantLink}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"
+                    className="flex-1 px-3 py-2 border border-dark-700 rounded-lg text-sm bg-dark-800 text-gray-300"
                   />
                   <button
                     onClick={() => {
@@ -305,7 +307,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                       setCopiedPLink(true);
                       setTimeout(() => setCopiedPLink(false), 2000);
                     }}
-                    className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold"
+                    className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg text-sm font-semibold transition-colors"
                   >
                     {copiedPLink ? 'Copied!' : 'Copy'}
                   </button>
@@ -313,14 +315,14 @@ function AdminPanel({ groupId, adminToken, onBack }) {
               </div>
               {adminLink && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                  <label className="block text-xs font-medium text-gray-400 mb-1">
                     Your admin link (keep private):
                   </label>
                   <div className="flex gap-2">
                     <input
                       readOnly
                       value={adminLink}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"
+                      className="flex-1 px-3 py-2 border border-dark-700 rounded-lg text-sm bg-dark-800 text-gray-300"
                     />
                     <button
                       onClick={() => {
@@ -328,7 +330,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                         setCopiedALink(true);
                         setTimeout(() => setCopiedALink(false), 2000);
                       }}
-                      className="px-3 py-2 bg-gray-700 text-white rounded-lg text-sm font-semibold"
+                      className="px-3 py-2 bg-dark-700 hover:bg-dark-800 text-gray-300 rounded-lg text-sm font-semibold border border-dark-700 transition-colors"
                     >
                       {copiedALink ? 'Copied!' : 'Copy'}
                     </button>
@@ -336,33 +338,33 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                 </div>
               )}
               {group.adminEmail && (
-                <div className="text-gray-700 text-sm flex items-center gap-1.5 mt-2">
-                  <Mail size={16} className="text-gray-400" /> {group.adminEmail}
+                <div className="text-gray-400 text-sm flex items-center gap-1.5 mt-2">
+                  <Mail size={16} className="text-gray-500" /> {group.adminEmail}
                 </div>
               )}
             </div>
           )}
 
           {editing && (
-            <div className="space-y-4 border-t pt-6">
+            <div className="space-y-4 border-t border-dark-700 pt-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Group Name</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Group Name</label>
                 <input
                   type="text"
                   value={editData.name}
                   onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Description {(editData.description || '').length}/500
                 </label>
                 <textarea
                   value={editData.description || ''}
                   onChange={(e) => setEditData({ ...editData, description: e.target.value.slice(0, 500) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className={inputClass}
                   rows="2"
                   maxLength="500"
                 />
@@ -370,22 +372,22 @@ function AdminPanel({ groupId, adminToken, onBack }) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Start Date</label>
                   <input
                     type="date"
                     value={editData.startDate}
                     onChange={(e) => setEditData({ ...editData, startDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={inputClass}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">End Date</label>
                   <input
                     type="date"
                     value={editData.endDate}
                     onChange={(e) => setEditData({ ...editData, endDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={inputClass}
                   />
                 </div>
               </div>
@@ -393,13 +395,13 @@ function AdminPanel({ groupId, adminToken, onBack }) {
               <div className="flex gap-2 pt-4">
                 <button
                   onClick={handleSaveEdit}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2"
+                  className="flex-1 bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
                 >
                   <Save size={18} /> Save
                 </button>
                 <button
                   onClick={() => setEditing(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg"
+                  className="flex-1 bg-dark-800 hover:bg-dark-700 text-gray-300 font-bold py-2 px-4 rounded-lg border border-dark-700 transition-colors"
                 >
                   Cancel
                 </button>
@@ -409,36 +411,36 @@ function AdminPanel({ groupId, adminToken, onBack }) {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="font-semibold text-gray-700 mb-4">Actions</h3>
+          <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
+            <h3 className="font-semibold text-gray-300 mb-4">Actions</h3>
             <div className="space-y-2">
               <button
                 onClick={handleExport}
                 disabled={participants.length === 0}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
               >
                 <Download size={18} /> Export CSV
               </button>
               <button
                 onClick={handleSendReminder}
                 disabled={!group.adminEmail}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
               >
                 <Mail size={18} /> Send Reminder
               </button>
-              {emailSent && <p className="text-green-600 text-sm text-center">Email sent!</p>}
+              {emailSent && <p className="text-emerald-400 text-sm text-center">Email sent!</p>}
               <button
                 onClick={handleDelete}
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg"
+                className="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 px-4 rounded-lg transition-colors"
               >
                 Delete Group
               </button>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="font-semibold text-gray-700 mb-4">Statistics</h3>
-            <div className="space-y-2 text-sm">
+          <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
+            <h3 className="font-semibold text-gray-300 mb-4">Statistics</h3>
+            <div className="space-y-2 text-sm text-gray-300">
               <p>Total participants: <span className="font-bold">{participants.length}</span></p>
               <p>Possible periods: <span className="font-bold">{overlaps.length}</span></p>
               {overlaps.length > 0 && (
@@ -448,25 +450,25 @@ function AdminPanel({ groupId, adminToken, onBack }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Participants ({participants.length})</h3>
+        <div className="bg-dark-900 rounded-xl border border-dark-700 p-6 mb-8">
+          <h3 className="text-xl font-bold text-gray-50 mb-4">Participants ({participants.length})</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-dark-800 border-b border-dark-700">
                 <tr>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-left">Duration</th>
-                  <th className="px-4 py-2 text-left">Days Available</th>
+                  <th className="px-4 py-2 text-left text-gray-300">Name</th>
+                  <th className="px-4 py-2 text-left text-gray-300">Email</th>
+                  <th className="px-4 py-2 text-left text-gray-300">Duration</th>
+                  <th className="px-4 py-2 text-left text-gray-300">Days Available</th>
                 </tr>
               </thead>
               <tbody>
                 {participants.map((p, i) => (
-                  <tr key={i} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-2">{p.name || 'N/A'}</td>
-                    <td className="px-4 py-2">{p.email || 'N/A'}</td>
-                    <td className="px-4 py-2">{p.duration} days</td>
-                    <td className="px-4 py-2">{(p.availableDays || []).length}</td>
+                  <tr key={i} className="border-b border-dark-700 hover:bg-dark-800">
+                    <td className="px-4 py-2 text-gray-300">{p.name || 'N/A'}</td>
+                    <td className="px-4 py-2 text-gray-300">{p.email || 'N/A'}</td>
+                    <td className="px-4 py-2 text-gray-300">{p.duration} days</td>
+                    <td className="px-4 py-2 text-gray-300">{(p.availableDays || []).length}</td>
                   </tr>
                 ))}
                 {participants.length === 0 && (
@@ -481,33 +483,33 @@ function AdminPanel({ groupId, adminToken, onBack }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="bg-dark-900 rounded-xl border border-dark-700 p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold text-gray-800">
+            <h3 className="text-xl font-bold text-gray-50">
               {adminParticipantId ? `Your Availability (${adminName})` : 'Add Your Availability'}
             </h3>
             <button
               onClick={() => setShowAvailability(s => !s)}
-              className="text-indigo-600 hover:text-indigo-700 text-sm font-semibold"
+              className="text-blue-400 hover:text-blue-300 text-sm font-semibold"
             >
               {showAvailability ? 'Hide' : adminParticipantId ? 'Update' : 'Add'}
             </button>
           </div>
 
           {adminParticipantId && !showAvailability && (
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-400 text-sm">
               {adminSavedDays.length} day{adminSavedDays.length !== 1 ? 's' : ''} selected. Click "Update" to change.
             </p>
           )}
 
           {!adminParticipantId && !showAvailability && (
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-400 text-sm">
               As the organizer, add your own availability so it's included in the overlap results.
             </p>
           )}
 
           {availabilitySubmitted && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg mb-4">
               Your availability has been saved!
             </div>
           )}

@@ -73,7 +73,7 @@ describe('ResultsDisplay', () => {
     }];
 
     const { container } = render(<ResultsDisplay overlaps={overlaps} />);
-    const progressBar = container.querySelector('.bg-indigo-600.h-2');
+    const progressBar = container.querySelector('.bg-blue-500.h-2');
     expect(progressBar.style.width).toBe('60%');
   });
 

@@ -109,11 +109,11 @@ describe('CalendarView interactions', () => {
     fireEvent.click(dayButton);
 
     // Day should be selected (has indigo class)
-    expect(dayButton.className).toContain('bg-indigo-600');
+    expect(dayButton.className).toContain('text-white');
 
     // Click again to deselect
     fireEvent.click(dayButton);
-    expect(dayButton.className).not.toContain('bg-indigo-600');
+    expect(dayButton.className).not.toContain('text-white');
   });
 
   test('days outside range are disabled', () => {
@@ -149,9 +149,9 @@ describe('CalendarView interactions', () => {
     fireEvent.click(screen.getByTestId('day-2024-06-10'));
 
     // Days 10, 11, 12 should all be selected
-    expect(screen.getByTestId('day-2024-06-10').className).toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-11').className).toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-12').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-10').className).toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-11').className).toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-12').className).toContain('text-white');
   });
 
   test('block mode gracefully handles selecting days near the end of the month boundary', () => {
@@ -168,9 +168,9 @@ describe('CalendarView interactions', () => {
     fireEvent.click(screen.getByTestId('day-2024-06-28'));
 
     // Should only select 28, 29, 30. Should not crash.
-    expect(screen.getByTestId('day-2024-06-28').className).toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-29').className).toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-30').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-28').className).toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-29').className).toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-30').className).toContain('text-white');
   });
 
   test('custom block input safely bounds invalid duration lengths', () => {
@@ -201,19 +201,19 @@ describe('CalendarView interactions', () => {
     fireEvent.change(numberInputs[1], { target: { value: '3' } });
     fireEvent.click(screen.getByTestId('day-2024-06-10'));
 
-    expect(screen.getByTestId('day-2024-06-12').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-12').className).toContain('text-white');
 
     // Switch back to Flexible
     fireEvent.click(screen.getByText('Flexible'));
 
     // The days should still be selected
-    expect(screen.getByTestId('day-2024-06-12').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-12').className).toContain('text-white');
 
     // But now we can unclick just one
     fireEvent.click(screen.getByTestId('day-2024-06-12'));
-    expect(screen.getByTestId('day-2024-06-12').className).not.toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-12').className).not.toContain('text-white');
     // Day 10 and 11 should remain selected
-    expect(screen.getByTestId('day-2024-06-11').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-11').className).toContain('text-white');
   });
 
 
@@ -223,8 +223,8 @@ describe('CalendarView interactions', () => {
       savedDays: ['2024-06-15', '2024-06-16']
     });
 
-    expect(screen.getByTestId('day-2024-06-15').className).toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-16').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-15').className).toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-16').className).toContain('text-white');
   });
 
   test('saved days can be dynamically unselected', () => {
@@ -236,13 +236,13 @@ describe('CalendarView interactions', () => {
     const savedDayBtn = screen.getByTestId('day-2024-06-15');
 
     // Day should initially be selected because it's a saved day
-    expect(savedDayBtn.className).toContain('bg-indigo-600');
+    expect(savedDayBtn.className).toContain('text-white');
 
     // Click to unselect
     fireEvent.click(savedDayBtn);
 
     // Day should no longer have the selected coloring
-    expect(savedDayBtn.className).not.toContain('bg-indigo-600');
+    expect(savedDayBtn.className).not.toContain('text-white');
 
     // The counter should also decrement down to 1
     const counter = screen.getByTestId('day-count');
@@ -399,9 +399,9 @@ describe('CalendarView edge cases', () => {
     // Click day 3 - block would go 3,4,5 (only 3 days since range ends at 5)
     fireEvent.click(screen.getByTestId('day-2024-06-03'));
 
-    expect(screen.getByTestId('day-2024-06-03').className).toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-04').className).toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-05').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-03').className).toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-04').className).toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-05').className).toContain('text-white');
   });
 
   test('block mode does not select days outside range', () => {
@@ -420,7 +420,7 @@ describe('CalendarView edge cases', () => {
 
     // Day 13 should NOT be selected (outside range and disabled)
     const day13 = screen.getByTestId('day-2024-06-13');
-    expect(day13.className).not.toContain('bg-indigo-600');
+    expect(day13.className).not.toContain('text-white');
   });
 
   // BUG-H (fixed): block mode now toggles — clicking a fully-selected block deselects it
@@ -437,14 +437,14 @@ describe('CalendarView edge cases', () => {
 
     // Click day 10 — selects 10, 11, 12
     fireEvent.click(screen.getByTestId('day-2024-06-10'));
-    expect(screen.getByTestId('day-2024-06-10').className).toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-11').className).toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-12').className).toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-10').className).toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-11').className).toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-12').className).toContain('text-white');
 
     // Click day 10 again — all 3 days already selected, so they should all deselect
     fireEvent.click(screen.getByTestId('day-2024-06-10'));
-    expect(screen.getByTestId('day-2024-06-10').className).not.toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-11').className).not.toContain('bg-indigo-600');
-    expect(screen.getByTestId('day-2024-06-12').className).not.toContain('bg-indigo-600');
+    expect(screen.getByTestId('day-2024-06-10').className).not.toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-11').className).not.toContain('text-white');
+    expect(screen.getByTestId('day-2024-06-12').className).not.toContain('text-white');
   });
 });
