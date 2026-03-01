@@ -3,6 +3,13 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RecoverAdminForm from './RecoverAdminForm';
 import { hashPhrase } from '../firebase';
+import { useNotification } from '../context/NotificationContext';
+
+jest.mock('../context/NotificationContext', () => ({
+    useNotification: jest.fn()
+}));
+
+const mockAddNotification = jest.fn();
 
 // Mock the firebase module — implementation set per-test in beforeEach
 jest.mock('../firebase', () => ({
@@ -12,6 +19,8 @@ jest.mock('../firebase', () => ({
 beforeEach(() => {
     global.fetch = jest.fn();
     jest.clearAllMocks();
+    useNotification.mockReturnValue({ addNotification: mockAddNotification });
+    mockAddNotification.mockClear();
     // Re-apply hashPhrase implementation after clearAllMocks resets it
     hashPhrase.mockImplementation((text) => Promise.resolve(`hashed:${text}`));
 });
@@ -115,7 +124,7 @@ describe('RecoverAdminForm', () => {
         await userEvent.click(screen.getByRole('button', { name: /recover access/i }));
 
         await waitFor(() =>
-            expect(screen.getByText(/Incorrect recovery passphrase/i)).toBeInTheDocument()
+            expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({ message: 'Incorrect recovery passphrase' }))
         );
     });
 
@@ -128,7 +137,7 @@ describe('RecoverAdminForm', () => {
         await userEvent.click(screen.getByRole('button', { name: /recover access/i }));
 
         await waitFor(() =>
-            expect(screen.getByText(/Network error/i)).toBeInTheDocument()
+            expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({ message: 'Network error' }))
         );
     });
 
@@ -161,7 +170,7 @@ describe('RecoverAdminForm', () => {
         expect(url).toBe('/api/find-groups');
         const body = JSON.parse(opts.body);
         expect(body.email).toBe('admin@example.com');
-        expect(screen.getByText(/We sent a summary/i)).toBeInTheDocument();
+        expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/We sent a summary/i) }));
     });
 
     it('shows error if /api/find-groups fails', async () => {
@@ -176,6 +185,6 @@ describe('RecoverAdminForm', () => {
         await userEvent.type(screen.getByPlaceholderText(/email you used when creating groups/i), 'admin@test.com');
         await userEvent.click(screen.getByRole('button', { name: /find my groups/i }));
 
-        await waitFor(() => expect(screen.getByText(/Search failed/i)).toBeInTheDocument());
+        await waitFor(() => expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/Search failed/i) })));
     });
 });

@@ -5,6 +5,7 @@ import './index.css';
 import AdminPanel from './components/AdminPanel';
 import ParticipantView from './components/ParticipantView';
 import RecoverAdminForm from './components/RecoverAdminForm';
+import { useNotification } from './context/NotificationContext';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -276,12 +277,11 @@ function CreateGroupForm({ onSuccess, onCancel }) {
   const [passphrase, setPassphrase] = useState('');
   const [showPassphrase, setShowPassphrase] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { addNotification } = useNotification();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       const { createGroup, hashPhrase } = await import('./firebase');
@@ -305,7 +305,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
       }
       onSuccess(result);
     } catch (err) {
-      setError(err.message);
+      addNotification({ type: 'error', title: 'Error', message: err.message });
     } finally {
       setLoading(false);
     }
@@ -409,8 +409,6 @@ function CreateGroupForm({ onSuccess, onCancel }) {
         <p className="text-xs text-gray-500 mt-1">Hashed in your browser — never stored in plaintext.</p>
       </div>
 
-      {error && <p className="text-rose-400 text-sm">{error}</p>}
-
       <div className="flex gap-3 pt-2">
         <button
           type="button"
@@ -434,20 +432,19 @@ function CreateGroupForm({ onSuccess, onCancel }) {
 function JoinGroupForm({ onSuccess, onCancel }) {
   const [groupId, setGroupId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { addNotification } = useNotification();
   const [isAdminFound, setIsAdminFound] = useState(false);
   const [adminToken, setAdminToken] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       const { getGroup } = await import('./firebase');
       const group = await getGroup(groupId);
       if (!group) {
-        setError('Group not found');
+        addNotification({ type: 'error', message: 'Group not found' });
         return;
       }
 
@@ -459,7 +456,7 @@ function JoinGroupForm({ onSuccess, onCancel }) {
         onSuccess(groupId);
       }
     } catch (err) {
-      setError(err.message);
+      addNotification({ type: 'error', title: 'Error', message: err.message });
     } finally {
       setLoading(false);
     }
@@ -505,8 +502,6 @@ function JoinGroupForm({ onSuccess, onCancel }) {
           placeholder="Paste group ID here"
         />
       </div>
-
-      {error && <p className="text-rose-400 text-sm">{error}</p>}
 
       <div className="flex gap-3 pt-2">
         <button

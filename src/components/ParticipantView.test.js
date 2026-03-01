@@ -2,6 +2,13 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ParticipantView from './ParticipantView';
 import * as firebase from '../firebase';
+import { useNotification } from '../context/NotificationContext';
+
+jest.mock('../context/NotificationContext', () => ({
+    useNotification: jest.fn()
+}));
+
+const mockAddNotification = jest.fn();
 
 // Mock Firebase functions
 jest.mock('../firebase', () => ({
@@ -28,6 +35,9 @@ const mockParticipants = [
 describe('ParticipantView - Duplicate Name Check', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+
+        useNotification.mockReturnValue({ addNotification: mockAddNotification });
+        mockAddNotification.mockClear();
 
         // Default mock behavior for successful subscription
         firebase.subscribeToGroup.mockImplementation((id, cb) => {
@@ -63,7 +73,7 @@ describe('ParticipantView - Duplicate Name Check', () => {
 
         // Should show error message (the component's error state)
         await waitFor(() => {
-            expect(screen.getByText(/A participant with this name already exists/i)).toBeInTheDocument();
+            expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/A participant with this name already exists/i) }));
         });
 
         // Firebase addParticipant should NOT have been called
@@ -96,7 +106,7 @@ describe('ParticipantView - Duplicate Name Check', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByText(/Your response has been recorded/i)).toBeInTheDocument();
+            expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/Your response has been recorded/i) }));
         });
     });
 });

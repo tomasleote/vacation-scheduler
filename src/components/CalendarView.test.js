@@ -1,6 +1,17 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CalendarView from './CalendarView';
+import { useNotification } from '../context/NotificationContext';
+
+jest.mock('../context/NotificationContext', () => ({
+  useNotification: jest.fn()
+}));
+
+const mockAddNotification = jest.fn();
+beforeEach(() => {
+  useNotification.mockReturnValue({ addNotification: mockAddNotification });
+  mockAddNotification.mockClear();
+});
 
 // Suppress console.log from Firebase init
 beforeAll(() => {
@@ -84,7 +95,7 @@ describe('CalendarView interactions', () => {
     const submitButton = screen.getByText('Submit Availability');
     fireEvent.click(submitButton);
 
-    expect(screen.getByText('Please enter your name')).toBeInTheDocument();
+    expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({ message: 'Please enter your name' }));
   });
 
   test('shows error when submitting without selected days', async () => {
@@ -99,7 +110,7 @@ describe('CalendarView interactions', () => {
     const form = nameInput.closest('form');
     fireEvent.submit(form);
 
-    expect(screen.getByText('Please select at least one day')).toBeInTheDocument();
+    expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({ message: 'Please select at least one day' }));
   });
 
   test('clicking a day in flexible mode toggles selection', () => {

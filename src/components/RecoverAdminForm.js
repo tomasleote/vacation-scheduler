@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { hashPhrase } from '../firebase';
 import { KeyRound, Mail, Eye, EyeOff, ArrowRight, Loader2, Search } from 'lucide-react';
+import { useNotification } from '../context/NotificationContext';
 
 /**
  * RecoverAdminForm
@@ -21,20 +22,18 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
     const [findEmail, setFindEmail] = useState('');
     const [showPassphrase, setShowPassphrase] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [emailSent, setEmailSent] = useState(false);
+    const { addNotification } = useNotification();
 
     const inputClass =
         'w-full px-3 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-gray-50 ' +
         'placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 ' +
         'focus:border-blue-500 transition-colors text-sm';
 
-    const switchTab = (t) => { setTab(t); setError(''); setEmailSent(false); };
+    const switchTab = (t) => { setTab(t); };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
 
         try {
             // ── Find my groups (email only) ──────────────────────────────────────────
@@ -47,7 +46,12 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Search failed. Please try again.');
-                setEmailSent(true);
+
+                addNotification({
+                    type: 'success',
+                    title: 'Summary Sent',
+                    message: 'Check your inbox! We sent a summary of your groups.'
+                });
                 return;
             }
 
@@ -74,11 +78,21 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
                 throw new Error(data.error || 'Recovery failed. Please check your details and try again.');
             }
 
-            if (tab === 'email') setEmailSent(true);
+            if (tab === 'email') {
+                addNotification({
+                    type: 'success',
+                    title: 'Email Sent',
+                    message: 'Recovery email sent! Check your inbox and click the link.'
+                });
+            }
 
             onSuccess(groupId.trim(), data.adminToken);
         } catch (err) {
-            setError(err.message);
+            addNotification({
+                type: 'error',
+                title: 'Error',
+                message: err.message
+            });
         } finally {
             setLoading(false);
         }
@@ -204,20 +218,6 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
                             You'll receive each group's ID and participant link. Then use the <strong className="text-gray-300">Email link</strong> tab with the Group ID to get a fresh admin link.
                         </p>
                     </div>
-                )}
-
-                {error && (
-                    <p className="text-rose-400 text-sm bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2">
-                        {error}
-                    </p>
-                )}
-
-                {emailSent && (
-                    <p className="text-emerald-400 text-sm bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
-                        {tab === 'find'
-                            ? '✅ Check your inbox! We sent a summary of your groups.'
-                            : '✅ Recovery email sent! Check your inbox and click the link.'}
-                    </p>
                 )}
 
                 <div className="flex gap-3 pt-1">

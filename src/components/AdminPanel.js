@@ -3,6 +3,7 @@ import { getGroup, updateGroup, getParticipants, deleteGroup, addParticipant, up
 import { calculateOverlap, getBestOverlapPeriods, formatDateRange } from '../utils/overlap';
 import { exportToCSV } from '../utils/export';
 import { CalendarRange, Users, Mail, Copy, CheckCircle2, ChevronDown, ChevronUp, Edit, X, Trash2, Download, Save, KeyRound } from 'lucide-react';
+import { useNotification } from '../context/NotificationContext';
 import SlidingOverlapCalendar from './SlidingOverlapCalendar';
 import CalendarView from './CalendarView';
 
@@ -15,8 +16,8 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   const [editData, setEditData] = useState({});
   const [durationFilter, setDurationFilter] = useState('3');
   const [overlaps, setOverlaps] = useState([]);
-  const [emailSent, setEmailSent] = useState(false);
   const [reminderSending, setReminderSending] = useState(false);
+  const { addNotification } = useNotification();
 
   const baseUrl = window.location.origin;
   const participantLink = `${baseUrl}?group=${groupId}`;
@@ -85,8 +86,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
 
       unsubGroup = subscribeToGroup(groupId, (data) => {
         if (!isMounted) return;
-        if (!data) setError('Group not found');
-        else {
+        if (data) {
           setGroup(data);
           setEditData(prev => Object.keys(prev).length === 0 ? data : prev);
         }
@@ -167,7 +167,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
       setAvailabilitySubmitted(true);
       setTimeout(() => setAvailabilitySubmitted(false), 3000);
     } catch (err) {
-      setError(err.message);
+      addNotification({ type: 'error', title: 'Error', message: err.message });
     }
   };
 
@@ -183,7 +183,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
       setGroup({ ...group, ...updates });
       setEditing(false);
     } catch (err) {
-      setError(err.message);
+      addNotification({ type: 'error', title: 'Update Failed', message: err.message });
     }
   };
 
@@ -193,7 +193,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
       await deleteGroup(groupId);
       onBack();
     } catch (err) {
-      setError(err.message);
+      addNotification({ type: 'error', title: 'Delete Failed', message: err.message });
     }
   };
 
@@ -203,13 +203,12 @@ function AdminPanel({ groupId, adminToken, onBack }) {
         exportToCSV(group, participants, overlaps);
       }
     } catch (err) {
-      setError('Failed to export CSV: ' + err.message);
+      addNotification({ type: 'error', title: 'Export Failed', message: err.message });
     }
   };
 
   const handleSendReminder = async () => {
     setReminderSending(true);
-    setError('');
     try {
       const response = await fetch('/api/send-reminder', {
         method: 'POST',
@@ -224,13 +223,24 @@ function AdminPanel({ groupId, adminToken, onBack }) {
       });
       const data = await response.json();
       if (response.ok) {
-        setEmailSent(data.sentTo ?? true);
-        setTimeout(() => setEmailSent(false), 4000);
+        addNotification({
+          type: 'success',
+          title: 'Reminder Sent',
+          message: 'Reminders have been sent to participants.'
+        });
       } else {
-        setError(`Failed to send reminder: ${data.error || response.statusText}`);
+        addNotification({
+          type: 'error',
+          title: 'Failed to Send Reminder',
+          message: data.error || response.statusText
+        });
       }
     } catch (err) {
-      setError('Failed to send reminder. Check your network and try again.');
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to send reminder. Check your network and try again.'
+      });
     } finally {
       setReminderSending(false);
     }
@@ -247,8 +257,8 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   if (!group) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-dark-900 rounded-xl border border-dark-700 p-8 max-w-md">
-          <p className="text-rose-400 mb-4">{error || 'Group not found'}</p>
+        <div className="bg-dark-900 rounded-xl border border-dark-700 p-8 max-w-md text-center">
+          <p className="text-rose-400 mb-6 font-medium">Group not found or could not be loaded.</p>
           <button
             onClick={onBack}
             className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg"
@@ -275,12 +285,6 @@ function AdminPanel({ groupId, adminToken, onBack }) {
           <h1 className="text-3xl font-bold text-gray-50 flex-1 text-center">Admin Panel</h1>
           <div className="w-20"></div>
         </div>
-
-        {error && (
-          <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
 
         <div className="bg-dark-900 rounded-xl border border-dark-700 p-6 mb-8">
           <div className="flex justify-between items-start mb-6">
