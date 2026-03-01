@@ -1,6 +1,16 @@
 // Vercel Serverless Function — POST /api/send-reminder
-// Sends a reminder to all participants who have an email address.
-// Required env var: RESEND_API_KEY
+// Sends a reminder to all participants who have an email address via Gmail + Nodemailer.
+// Required env vars: EMAIL_USER, EMAIL_PASSWORD (Gmail App Password)
+
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+    },
+});
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -9,15 +19,14 @@ export default async function handler(req, res) {
 
     const { groupId, groupName, startDate, participants, baseUrl } = req.body ?? {};
 
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-        console.error('[send-reminder] RESEND_API_KEY is not set');
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+        console.error('[send-reminder] EMAIL_USER or EMAIL_PASSWORD is not set');
         return res.status(500).json({ error: 'Email service is not configured' });
     }
 
-    // Collect participants who have an email address
+    // Collect unique valid participant emails
     const recipients = Array.isArray(participants)
-        ? participants.filter((p) => p.email && p.email.includes('@')).map((p) => p.email)
+        ? [...new Set(participants.filter((p) => p.email && p.email.includes('@')).map((p) => p.email))]
         : [];
 
     if (recipients.length === 0) {
@@ -67,28 +76,15 @@ export default async function handler(req, res) {
   `;
 
     try {
-        const response = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                from: 'Vacation Scheduler <onboarding@resend.dev>',
-                to: recipients,
-                subject: `Reminder: update your availability for "${groupName || 'the trip'}"`,
-                html,
-            }),
+        await transporter.sendMail({
+            from: `"Vacation Scheduler" <${process.env.EMAIL_USER}>`,
+            to: recipients,
+            subject: `Reminder: update your availability for "${groupName || 'the trip'}"`,
+            html,
         });
-
-        const data = await response.json();
-        if (!response.ok) {
-            console.error('[send-reminder] Resend API error:', data);
-            return res.status(502).json({ error: data.message || 'Failed to send email' });
-        }
-        return res.status(200).json({ success: true, sentTo: recipients.length, id: data.id });
+        return res.status(200).json({ success: true, sentTo: recipients.length });
     } catch (err) {
-        console.error('[send-reminder] Unexpected error:', err);
-        return res.status(500).json({ error: 'Unexpected server error' });
+        console.error('[send-reminder] Failed to send email:', err.message);
+        return res.status(500).json({ error: 'Failed to send email' });
     }
 }

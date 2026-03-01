@@ -1,33 +1,41 @@
 // Vercel Serverless Function — POST /api/send-welcome
-// Sends a welcome email to the admin after a group is created.
-// Required env var: RESEND_API_KEY
+// Sends a welcome email to the admin after a group is created via Gmail + Nodemailer.
+// Required env vars: EMAIL_USER, EMAIL_PASSWORD (Gmail App Password)
+
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
 
 export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
-    }
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
-    const { groupId, adminToken, groupName, startDate, endDate, adminEmail, baseUrl } = req.body ?? {};
+  const { groupId, adminToken, groupName, startDate, endDate, adminEmail, baseUrl } = req.body ?? {};
 
-    if (!adminEmail) {
-        // No email provided — silently succeed (admin email is optional)
-        return res.status(200).json({ success: true, skipped: true });
-    }
+  if (!adminEmail) {
+    return res.status(200).json({ success: true, skipped: true });
+  }
 
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-        console.error('[send-welcome] RESEND_API_KEY is not set');
-        return res.status(500).json({ error: 'Email service is not configured' });
-    }
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    console.error('[send-welcome] EMAIL_USER or EMAIL_PASSWORD is not set');
+    return res.status(500).json({ error: 'Email service is not configured' });
+  }
 
-    const origin = baseUrl || 'https://vacation-scheduler.vercel.app';
-    const participantLink = `${origin}?group=${groupId}`;
-    const adminLink = `${origin}?group=${groupId}&admin=${adminToken}`;
+  const origin = baseUrl || 'https://vacation-scheduler.vercel.app';
+  const participantLink = `${origin}?group=${groupId}`;
+  const adminLink = `${origin}?group=${groupId}&admin=${adminToken}`;
 
-    const formatDate = (d) =>
-        new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const formatDate = (d) =>
+    new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
-    const html = `
+  const html = `
     <div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#0f172a;color:#f8fafc;border-radius:12px;overflow:hidden;">
       <div style="background:#1e3a5f;padding:32px 32px 24px;">
         <h1 style="margin:0;font-size:22px;font-weight:700;color:#60a5fa;">Vacation Scheduler</h1>
@@ -66,29 +74,16 @@ export default async function handler(req, res) {
     </div>
   `;
 
-    try {
-        const response = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                from: 'Vacation Scheduler <onboarding@resend.dev>',
-                to: [adminEmail],
-                subject: `🎉 Your group "${groupName || 'Trip'}" is ready — save your admin link`,
-                html,
-            }),
-        });
-
-        const data = await response.json();
-        if (!response.ok) {
-            console.error('[send-welcome] Resend API error:', data);
-            return res.status(502).json({ error: data.message || 'Failed to send email' });
-        }
-        return res.status(200).json({ success: true, id: data.id });
-    } catch (err) {
-        console.error('[send-welcome] Unexpected error:', err);
-        return res.status(500).json({ error: 'Unexpected server error' });
-    }
+  try {
+    await transporter.sendMail({
+      from: `"Vacation Scheduler" <${process.env.EMAIL_USER}>`,
+      to: adminEmail,
+      subject: `🎉 Your group "${groupName || 'Trip'}" is ready — save your admin link`,
+      html,
+    });
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('[send-welcome] Failed to send email:', err.message);
+    return res.status(500).json({ error: 'Failed to send email' });
+  }
 }
