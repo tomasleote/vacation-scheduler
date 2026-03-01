@@ -24,7 +24,7 @@ function App() {
     if (adminTok) {
       setAdminToken(adminTok);
       setCurrentPage('admin');
-      try { localStorage.setItem(`vacation_admin_${gId}`, adminTok); } catch {}
+      try { localStorage.setItem(`vacation_admin_${gId}`, adminTok); } catch { }
       return;
     }
 
@@ -49,7 +49,7 @@ function App() {
         setCurrentPage('participant');
         return;
       }
-    } catch {}
+    } catch { }
 
     setCurrentPage('participant');
   }, []);
@@ -58,13 +58,13 @@ function App() {
     setGroupId(groupId);
     setAdminToken(adminToken);
     // Persist token immediately so it survives page refresh before entering admin panel
-    try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch {}
+    try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch { }
     setCurrentPage('created');
   };
 
   const handleEnterAdmin = () => {
     setCurrentPage('admin');
-    try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch {}
+    try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch { }
     window.history.pushState({}, '', `?group=${groupId}&admin=${adminToken}`);
   };
 
@@ -260,6 +260,22 @@ function CreateGroupForm({ onSuccess, onCancel }) {
     try {
       const { createGroup } = await import('./firebase');
       const result = await createGroup({ name, description, startDate, endDate, adminEmail });
+      // Best-effort welcome email — does not block group creation
+      if (adminEmail) {
+        fetch('/api/send-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            groupId: result.groupId,
+            adminToken: result.adminToken,
+            groupName: name,
+            startDate,
+            endDate,
+            adminEmail,
+            baseUrl: window.location.origin,
+          }),
+        }).catch(() => { /* non-critical — ignore failures */ });
+      }
       onSuccess(result);
     } catch (err) {
       setError(err.message);
