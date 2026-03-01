@@ -16,6 +16,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   const [durationFilter, setDurationFilter] = useState('3');
   const [overlaps, setOverlaps] = useState([]);
   const [emailSent, setEmailSent] = useState(false);
+  const [reminderSending, setReminderSending] = useState(false);
 
   const baseUrl = window.location.origin;
   const participantLink = `${baseUrl}?group=${groupId}`;
@@ -201,6 +202,8 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   };
 
   const handleSendReminder = async () => {
+    setReminderSending(true);
+    setError('');
     try {
       const response = await fetch('/api/send-reminder', {
         method: 'POST',
@@ -208,19 +211,22 @@ function AdminPanel({ groupId, adminToken, onBack }) {
         body: JSON.stringify({
           groupId,
           groupName: group.name,
-          adminEmail: group.adminEmail,
-          participantCount: participants.length,
-          daysRemaining: Math.ceil((new Date(group.startDate) - new Date()) / (1000 * 60 * 60 * 24))
+          startDate: group.startDate,
+          participants: participants.map(p => ({ email: p.email })),
+          baseUrl: window.location.origin,
         })
       });
+      const data = await response.json();
       if (response.ok) {
-        setEmailSent(true);
-        setTimeout(() => setEmailSent(false), 3000);
+        setEmailSent(data.sentTo ?? true);
+        setTimeout(() => setEmailSent(false), 4000);
       } else {
-        setError('Failed to send reminder');
+        setError(`Failed to send reminder: ${data.error || response.statusText}`);
       }
     } catch (err) {
-      setError('Failed to send reminder');
+      setError('Failed to send reminder. Check your network and try again.');
+    } finally {
+      setReminderSending(false);
     }
   };
 
@@ -443,12 +449,17 @@ function AdminPanel({ groupId, adminToken, onBack }) {
               </button>
               <button
                 onClick={handleSendReminder}
-                disabled={!group.adminEmail}
+                disabled={reminderSending || !participants.some(p => p.email)}
                 className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+                title={!participants.some(p => p.email) ? 'No participants have an email address' : ''}
               >
-                <Mail size={18} /> Send Reminder
+                <Mail size={18} /> {reminderSending ? 'Sending...' : 'Send Reminder'}
               </button>
-              {emailSent && <p className="text-emerald-400 text-sm text-center">Email sent!</p>}
+              {emailSent && (
+                <p className="text-emerald-400 text-sm text-center">
+                  ✅ Reminder sent{typeof emailSent === 'number' ? ` to ${emailSent} participant${emailSent !== 1 ? 's' : ''}` : ''}!
+                </p>
+              )}
               <button
                 onClick={handleDelete}
                 className="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 px-4 rounded-lg transition-colors"

@@ -276,6 +276,22 @@ function CreateGroupForm({ onSuccess, onCancel }) {
           }),
         }).catch((err) => { console.error('[send-welcome] fetch failed:', err); });
       }
+      // Best-effort welcome email — does not block group creation
+      if (adminEmail) {
+        fetch('/api/send-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            groupId: result.groupId,
+            adminToken: result.adminToken,
+            groupName: name,
+            startDate,
+            endDate,
+            adminEmail,
+            baseUrl: window.location.origin,
+          }),
+        }).catch(() => { /* non-critical — ignore failures */ });
+      }
       onSuccess(result);
     } catch (err) {
       setError(err.message);
