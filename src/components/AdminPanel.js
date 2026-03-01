@@ -22,6 +22,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   const adminLink = adminToken ? `${baseUrl}?group=${groupId}&admin=${adminToken}` : null;
   const [copiedPLink, setCopiedPLink] = useState(false);
   const [copiedALink, setCopiedALink] = useState(false);
+  const [copiedGroupId, setCopiedGroupId] = useState(false);
 
   const [adminParticipantId, setAdminParticipantId] = useState(null);
   const [adminSavedDays, setAdminSavedDays] = useState([]);
@@ -318,7 +319,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                   <label className="block text-xs font-medium text-gray-400 mb-1">
                     Your admin link (keep private):
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mb-3">
                     <input
                       readOnly
                       value={adminLink}
@@ -335,10 +336,29 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                       {copiedALink ? 'Copied!' : 'Copy'}
                     </button>
                   </div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">
+                    Group ID:
+                  </label>
+                  <div className="flex gap-2">
+                    <code className="flex-1 px-3 py-1.5 border border-dark-700 rounded-lg text-xs font-mono bg-dark-800 text-blue-400 flex items-center">
+                      {groupId}
+                    </code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(groupId);
+                        setCopiedGroupId(true);
+                        setTimeout(() => setCopiedGroupId(false), 2000);
+                      }}
+                      className="px-3 py-1.5 bg-dark-700 hover:bg-dark-800 text-gray-300 rounded-lg text-xs font-semibold border border-dark-700 transition-colors flex items-center gap-1"
+                    >
+                      {copiedGroupId ? <CheckCircle2 size={14} className="text-blue-400" /> : <Copy size={14} />}
+                      {copiedGroupId ? 'Copied' : 'Copy ID'}
+                    </button>
+                  </div>
                 </div>
               )}
               {group.adminEmail && (
-                <div className="text-gray-400 text-sm flex items-center gap-1.5 mt-2">
+                <div className="text-gray-400 text-sm flex items-center gap-1.5 mt-3 border-t border-dark-700/50 pt-2">
                   <Mail size={16} className="text-gray-500" /> {group.adminEmail}
                 </div>
               )}
@@ -483,6 +503,19 @@ function AdminPanel({ groupId, adminToken, onBack }) {
           </div>
         </div>
 
+        {overlaps.length > 0 && (
+          <div className="mb-8">
+            <SlidingOverlapCalendar
+              startDate={group.startDate}
+              endDate={group.endDate}
+              participants={participants}
+              duration={durationFilter}
+              overlaps={overlaps}
+              onDurationChange={setDurationFilter}
+            />
+          </div>
+        )}
+
         <div className="bg-dark-900 rounded-xl border border-dark-700 p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-bold text-gray-50">
@@ -527,16 +560,6 @@ function AdminPanel({ groupId, adminToken, onBack }) {
           )}
         </div>
 
-        {overlaps.length > 0 && (
-          <SlidingOverlapCalendar
-            startDate={group.startDate}
-            endDate={group.endDate}
-            participants={participants}
-            duration={durationFilter}
-            overlaps={overlaps}
-            onDurationChange={setDurationFilter}
-          />
-        )}
       </div>
     </div>
   );
