@@ -99,7 +99,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
       }
 
       // The CalendarView now passes the entire desired array state.
-      // E.g., if a user unselects a previously saved day, formData.selectedDays simply won't include it. 
+      // E.g., if a user unselects a previously saved day, formData.selectedDays simply won't include it.
       const finalDays = formData.selectedDays || [];
 
       if (!currentParticipantId) {
@@ -150,7 +150,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-600">Loading...</div>
+        <div className="text-xl text-gray-400">Loading...</div>
       </div>
     );
   }
@@ -158,11 +158,11 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
   if (!group) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md">
-          <p className="text-red-600 mb-4">{error || 'Group not found'}</p>
+        <div className="bg-dark-900 rounded-xl border border-dark-700 p-8 max-w-md">
+          <p className="text-rose-400 mb-4">{error || 'Group not found'}</p>
           <button
             onClick={onBack}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg"
+            className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg transition-colors"
           >
             Go Home
           </button>
@@ -173,35 +173,35 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
 
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <button
           onClick={onBack}
-          className="text-indigo-600 hover:text-indigo-700 font-semibold mb-8"
+          className="text-blue-400 hover:text-blue-300 font-semibold mb-8"
         >
           ← Back to Home
         </button>
 
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">{group.name}</h1>
+        <div className="bg-dark-900 rounded-xl border border-dark-700 p-6 mb-8">
+          <h1 className="text-3xl font-bold text-gray-50 mb-2">{group.name}</h1>
           {group.description && (
-            <p className="text-gray-600 mb-4 italic">{group.description}</p>
+            <p className="text-gray-400 mb-4 italic">{group.description}</p>
           )}
-          <p className="text-gray-600 mb-4">Select your available dates for the vacation</p>
-          <div className="flex gap-4 text-sm text-gray-600 flex-wrap">
-            <span className="flex items-center gap-1.5"><CalendarRange size={16} className="text-gray-400" /> {group.startDate} to {group.endDate}</span>
-            <span className="flex items-center gap-1.5"><Users size={16} className="text-gray-400" /> {participants.length} people attending</span>
+          <p className="text-gray-400 mb-4">Select your available dates for the vacation</p>
+          <div className="flex gap-4 text-sm text-gray-400 flex-wrap">
+            <span className="flex items-center gap-1.5"><CalendarRange size={16} className="text-gray-500" /> {group.startDate} to {group.endDate}</span>
+            <span className="flex items-center gap-1.5"><Users size={16} className="text-gray-500" /> {participants.length} people attending</span>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
 
         {submitted && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg mb-6">
             ✓ Your response has been recorded. Thank you!
           </div>
         )}
@@ -220,8 +220,8 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
                 onSubmit={handleSubmit}
               />
             ) : (
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Select Your Availability</h2>
+              <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
+                <h2 className="text-xl font-bold text-gray-50 mb-4">Select Your Availability</h2>
                 <CalendarView
                   startDate={group.startDate}
                   endDate={group.endDate}
@@ -234,17 +234,17 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
           </div>
 
           <div className="md:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Participants</h3>
+            <div className="bg-dark-900 rounded-xl border border-dark-700 p-6 sticky top-4">
+              <h3 className="text-lg font-bold text-gray-50 mb-4">Participants</h3>
               <div className="space-y-2 text-sm max-h-96 overflow-y-auto">
                 {participants.length === 0 ? (
                   <p className="text-gray-500">Be the first to join!</p>
                 ) : (
                   participants.map((p, i) => (
-                    <div key={i} className="bg-indigo-50 rounded p-3 border-l-4 border-indigo-500">
-                      <p className="font-semibold text-gray-800">{p.name || 'Anonymous'}</p>
-                      <p className="text-gray-600 text-xs">{p.duration}-day trip</p>
-                      <p className="text-gray-500 text-xs">{(p.availableDays || []).length} days available</p>
+                    <div key={i} className="bg-dark-800 rounded p-3 border-l-4 border-blue-500">
+                      <p className="font-semibold text-gray-50">{p.name || 'Anonymous'}</p>
+                      <p className="text-gray-400 text-xs">{p.duration}-day trip</p>
+                      <p className="text-gray-400 text-xs">{(p.availableDays || []).length} days available</p>
                     </div>
                   ))
                 )}
@@ -255,7 +255,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
 
         {overlaps.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Current Group Availability</h2>
+            <h2 className="text-xl font-bold text-gray-50 mb-4">Current Group Availability</h2>
             <SlidingOverlapCalendar
               startDate={group.startDate}
               endDate={group.endDate}
@@ -285,23 +285,23 @@ function ParticipantDashboard({ groupId, participantId, participantName, partici
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-1">Hi, {participantName}!</h2>
-        <p className="text-gray-500 text-sm mb-4">Your availability is saved.</p>
+      <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
+        <h2 className="text-xl font-bold text-gray-50 mb-1">Hi, {participantName}!</h2>
+        <p className="text-gray-400 text-sm mb-4">Your availability is saved.</p>
 
         <div className="mb-4">
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+          <label className="block text-xs font-medium text-gray-400 mb-1">
             Your personal link — save to edit later:
           </label>
           <div className="flex gap-2">
             <input
               readOnly
               value={personalLink}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50"
+              className="flex-1 px-3 py-2 border border-dark-700 rounded-lg text-sm bg-dark-800 text-gray-300"
             />
             <button
               onClick={copy}
-              className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold"
+              className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg text-sm font-semibold transition-colors"
             >
               {copied ? 'Copied!' : 'Copy'}
             </button>
@@ -310,15 +310,15 @@ function ParticipantDashboard({ groupId, participantId, participantName, partici
 
         <button
           onClick={() => setUpdating(u => !u)}
-          className="text-indigo-600 hover:text-indigo-700 text-sm font-semibold"
+          className="text-blue-400 hover:text-blue-300 text-sm font-semibold"
         >
           {updating ? '\u2191 Hide update form' : '\u270F Update your dates'}
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h3 className="text-base font-bold text-gray-700 mb-1">Your selected dates</h3>
-        <p className="text-gray-400 text-xs mb-3">Changing your name, email, or duration below will update your info when you submit.</p>
+      <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
+        <h3 className="text-base font-bold text-gray-300 mb-1">Your selected dates</h3>
+        <p className="text-gray-500 text-xs mb-3">Changing your name, email, or duration below will update your info when you submit.</p>
         <CalendarView
           startDate={group.startDate}
           endDate={group.endDate}

@@ -174,21 +174,21 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col h-full relative">
       {/* --- DASHBOARD ROW --- */}
-      <div className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-200 mb-6 shrink-0">
+      <div className="bg-dark-900 p-4 md:p-5 rounded-2xl border border-dark-700 mb-6 shrink-0">
 
         <div className="flex flex-wrap items-center gap-3">
 
           {/* Name Pill */}
           <div className="relative group flex-1 min-w-[180px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <User size={16} className="text-gray-400 group-hover:text-indigo-500 transition-colors" />
+              <User size={16} className="text-gray-500 group-hover:text-blue-400 transition-colors" />
             </div>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value.slice(0, 30))}
               required
-              className="w-full bg-gray-50 hover:bg-white text-gray-800 font-medium pl-10 pr-4 py-2.5 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+              className="w-full bg-dark-800 hover:bg-dark-700 text-gray-50 font-medium pl-10 pr-4 py-2.5 rounded-full border border-dark-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
               placeholder="Your Name *"
               maxLength="30"
             />
@@ -197,20 +197,20 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
           {/* Email Pill */}
           <div className="relative group flex-1 min-w-[180px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Mail size={16} className="text-gray-400 group-hover:text-indigo-500 transition-colors" />
+              <Mail size={16} className="text-gray-500 group-hover:text-blue-400 transition-colors" />
             </div>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-gray-50 hover:bg-white text-gray-800 font-medium pl-10 pr-4 py-2.5 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+              className="w-full bg-dark-800 hover:bg-dark-700 text-gray-50 font-medium pl-10 pr-4 py-2.5 rounded-full border border-dark-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
               placeholder="Email (optional)"
             />
           </div>
 
           {/* Duration Pill */}
-          <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:bg-white transition-all shrink-0">
-            <Clock size={16} className="text-gray-400" />
+          <div className="flex items-center gap-1.5 bg-dark-800 px-3 py-1.5 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500 transition-all shrink-0">
+            <Clock size={16} className="text-gray-500" />
             <input
               type="number"
               min="1"
@@ -225,33 +225,33 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
                 setLocalDuration(strVal);
                 setDuration(strVal);
               }}
-              className="w-8 text-center bg-transparent font-bold text-gray-800 focus:outline-none p-0"
+              className="w-8 text-center bg-transparent font-bold text-gray-50 focus:outline-none p-0"
             />
-            <span className="text-gray-600 font-medium pr-2 text-sm">days trip</span>
+            <span className="text-gray-400 font-medium pr-2 text-sm">days trip</span>
           </div>
 
           {/* Segmented Control - Selection Mode */}
-          <div className="flex items-center bg-gray-100 p-1 rounded-full border border-gray-200 shrink-0">
+          <div className="flex items-center bg-dark-800 p-1 rounded-full border border-dark-700 shrink-0">
             <button
               type="button"
               onClick={() => setBlockType('flexible')}
               className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${blockType === 'flexible'
-                ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-black/5'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-dark-700 text-blue-400 shadow-sm ring-1 ring-blue-500/20'
+                : 'text-gray-500 hover:text-gray-300'
                 }`}
             >
-              <Sparkles size={16} className={blockType === 'flexible' ? 'text-indigo-500' : 'text-gray-400'} />
+              <Sparkles size={16} className={blockType === 'flexible' ? 'text-blue-400' : 'text-gray-500'} />
               Flexible
             </button>
             <button
               type="button"
               onClick={() => setBlockType('custom')}
               className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${blockType !== 'flexible'
-                ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-black/5'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-dark-700 text-blue-400 shadow-sm ring-1 ring-blue-500/20'
+                : 'text-gray-500 hover:text-gray-300'
                 }`}
             >
-              <CalendarRange size={16} className={blockType !== 'flexible' ? 'text-indigo-500' : 'text-gray-400'} />
+              <CalendarRange size={16} className={blockType !== 'flexible' ? 'text-blue-400' : 'text-gray-500'} />
               Block
 
               {/* Embedded Block Size Input */}
@@ -268,8 +268,8 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
                     if (val > dateRange.length) val = dateRange.length;
                     setCustomBlockSize(String(val));
                   }}
-                  onClick={(e) => e.stopPropagation()} // Prevent toggling the button when clicking the input
-                  className="w-8 text-center bg-indigo-50 font-bold text-indigo-900 focus:outline-none focus:ring-1 focus:ring-indigo-400 rounded-md p-0"
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-8 text-center bg-blue-500/10 font-bold text-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 rounded-md p-0"
                 />
               )}
             </button>
@@ -280,7 +280,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
             type="button"
             onClick={handleSaveDetails}
             disabled={loading}
-            className="flex items-center justify-center shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-full transition-all border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50 h-[38px] my-auto"
+            className="flex items-center justify-center shrink-0 bg-dark-800 hover:bg-dark-700 text-gray-300 font-bold px-4 py-2 rounded-full transition-all border border-dark-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:opacity-50 h-[38px] my-auto"
           >
             {loading ? 'Saving...' : 'Save Details'}
           </button>
@@ -289,22 +289,22 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
       {/* --- END DASHBOARD ROW --- */}
 
       {/* --- CALENDAR GRID AREA --- */}
-      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-4 shrink-0">
+      <div className="flex-1 bg-dark-900 rounded-2xl border border-dark-700 p-4 shrink-0">
 
         {/* Month Navigation Row */}
         <div className="flex justify-between items-center mb-6">
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 transition"
+            className="px-4 py-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-xl text-sm font-bold text-gray-300 transition"
           >
             ← Prev
           </button>
-          <h3 className="text-xl font-bold text-gray-800 tracking-tight">{monthName}</h3>
+          <h3 className="text-xl font-bold text-gray-50 tracking-tight">{monthName}</h3>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 transition"
+            className="px-4 py-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-xl text-sm font-bold text-gray-300 transition"
           >
             Next →
           </button>
@@ -312,7 +312,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
 
         <div className="grid grid-cols-7 gap-1 md:gap-2 mb-4">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className="text-center font-bold text-gray-400 text-xs py-2 uppercase tracking-wide">
+            <div key={day} className="text-center font-bold text-gray-500 text-xs py-2 uppercase tracking-wide">
               {day}
             </div>
           ))}
@@ -339,8 +339,8 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
                 className={`
                   aspect-square p-2 text-sm md:text-base font-bold rounded-xl transition-all duration-200
                   ${!day ? 'bg-transparent' : ''}
-                  ${!inRange ? 'bg-gray-50 text-gray-300 cursor-not-allowed opacity-50' : ''}
-                  ${selected ? 'bg-indigo-600 text-white shadow-md transform scale-[1.02]' : inRange ? 'bg-white border-2 border-gray-100 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700' : ''}
+                  ${!inRange ? 'bg-dark-950 text-gray-600 cursor-not-allowed opacity-50' : ''}
+                  ${selected ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20 transform scale-[1.02]' : inRange ? 'bg-dark-800 border border-dark-700 hover:border-blue-500/50 hover:bg-blue-500/5 text-gray-300' : ''}
                 `}
               >
                 {day}
@@ -351,7 +351,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
 
         {/* Dynamic Selection Counter */}
         {selectedDays.length > 0 && (
-          <div className="bg-indigo-50 text-indigo-800 p-3 rounded-xl border border-indigo-100 mt-6 flex justify-center items-center gap-2 font-medium">
+          <div className="bg-blue-500/10 text-blue-400 p-3 rounded-xl border border-blue-500/20 mt-6 flex justify-center items-center gap-2 font-medium">
             <span data-testid="day-count">
               <strong>{selectedDays.length}</strong> day{selectedDays.length !== 1 ? 's' : ''} selected
             </span>
@@ -361,7 +361,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
         {/* Global Error Message */}
         {error && (
           <div className="mt-6 mb-2">
-            <p className="text-red-600 font-bold text-sm bg-red-50 border border-red-200 px-4 py-3 rounded-xl">
+            <p className="text-rose-400 font-bold text-sm bg-rose-500/10 border border-rose-500/20 px-4 py-3 rounded-xl">
               {error}
             </p>
           </div>
@@ -372,7 +372,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
           <button
             type="submit"
             disabled={loading || selectedDays.length === 0}
-            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 flex items-center justify-center gap-2 transform active:scale-95"
+            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md shadow-blue-500/20 hover:shadow-lg focus:ring-2 focus:ring-blue-500/30 disabled:opacity-50 flex items-center justify-center gap-2 transform active:scale-95"
           >
             <Calendar size={18} />
             {loading ? 'Submitting...' : 'Submit Availability'}
