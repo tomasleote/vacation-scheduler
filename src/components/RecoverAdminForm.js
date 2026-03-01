@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
 import { hashPhrase } from '../firebase';
-import { KeyRound, Mail, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
+import { KeyRound, Mail, Eye, EyeOff, ArrowRight, Loader2, Search } from 'lucide-react';
 
 /**
  * RecoverAdminForm
- * Allows an admin to recover their admin link via either:
- *   - Recovery passphrase (Option 1)
- *   - Email magic link   (Option 2, requires adminEmail to have been set)
+ * Three recovery modes:
+ *   - Passphrase: Group ID + passphrase → new admin link returned immediately
+ *   - Email link: Group ID + email → new admin link emailed + returned
+ *   - Find groups: email only → summary of all admin groups emailed (no Group ID needed)
  *
  * Props:
- *   onSuccess(groupId, adminToken) — called when recovery succeeds
- *   onCancel()                     — called when user dismisses the form
+ *   onSuccess(groupId, adminToken) — called when passphrase/email recovery succeeds
+ *   onCancel()
  */
 function RecoverAdminForm({ onSuccess, onCancel }) {
-    const [tab, setTab] = useState('passphrase'); // 'passphrase' | 'email'
+    const [tab, setTab] = useState('passphrase'); // 'passphrase' | 'email' | 'find'
     const [groupId, setGroupId] = useState('');
     const [passphrase, setPassphrase] = useState('');
     const [email, setEmail] = useState('');
+    const [findEmail, setFindEmail] = useState('');
     const [showPassphrase, setShowPassphrase] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -27,12 +29,29 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
         'placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 ' +
         'focus:border-blue-500 transition-colors text-sm';
 
+    const switchTab = (t) => { setTab(t); setError(''); setEmailSent(false); };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
         try {
+            // ── Find my groups (email only) ──────────────────────────────────────────
+            if (tab === 'find') {
+                if (!findEmail) throw new Error('Please enter your email address.');
+                const res = await fetch('/api/find-groups', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: findEmail.trim().toLowerCase(), baseUrl: window.location.origin }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Search failed. Please try again.');
+                setEmailSent(true);
+                return;
+            }
+
+            // ── Passphrase / email recovery ──────────────────────────────────────────
             const body = { groupId: groupId.trim() };
 
             if (tab === 'passphrase') {
@@ -55,9 +74,7 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
                 throw new Error(data.error || 'Recovery failed. Please check your details and try again.');
             }
 
-            if (tab === 'email') {
-                setEmailSent(true);
-            }
+            if (tab === 'email') setEmailSent(true);
 
             onSuccess(groupId.trim(), data.adminToken);
         } catch (err) {
@@ -73,47 +90,52 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
             <div className="flex rounded-lg overflow-hidden border border-dark-700">
                 <button
                     type="button"
-                    onClick={() => { setTab('passphrase'); setError(''); }}
-                    className={`flex-1 py-2 text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors ${tab === 'passphrase'
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-dark-800 text-gray-400 hover:text-gray-200'
+                    onClick={() => switchTab('passphrase')}
+                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${tab === 'passphrase' ? 'bg-blue-500 text-white' : 'bg-dark-800 text-gray-400 hover:text-gray-200'
                         }`}
                 >
-                    <KeyRound size={14} /> Passphrase
+                    <KeyRound size={12} /> Passphrase
                 </button>
                 <button
                     type="button"
-                    onClick={() => { setTab('email'); setError(''); }}
-                    className={`flex-1 py-2 text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors ${tab === 'email'
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-dark-800 text-gray-400 hover:text-gray-200'
+                    onClick={() => switchTab('email')}
+                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${tab === 'email' ? 'bg-blue-500 text-white' : 'bg-dark-800 text-gray-400 hover:text-gray-200'
                         }`}
                 >
-                    <Mail size={14} /> Email link
+                    <Mail size={12} /> Email link
+                </button>
+                <button
+                    type="button"
+                    onClick={() => switchTab('find')}
+                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${tab === 'find' ? 'bg-blue-500 text-white' : 'bg-dark-800 text-gray-400 hover:text-gray-200'
+                        }`}
+                >
+                    <Search size={12} /> Find groups
                 </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Group ID */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Group ID</label>
-                    <input
-                        id="recover-group-id"
-                        type="text"
-                        value={groupId}
-                        onChange={(e) => setGroupId(e.target.value)}
-                        required
-                        className={inputClass}
-                        placeholder="Paste your group ID here"
-                    />
-                </div>
+
+                {/* Group ID — only for passphrase/email tabs */}
+                {tab !== 'find' && (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-1.5">Group ID</label>
+                        <input
+                            id="recover-group-id"
+                            type="text"
+                            value={groupId}
+                            onChange={(e) => setGroupId(e.target.value)}
+                            required
+                            className={inputClass}
+                            placeholder="Paste your group ID here"
+                        />
+                    </div>
+                )}
 
                 {/* Passphrase tab */}
                 {tab === 'passphrase' && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                            Recovery passphrase
-                        </label>
+                        <label className="block text-sm font-medium text-gray-300 mb-1.5">Recovery passphrase</label>
                         <div className="relative">
                             <input
                                 id="recover-passphrase"
@@ -139,7 +161,7 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
                     </div>
                 )}
 
-                {/* Email tab */}
+                {/* Email recovery tab */}
                 {tab === 'email' && (
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-1.5">Admin email</label>
@@ -158,6 +180,30 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
                     </div>
                 )}
 
+                {/* Find my groups tab */}
+                {tab === 'find' && (
+                    <div className="space-y-3">
+                        <p className="text-sm text-gray-400 leading-relaxed">
+                            Don't remember your Group ID? Enter your email and we'll send you a summary of all groups you administer.
+                        </p>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-1.5">Your admin email</label>
+                            <input
+                                id="find-groups-email"
+                                type="email"
+                                value={findEmail}
+                                onChange={(e) => setFindEmail(e.target.value)}
+                                required
+                                className={inputClass}
+                                placeholder="The email you used when creating groups"
+                            />
+                        </div>
+                        <p className="text-xs text-gray-500">
+                            You'll receive each group's ID and participant link. Then use the <strong className="text-gray-300">Email link</strong> tab with the Group ID to get a fresh admin link.
+                        </p>
+                    </div>
+                )}
+
                 {error && (
                     <p className="text-rose-400 text-sm bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2">
                         {error}
@@ -166,7 +212,9 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
 
                 {emailSent && (
                     <p className="text-emerald-400 text-sm bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
-                        ✅ Recovery email sent! Check your inbox and click the link.
+                        {tab === 'find'
+                            ? '✅ Check your inbox! We sent a summary of your groups.'
+                            : '✅ Recovery email sent! Check your inbox and click the link.'}
                     </p>
                 )}
 
@@ -184,8 +232,10 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
                         className="flex-1 bg-blue-500 hover:bg-blue-400 text-white font-bold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
                     >
                         {loading
-                            ? <><Loader2 size={15} className="animate-spin" /> Recovering...</>
-                            : <><ArrowRight size={15} /> Recover access</>
+                            ? <><Loader2 size={15} className="animate-spin" /> {tab === 'find' ? 'Searching...' : 'Recovering...'}</>
+                            : tab === 'find'
+                                ? <><Search size={15} /> Find my groups</>
+                                : <><ArrowRight size={15} /> Recover access</>
                         }
                     </button>
                 </div>
