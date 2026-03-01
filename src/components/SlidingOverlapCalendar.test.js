@@ -106,8 +106,7 @@ describe('SlidingOverlapCalendar Edge Cases', () => {
                 overlaps={[]}
             />
         );
-
-        expect(screen.getByText('No matches found')).toBeInTheDocument();
+        expect(screen.getByText('No matches > 50% found')).toBeInTheDocument();
         expect(screen.getByText(/Try lowering the duration/)).toBeInTheDocument();
     });
 

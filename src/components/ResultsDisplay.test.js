@@ -5,17 +5,17 @@ import ResultsDisplay from './ResultsDisplay';
 describe('ResultsDisplay', () => {
   test('shows empty message when no overlaps', () => {
     render(<ResultsDisplay overlaps={[]} />);
-    expect(screen.getByText('No matching periods found. More participants needed.')).toBeInTheDocument();
+    expect(screen.getByText('No matches > 50% found. Try lowering the duration or getting more participants to respond.')).toBeInTheDocument();
   });
 
   test('shows empty message when overlaps is null', () => {
     render(<ResultsDisplay overlaps={null} />);
-    expect(screen.getByText('No matching periods found. More participants needed.')).toBeInTheDocument();
+    expect(screen.getByText('No matches > 50% found. Try lowering the duration or getting more participants to respond.')).toBeInTheDocument();
   });
 
   test('shows empty message when overlaps is undefined', () => {
     render(<ResultsDisplay />);
-    expect(screen.getByText('No matching periods found. More participants needed.')).toBeInTheDocument();
+    expect(screen.getByText('No matches > 50% found. Try lowering the duration or getting more participants to respond.')).toBeInTheDocument();
   });
 
   test('renders overlap cards with correct data', () => {
@@ -49,7 +49,7 @@ describe('ResultsDisplay', () => {
       {
         startDate: '2024-06-05',
         endDate: '2024-06-07',
-        availabilityPercent: 50,
+        availabilityPercent: 55,
         availableCount: 2,
         totalParticipants: 4,
         dayCount: 3
@@ -59,7 +59,7 @@ describe('ResultsDisplay', () => {
     render(<ResultsDisplay overlaps={overlaps} />);
 
     expect(screen.getByText('100%')).toBeInTheDocument();
-    expect(screen.getByText('50%')).toBeInTheDocument();
+    expect(screen.getByText('55%')).toBeInTheDocument();
   });
 
   test('renders progress bar with correct width', () => {
