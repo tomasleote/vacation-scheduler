@@ -135,11 +135,24 @@ function newId() {
  */
 async function writeParticipant(groupId, participantId, data) {
     const url = `${DB_URL.replace(/\/$/, '')}/groups/${groupId}/participants/${participantId}.json`;
-    const res = await fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000);
+    let res;
+    try {
+        res = await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            signal: controller.signal,
+        });
+    } catch (err) {
+        clearTimeout(timer);
+        if (err instanceof DOMException && err.name === 'AbortError') {
+            throw new Error(`Request timed out after 10 s (${url})`);
+        }
+        throw err;
+    }
+    clearTimeout(timer);
     if (!res.ok) {
         const text = await res.text();
         throw new Error(`HTTP ${res.status}: ${text}`);
@@ -149,10 +162,16 @@ async function writeParticipant(groupId, participantId, data) {
 
 // ─── 7. Main ─────────────────────────────────────────────────────────────────
 async function main() {
-    const [csvPath, groupId] = process.argv.slice(2);
+    const [csvPath, rawGroupId] = process.argv.slice(2);
 
-    if (!csvPath || !groupId) {
+    if (!csvPath || !rawGroupId) {
         console.error('Usage: node scripts/import-csv.js <path-to-csv> <groupId>');
+        process.exit(1);
+    }
+
+    const groupId = rawGroupId.trim();
+    if (!/^[A-Za-z0-9-]+$/.test(groupId)) {
+        console.error(`❌  Invalid groupId: "${groupId}". Only letters, digits, and hyphens are allowed.`);
         process.exit(1);
     }
 

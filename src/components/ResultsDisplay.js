@@ -1,8 +1,9 @@
 import React from 'react';
 import { TrendingUp, Lightbulb } from 'lucide-react';
+import { getTopFilteredOverlaps } from '../utils/overlap';
 
 function ResultsDisplay({ overlaps }) {
-  const topFilteredOverlaps = overlaps ? overlaps.filter(o => o.availabilityPercent > 50).slice(0, 5) : [];
+  const topFilteredOverlaps = getTopFilteredOverlaps(overlaps);
 
   if (topFilteredOverlaps.length === 0) {
     return (

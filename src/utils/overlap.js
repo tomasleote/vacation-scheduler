@@ -70,6 +70,11 @@ export const calculateOverlap = (participants, startDate, endDate, durationDays)
   return results.sort((a, b) => b.availabilityPercent - a.availabilityPercent);
 };
 
+export const getTopFilteredOverlaps = (overlaps, threshold = 50, limit = 5) => {
+  if (!overlaps) return [];
+  return overlaps.filter(o => o.availabilityPercent > threshold).slice(0, limit);
+};
+
 export const getBestOverlapPeriods = (overlaps, limit = 5) => {
   return overlaps
     .filter(o => o.availabilityPercent > 0)

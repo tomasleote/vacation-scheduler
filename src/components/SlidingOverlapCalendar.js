@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { getDatesBetween, formatDateRange } from '../utils/overlap';
+import { getDatesBetween, formatDateRange, getTopFilteredOverlaps } from '../utils/overlap';
 import { Calendar as CalendarIcon, Users, Edit2, Play, ChevronLeft, ChevronRight, XIcon, PartyPopper, UserX, TrendingUp } from 'lucide-react';
 
 function SlidingOverlapCalendar({ startDate, endDate, participants, duration, overlaps, onDurationChange }) {
@@ -372,7 +372,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                         </h4>
 
                         {(() => {
-                            const topFilteredOverlaps = overlaps ? overlaps.filter(o => o.availabilityPercent > 50).slice(0, 5) : [];
+                            const topFilteredOverlaps = getTopFilteredOverlaps(overlaps);
 
                             if (topFilteredOverlaps.length === 0) {
                                 return (
