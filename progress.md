@@ -336,3 +336,93 @@ src/
 - Phase 4: AdminPanel Decomposition (if proceeding)
 - Phase 5: Polish & Performance (memoization, callbacks)
 - Phase 6: TypeScript Migration (optional, high-effort)
+
+---
+
+## Session: 2026-03-02 (Phase 4 Implementation)
+
+### Phase 4 — AdminPanel Decomposition: COMPLETE
+
+#### Step 4.1 — useGroupData hook
+- [x] Created `src/features/admin/hooks/useGroupData.js` (129 lines)
+- Manages: group subscription, participant subscription, admin token validation, admin participant recovery from localStorage, overlap calculation
+- Returns all data state + setters needed by sub-components
+
+#### Step 4.2 — useParticipantActions hook
+- [x] Created `src/features/admin/hooks/useParticipantActions.js` (233 lines)
+- Manages: create/edit/delete participant with optimistic updates + rollback, copy participant link, send invite email
+- All UI state (modals, form fields, loading states) encapsulated
+
+#### Step 4.3 — GroupSettings component
+- [x] Created `src/features/admin/GroupSettings.jsx` (218 lines)
+- Group info display + edit mode with recovery settings
+- Links section (participant link, admin link, group ID)
+- Uses shared/ui: Input, Label, ReadOnlyInput, CopyButton
+
+#### Step 4.4 — ParticipantTable component
+- [x] Created `src/features/admin/ParticipantTable.jsx` (221 lines)
+- Participant table with action buttons (edit, delete, copy link, send invite)
+- Inline create participant form
+- Edit participant modal
+- Delete confirmation dialog
+- Uses shared/ui: Modal, Input, Label, ConfirmDialog
+
+#### Step 4.5 — AdminAvailability component
+- [x] Created `src/features/admin/AdminAvailability.jsx` (56 lines)
+- Admin's own calendar section with show/hide toggle
+- Manages showAvailability state internally
+
+#### Step 4.6 — OverlapResults component
+- [x] Created `src/features/admin/OverlapResults.jsx` (21 lines)
+- Wraps SlidingOverlapCalendar with null check
+- Pure presentational wrapper
+
+#### Step 4.7 — AdminPage orchestrator
+- [x] Created `src/features/admin/AdminPage.jsx` (285 lines)
+- Composes all sub-components
+- Owns group-level handlers: handleSaveEdit, handleDelete, handleExport, handleSendReminder, handleAdminAvailability
+- Uses useGroupData + useParticipantActions hooks
+- Renders loading/error states, header, grid layout
+
+#### Integration
+- [x] App.js updated to import from `features/admin/AdminPage`
+- [x] AdminPanel.js converted to re-export wrapper for backward compatibility
+- [x] All test mocks still resolve correctly (same service module paths)
+
+#### Verification
+- [x] Production build: Compiled successfully
+- [x] All 161 tests pass across 11 test suites
+- [x] Zero console errors
+- [x] Zero broken imports
+- [x] Zero circular dependencies
+- [x] Architecture compliance: no cross-feature imports, no direct Firebase in features, shared/ui is presentation-only
+
+### Files Created (Phase 4)
+- `src/features/admin/hooks/useGroupData.js`
+- `src/features/admin/hooks/useParticipantActions.js`
+- `src/features/admin/GroupSettings.jsx`
+- `src/features/admin/ParticipantTable.jsx`
+- `src/features/admin/AdminAvailability.jsx`
+- `src/features/admin/OverlapResults.jsx`
+- `src/features/admin/AdminPage.jsx`
+
+### Files Modified (Phase 4)
+- `src/App.js` — import changed from `./components/AdminPanel` to `./features/admin/AdminPage`
+- `src/components/AdminPanel.js` — replaced 981-line god component with 2-line re-export wrapper
+
+### Impact Summary
+- **Original AdminPanel.js**: 981 lines, 27 useState variables, mixed concerns
+- **New structure**: 7 files totaling 1,163 lines
+- **AdminPage orchestrator**: 285 lines (vs 981 original)
+- **Largest sub-component**: AdminPage.jsx at 285 lines (within plan's target)
+- **State management**: Split across useGroupData (data subscriptions) and useParticipantActions (CRUD operations)
+- **Components extracted**: 4 presentational + 2 hooks + 1 orchestrator = 7 files
+
+### Deviations from Plan
+1. **ParticipantForm.jsx not created as separate file** — The create participant form is inline within ParticipantTable and the edit form is a modal within ParticipantTable. Creating a separate ParticipantForm component would require prop threading for both create and edit modes with no duplication benefit since the forms have different layouts (inline vs modal). Kept within ParticipantTable for cohesion.
+2. **AdminPanel.js kept as re-export wrapper** — Plan said "AdminPanel.js can be deleted" but the test file imports from this path. Re-export wrapper maintains backward compatibility without test changes (same pattern used for firebase.js in Phase 1).
+3. **showAvailability state moved to AdminAvailability** — Plan had this in AdminPage, but it's purely internal UI state for the availability toggle. Moving it to the component that owns it follows the "co-locate state with its consumer" principle.
+
+### Next Steps
+- Phase 5: Polish & Performance (memoization, callbacks, lazy loading, RecoverAdminForm move)
+- Phase 6: TypeScript Migration (optional, high-effort)

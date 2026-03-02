@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
-import AdminPanel from './components/AdminPanel';
+import AdminPanel from './features/admin/AdminPage';
 import ParticipantView from './components/ParticipantView';
 import HomePage from './features/home/HomePage';
 import GroupCreatedScreen from './features/home/GroupCreatedScreen';
