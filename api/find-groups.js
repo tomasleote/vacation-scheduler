@@ -53,9 +53,18 @@ async function getAllGroups(options = {}) {
     params.append('shallow', 'false');
   }
   url += `?${params.toString()}`;
-  const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
-  if (!res.ok) return {};
-  return (await res.json()) ?? {};
+
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) return {};
+    return (await res.json()) ?? {};
+  } catch (err) {
+    console.error(`[find-groups] getAllGroups fetch error:`, err.message);
+    if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+      throw new Error('Database timeout while fetching groups, please try again.');
+    }
+    throw new Error('Failed to reach database while fetching groups.');
+  }
 }
 
 module.exports = async function handler(req, res) {

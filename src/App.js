@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import './index.css';
 import { GroupProvider } from './shared/context';
-import { LoadingSpinner } from './shared/ui';
+import { LoadingSpinner, ErrorBoundary } from './shared/ui';
 
 const AdminPanel = React.lazy(() => import('./features/admin/AdminPage'));
 const ParticipantView = React.lazy(() => import('./components/ParticipantView'));
@@ -108,26 +108,34 @@ function App() {
           </div>
         }>
           {currentPage === 'home' && (
-            <HomePage onCreateGroup={handleCreateGroup} onJoinGroup={handleJoinGroup} onRecoverAdmin={handleRecoverAdmin} />
+            <ErrorBoundary>
+              <HomePage onCreateGroup={handleCreateGroup} onJoinGroup={handleJoinGroup} onRecoverAdmin={handleRecoverAdmin} />
+            </ErrorBoundary>
           )}
           {currentPage === 'created' && (
-            <GroupCreatedScreen
-              groupId={groupId}
-              adminToken={adminToken}
-              onEnterAdmin={handleEnterAdmin}
-              onBack={handleBackHome}
-            />
+            <ErrorBoundary>
+              <GroupCreatedScreen
+                groupId={groupId}
+                adminToken={adminToken}
+                onEnterAdmin={handleEnterAdmin}
+                onBack={handleBackHome}
+              />
+            </ErrorBoundary>
           )}
           {currentPage === 'admin' && (
-            <AdminPanel
-              onBack={handleBackHome}
-            />
+            <ErrorBoundary>
+              <AdminPanel
+                onBack={handleBackHome}
+              />
+            </ErrorBoundary>
           )}
           {currentPage === 'participant' && (
-            <ParticipantView
-              participantId={participantId}
-              onBack={handleBackHome}
-            />
+            <ErrorBoundary>
+              <ParticipantView
+                participantId={participantId}
+                onBack={handleBackHome}
+              />
+            </ErrorBoundary>
           )}
         </Suspense>
       </div>

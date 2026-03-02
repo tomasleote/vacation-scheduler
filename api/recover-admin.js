@@ -24,20 +24,33 @@ function escapeHtml(unsafe) {
 
 async function readGroup(groupId) {
     const url = `${DB_URL.replace(/\/$/, '')}/groups/${groupId}.json`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data ?? null;
+    try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data ?? null;
+    } catch (err) {
+        console.error(`[recover-admin] readGroup fetch error:`, err.message);
+        if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+            throw new Error('Database timeout while reading group, please try again later.');
+        }
+        throw new Error('Failed to reach database while reading group.');
+    }
 }
 
 async function writeNewAdminToken(groupId, newHash) {
     const url = `${DB_URL.replace(/\/$/, '')}/groups/${groupId}.json`;
-    const res = await fetch(url, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminTokenHash: newHash }),
-    });
-    return res.ok;
+    try {
+        const res = await fetch(url, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ adminTokenHash: newHash }),
+        });
+        return res.ok;
+    } catch (err) {
+        console.error(`[recover-admin] writeNewAdminToken fetch error:`, err.message);
+        return false;
+    }
 }
 
 async function sendRecoveryEmail(adminEmail, groupName, adminLink) {
