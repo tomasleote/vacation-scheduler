@@ -1,7 +1,4 @@
-/**
- * Participant validation and link generation utilities.
- * Pure functions — no Firebase or React dependencies.
- */
+import { MAX_PARTICIPANT_NAME_LENGTH } from './constants/validation';
 
 /**
  * Validates a participant name for uniqueness and non-emptiness.
@@ -15,8 +12,8 @@ export function validateParticipantName(name, existingParticipants = [], current
     if (!trimmed) {
         return { valid: false, error: 'Name is required.' };
     }
-    if (trimmed.length > 100) {
-        return { valid: false, error: 'Name must be 100 characters or fewer.' };
+    if (trimmed.length > MAX_PARTICIPANT_NAME_LENGTH) {
+        return { valid: false, error: `Name must be ${MAX_PARTICIPANT_NAME_LENGTH} characters or fewer.` };
     }
 
     const normalized = trimmed.toLowerCase();
@@ -57,7 +54,7 @@ export function validateEmail(email) {
  * @returns {string}
  */
 export function sanitizeName(name) {
-    return String(name || '').trim().slice(0, 100);
+    return String(name || '').trim().slice(0, MAX_PARTICIPANT_NAME_LENGTH);
 }
 
 /**

@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { addParticipant, updateParticipant, getParticipant, subscribeToGroup, subscribeToParticipants } from '../firebase';
+import { subscribeToGroup } from '../services/groupService';
+import { addParticipant, updateParticipant, getParticipant, subscribeToParticipants } from '../services/participantService';
 import { getDatesBetween, calculateOverlap, getBestOverlapPeriods } from '../utils/overlap';
+import { ReadOnlyInput, CopyButton, Button, LoadingSpinner, Card, TruncatedText } from '../shared/ui';
 import { useNotification } from '../context/NotificationContext';
+import { useGroupContext } from '../shared/context';
 
 import CalendarView from './CalendarView';
 import SlidingOverlapCalendar from './SlidingOverlapCalendar';
 import { ChevronDown, ChevronUp, CalendarRange, Users } from 'lucide-react';
 
-function ParticipantView({ groupId, participantId: initialParticipantId, onBack }) {
+function ParticipantView({ participantId: initialParticipantId, onBack }) {
+  const { groupId } = useGroupContext();
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const { addNotification } = useNotification();
@@ -155,11 +159,7 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-400">Loading...</div>
-      </div>
-    );
+    return <LoadingSpinner label="Loading..." />;
   }
 
   if (!group) {
@@ -190,7 +190,9 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
         </button>
 
         <div className="bg-dark-900 rounded-xl border border-dark-700 p-6 mb-8">
-          <h1 className="text-3xl font-bold text-gray-50 mb-2">{group.name}</h1>
+          <h1 className="text-3xl font-bold text-gray-50 mb-2">
+            <TruncatedText text={group.name} />
+          </h1>
           {group.description && (
             <p className="text-gray-400 mb-4 italic">{group.description}</p>
           )}
@@ -237,7 +239,9 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
                 ) : (
                   participants?.map((p, i) => (
                     <div key={i} className="bg-dark-800 rounded p-3 border-l-4 border-blue-500">
-                      <p className="font-semibold text-gray-50">{p.name || 'Anonymous'}</p>
+                      <p className="font-semibold text-gray-50">
+                        <TruncatedText text={p.name || 'Anonymous'} maxWidth="100%" />
+                      </p>
                       <p className="text-gray-400 text-xs">{p.duration}-day trip</p>
                       <p className="text-gray-400 text-xs">{(p.availableDays || []).length} days available</p>
                     </div>
@@ -269,19 +273,14 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
 function ParticipantDashboard({ groupId, participantId, participantName, participantEmail, participantDuration, savedDays, group, onSubmit }) {
   const baseUrl = window.location.origin;
   const personalLink = `${baseUrl}?group=${groupId}&p=${participantId}`;
-  const [copied, setCopied] = useState(false);
   const [updating, setUpdating] = useState(false);
-
-  const copy = () => {
-    navigator.clipboard.writeText(personalLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <div className="space-y-4">
       <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
-        <h2 className="text-xl font-bold text-gray-50 mb-1">Hi, {participantName}!</h2>
+        <h2 className="text-xl font-bold text-gray-50 mb-1 flex items-center gap-1">
+          Hi, <TruncatedText text={participantName} maxWidth="200px" />!
+        </h2>
         <p className="text-gray-400 text-sm mb-4">Your availability is saved.</p>
 
         <div className="mb-4">
@@ -289,17 +288,8 @@ function ParticipantDashboard({ groupId, participantId, participantName, partici
             Your personal link — save to edit later:
           </label>
           <div className="flex gap-2">
-            <input
-              readOnly
-              value={personalLink}
-              className="flex-1 px-3 py-2 border border-dark-700 rounded-lg text-sm bg-dark-800 text-gray-300"
-            />
-            <button
-              onClick={copy}
-              className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg text-sm font-semibold transition-colors"
-            >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
+            <ReadOnlyInput value={personalLink} />
+            <CopyButton value={personalLink} />
           </div>
         </div>
 

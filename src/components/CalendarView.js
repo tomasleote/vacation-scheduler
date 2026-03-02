@@ -1,7 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getDatesBetween } from '../utils/overlap';
 import { Calendar, User, Mail, Clock, Sparkles, CalendarRange } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
+import { MAX_PARTICIPANT_NAME_LENGTH } from '../utils/constants/validation';
+
+const DayCell = React.memo(({ day, currentYear, currentMonth, monthName, isDateInRange, isDaySelected, onDayClick }) => {
+  if (!day) {
+    return (
+      <button
+        type="button"
+        disabled
+        className="aspect-square p-2 text-sm md:text-base font-bold rounded-xl transition-all duration-200 bg-transparent"
+      />
+    );
+  }
+
+  const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const inRange = isDateInRange(dateStr);
+  const selected = isDaySelected(day);
+
+  const ariaLabel = `${monthName}, day ${day}${selected ? ' (selected)' : ''}`;
+  const testId = `day-${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onDayClick(day)}
+      disabled={!inRange}
+      aria-label={ariaLabel}
+      data-testid={testId}
+      className={`
+        aspect-square p-2 text-sm md:text-base font-bold rounded-xl transition-all duration-200
+        ${!inRange ? 'bg-dark-950 text-gray-600 cursor-not-allowed opacity-50' : ''}
+        ${selected ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20 transform scale-[1.02]' : inRange ? 'bg-dark-800 border border-dark-700 hover:border-blue-500/50 hover:bg-blue-500/5 text-gray-300' : ''}
+      `}
+    >
+      {day}
+    </button>
+  );
+});
 
 function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialName = '', initialEmail = '', initialDuration = '3' }) {
   const [name, setName] = useState(initialName);
@@ -48,7 +85,37 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
     days.push(i);
   }
 
-  const handleDayClick = (day) => {
+  // Helper hooks first, since they are used in dependency arrays
+  const isDateInRange = useCallback((dateStr) => dateRange.includes(dateStr), [dateRange]);
+
+  const isDaySelected = useCallback((day) => {
+    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return selectedDays.includes(dateStr);
+  }, [currentYear, currentMonth, selectedDays]);
+
+  const selectDayBlock = useCallback((startDateStr, blockSize) => {
+    const blockStart = new Date(startDateStr);
+    const blockDates = [];
+
+    for (let i = 0; i < blockSize; i++) {
+      const d = new Date(blockStart);
+      d.setDate(d.getDate() + i);
+      const dateStr = d.toISOString().split('T')[0];
+      if (isDateInRange(dateStr)) {
+        blockDates.push(dateStr);
+      }
+    }
+
+    setSelectedDays(prev => {
+      const allSelected = blockDates.length > 0 && blockDates.every(d => prev.includes(d));
+      if (allSelected) {
+        return prev.filter(d => !blockDates.includes(d));
+      }
+      return Array.from(new Set([...prev, ...blockDates]));
+    });
+  }, [isDateInRange]);
+
+  const handleDayClick = useCallback((day) => {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
     if (!isDateInRange(dateStr)) return;
@@ -62,39 +129,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
     } else {
       selectDayBlock(dateStr, parseInt(customBlockSize));
     }
-  };
-
-  const selectDayBlock = (startDateStr, blockSize) => {
-    const blockStart = new Date(startDateStr);
-    const blockDates = [];
-
-    // BUG-J fix: no break — iterate the full window and only include in-range dates
-    // (clamps naturally to the allowed range without stopping at the first gap)
-    for (let i = 0; i < blockSize; i++) {
-      const d = new Date(blockStart);
-      d.setDate(d.getDate() + i);
-      const dateStr = d.toISOString().split('T')[0];
-      if (isDateInRange(dateStr)) {
-        blockDates.push(dateStr);
-      }
-    }
-
-    // BUG-H fix: toggle — if every date in the block is already selected, deselect all of them
-    setSelectedDays(prev => {
-      const allSelected = blockDates.length > 0 && blockDates.every(d => prev.includes(d));
-      if (allSelected) {
-        return prev.filter(d => !blockDates.includes(d));
-      }
-      return Array.from(new Set([...prev, ...blockDates]));
-    });
-  };
-
-  const isDateInRange = (dateStr) => dateRange.includes(dateStr);
-
-  const isDaySelected = (day) => {
-    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return selectedDays.includes(dateStr);
-  };
+  }, [currentYear, currentMonth, blockType, customBlockSize, isDateInRange, selectDayBlock]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -189,11 +224,11 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value.slice(0, 30))}
+              onChange={(e) => setName(e.target.value.slice(0, MAX_PARTICIPANT_NAME_LENGTH))}
               required
               className="w-full bg-dark-800 hover:bg-dark-700 text-gray-50 font-medium pl-10 pr-4 py-2.5 rounded-full border border-dark-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
               placeholder="Your Name *"
-              maxLength="30"
+              maxLength={MAX_PARTICIPANT_NAME_LENGTH}
             />
           </div>
 
@@ -206,7 +241,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              maxLength="30"
+              maxLength="254"
               className="w-full bg-dark-800 hover:bg-dark-700 text-gray-50 font-medium pl-10 pr-4 py-2.5 rounded-full border border-dark-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
               placeholder="Email (optional)"
             />
@@ -320,37 +355,18 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
               {day}
             </div>
           ))}
-          {days.map((day, i) => {
-            const dateStr = day ? `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` : '';
-            const inRange = day ? isDateInRange(dateStr) : false;
-            const selected = day ? isDaySelected(day) : false;
-
-            const ariaLabel = day
-              ? `${monthName}, day ${day}${selected ? ' (selected)' : ''}`
-              : undefined;
-            const testId = day
-              ? `day-${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-              : undefined;
-
-            return (
-              <button
-                key={i}
-                type="button"
-                onClick={() => day && handleDayClick(day)}
-                disabled={!inRange}
-                aria-label={ariaLabel}
-                data-testid={testId}
-                className={`
-                  aspect-square p-2 text-sm md:text-base font-bold rounded-xl transition-all duration-200
-                  ${!day ? 'bg-transparent' : ''}
-                  ${!inRange ? 'bg-dark-950 text-gray-600 cursor-not-allowed opacity-50' : ''}
-                  ${selected ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20 transform scale-[1.02]' : inRange ? 'bg-dark-800 border border-dark-700 hover:border-blue-500/50 hover:bg-blue-500/5 text-gray-300' : ''}
-                `}
-              >
-                {day}
-              </button>
-            );
-          })}
+          {days.map((day, i) => (
+            <DayCell
+              key={i}
+              day={day}
+              currentYear={currentYear}
+              currentMonth={currentMonth}
+              monthName={monthName}
+              isDateInRange={isDateInRange}
+              isDaySelected={isDaySelected}
+              onDayClick={handleDayClick}
+            />
+          ))}
         </div>
 
         {/* Dynamic Selection Counter */}

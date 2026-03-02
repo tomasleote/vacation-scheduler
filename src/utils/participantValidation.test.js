@@ -10,6 +10,7 @@ import {
     sanitizeEmail,
     generateParticipantLink
 } from './participantValidation';
+import { MAX_PARTICIPANT_NAME_LENGTH } from './constants/validation';
 
 describe('validateParticipantName', () => {
     const existingParticipants = [
@@ -35,11 +36,11 @@ describe('validateParticipantName', () => {
         expect(validateParticipantName(undefined, existingParticipants).valid).toBe(false);
     });
 
-    test('rejects name exceeding 100 characters', () => {
-        const longName = 'A'.repeat(101);
+    test('rejects name exceeding MAX_PARTICIPANT_NAME_LENGTH characters', () => {
+        const longName = 'A'.repeat(MAX_PARTICIPANT_NAME_LENGTH + 1);
         const result = validateParticipantName(longName, []);
         expect(result.valid).toBe(false);
-        expect(result.error).toMatch(/100 characters/);
+        expect(result.error).toMatch(new RegExp(`${MAX_PARTICIPANT_NAME_LENGTH} characters`));
     });
 
     test('rejects duplicate names (exact match)', () => {
@@ -113,9 +114,9 @@ describe('sanitizeName', () => {
         expect(sanitizeName('  Alice  ')).toBe('Alice');
     });
 
-    test('caps at 100 characters', () => {
+    test('caps at MAX_PARTICIPANT_NAME_LENGTH characters', () => {
         const longName = 'A'.repeat(200);
-        expect(sanitizeName(longName)).toHaveLength(100);
+        expect(sanitizeName(longName)).toHaveLength(MAX_PARTICIPANT_NAME_LENGTH);
     });
 
     test('handles null/undefined', () => {

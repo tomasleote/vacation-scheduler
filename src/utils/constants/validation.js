@@ -1,0 +1,2 @@
+export const MAX_GROUP_NAME_LENGTH = 30;
+export const MAX_PARTICIPANT_NAME_LENGTH = 20;

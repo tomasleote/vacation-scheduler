@@ -26,18 +26,24 @@ const mockValidateAdminToken = jest.fn();
 const mockSubscribeToGroup = jest.fn();
 const mockSubscribeToParticipants = jest.fn();
 
-jest.mock('../firebase', () => ({
+jest.mock('../services/groupService', () => ({
     getGroup: jest.fn(),
     updateGroup: jest.fn(),
-    getParticipants: jest.fn(),
     deleteGroup: jest.fn(),
+    subscribeToGroup: (...args) => mockSubscribeToGroup(...args),
+}));
+
+jest.mock('../services/participantService', () => ({
     addParticipant: (...args) => mockAddParticipant(...args),
     updateParticipant: (...args) => mockUpdateParticipant(...args),
     deleteParticipant: (...args) => mockDeleteParticipant(...args),
     getParticipant: (...args) => mockGetParticipant(...args),
-    validateAdminToken: (...args) => mockValidateAdminToken(...args),
-    subscribeToGroup: (...args) => mockSubscribeToGroup(...args),
+    getParticipants: jest.fn(),
     subscribeToParticipants: (...args) => mockSubscribeToParticipants(...args),
+}));
+
+jest.mock('../services/adminService', () => ({
+    validateAdminToken: (...args) => mockValidateAdminToken(...args),
     hashPhrase: jest.fn(),
 }));
 
@@ -57,6 +63,9 @@ const mockAddNotification = jest.fn();
 jest.mock('../context/NotificationContext', () => ({
     useNotification: () => ({ addNotification: mockAddNotification }),
 }));
+
+// Import GroupProvider
+import { GroupProvider } from '../shared/context';
 
 // Mock child components to simplify rendering
 jest.mock('./SlidingOverlapCalendar', () => () => null);
@@ -105,7 +114,11 @@ function renderAdminPanel() {
         return () => { };
     });
 
-    return render(<AdminPanel groupId="group-123" adminToken="token-abc" onBack={jest.fn()} />);
+    return render(
+        <GroupProvider groupId="group-123" adminToken="token-abc" isAdmin={true}>
+            <AdminPanel onBack={jest.fn()} />
+        </GroupProvider>
+    );
 }
 
 /**

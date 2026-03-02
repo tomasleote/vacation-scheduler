@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { getDatesBetween, formatDateRange, getTopFilteredOverlaps } from '../utils/overlap';
 import { Calendar as CalendarIcon, Users, Edit2, Play, ChevronLeft, ChevronRight, XIcon, PartyPopper, UserX, TrendingUp } from 'lucide-react';
+import { TruncatedText } from '../shared/ui';
 
 function SlidingOverlapCalendar({ startDate, endDate, participants, duration, overlaps, onDurationChange }) {
     const [currentMonth, setCurrentMonth] = useState(new Date(startDate).getMonth());
@@ -8,15 +9,34 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
     const [hoveredDate, setHoveredDate] = useState(null);
     const [lockedDate, setLockedDate] = useState(null);
     const [localDuration, setLocalDuration] = useState(duration);
+    const [debouncedDuration, setDebouncedDuration] = useState(duration);
+
+    const { start, end, dateRange } = useMemo(() => ({
+        start: new Date(startDate),
+        end: new Date(endDate),
+        dateRange: getDatesBetween(startDate, endDate)
+    }), [startDate, endDate]);
 
     // Keep local duration in sync if props change from outside
     React.useEffect(() => {
         setLocalDuration(duration);
     }, [duration]);
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const dateRange = getDatesBetween(startDate, endDate);
+    // Debounce the duration input
+    React.useEffect(() => {
+        const handler = setTimeout(() => {
+            let val = parseInt(localDuration);
+            if (!isNaN(val) && val >= 1) {
+                if (val > (dateRange?.length || 100)) val = dateRange.length;
+                setDebouncedDuration(String(val));
+                if (onDurationChange && String(val) !== String(duration)) {
+                    onDurationChange(String(val));
+                }
+            }
+        }, 500);
+
+        return () => clearTimeout(handler);
+    }, [localDuration, dateRange?.length, duration, onDurationChange]);
 
     // 1. Calculate Daily Availability (Heatmap)
     const dailyAvailability = useMemo(() => {
@@ -152,14 +172,8 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                 value={localDuration}
                                 onChange={(e) => {
                                     const valStr = e.target.value;
+                                    // State is updated; debounced effect handles the callback
                                     setLocalDuration(valStr);
-
-                                    // Apply dynamically if it's a valid number
-                                    let val = parseInt(valStr);
-                                    if (!isNaN(val) && val >= 1) {
-                                        if (val > dateRange.length) val = dateRange.length;
-                                        onDurationChange(String(val));
-                                    }
                                 }}
                                 onBlur={() => {
                                     let val = parseInt(localDuration);
@@ -307,7 +321,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                     <div className="flex flex-wrap gap-2">
                                         {blockDetails.available.map((p, i) => (
                                             <div key={i} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-full text-sm font-medium">
-                                                {p.name || 'Unnamed'}
+                                                <TruncatedText text={p.name || 'Unnamed'} maxWidth="150px" />
                                             </div>
                                         ))}
                                     </div>
@@ -329,7 +343,9 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                             const missingCount = activeBlock.filter(day => !p.availableDays?.includes(day)).length;
                                             return (
                                                 <div key={i} className="flex justify-between items-center bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-2 rounded-lg text-sm">
-                                                    <span className="font-medium">{p.name || 'Unnamed'}</span>
+                                                    <span className="font-medium">
+                                                        <TruncatedText text={p.name || 'Unnamed'} maxWidth="150px" />
+                                                    </span>
                                                     <span className="text-xs text-rose-400 bg-dark-800 px-2 py-0.5 rounded-full border border-rose-500/20 font-semibold">
                                                         Missing {missingCount} day{missingCount !== 1 ? 's' : ''}
                                                     </span>

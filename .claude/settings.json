@@ -1,0 +1,9 @@
+{
+    "permissions": {
+        "allow": [
+            "Bash(npm test -- --passWithNoTests --watchAll=false)",
+            "Bash(npx react-scripts test --watchAll=false)",
+            "Bash(npx react-scripts build)"
+        ]
+    }
+}
