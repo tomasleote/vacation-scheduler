@@ -37,6 +37,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
     };
 
     const unsubGroup = subscribeToGroup(groupId, (data) => {
+      setError('');
       if (data) {
         setGroup(data);
       } else {
@@ -49,6 +50,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
     });
 
     const unsubParts = subscribeToParticipants(groupId, (data) => {
+      setError('');
       setParticipants(data || []);
       onLoad();
     }, (err) => {

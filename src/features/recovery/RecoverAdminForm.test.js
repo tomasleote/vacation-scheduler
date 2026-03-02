@@ -137,7 +137,7 @@ describe('RecoverAdminForm', () => {
         await userEvent.click(screen.getByRole('button', { name: /recover access/i }));
 
         await waitFor(() =>
-            expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({ message: 'Network error' }))
+            expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({ message: 'You appear to be offline or the network failed to reach the server.' }))
         );
     });
 

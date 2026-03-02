@@ -35,10 +35,11 @@ export async function apiCall(endpoint, options = {}) {
         return data;
     } catch (err) {
         // 2. Fetch network-level catching (e.g. DNS or CORS fails before response)
-        if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
+        const isNetworkErr = err.message === 'Failed to fetch' || err.name === 'NetworkError' || (err.message && err.message.toLowerCase().includes('network'));
+        if (isNetworkErr) {
             throw new Error('You appear to be offline or the network failed to reach the server.');
         }
-        // Repropagate standardized errors
+        // Repropagate standardized errors decoding/TypeError issues
         throw err;
     }
 }

@@ -69,6 +69,7 @@ export function useGroupData(groupId, adminToken, onBack) {
 
       unsubGroup = subscribeToGroup(groupId, (data) => {
         if (!isMounted) return;
+        setError(null);
         if (data) {
           setGroup(data);
           setEditData(prev => Object.keys(prev).length === 0 ? data : prev);
@@ -85,6 +86,7 @@ export function useGroupData(groupId, adminToken, onBack) {
 
       unsubParts = subscribeToParticipants(groupId, (data) => {
         if (!isMounted) return;
+        setError(null);
         setParticipants(data || []);
         onLoad();
       }, (err) => {

@@ -40,15 +40,23 @@ async function readGroup(groupId) {
 
 async function writeNewAdminToken(groupId, newHash) {
     const url = `${DB_URL.replace(/\/$/, '')}/groups/${groupId}.json`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     try {
         const res = await fetch(url, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ adminTokenHash: newHash }),
+            signal: controller.signal
         });
+        clearTimeout(timeout);
         return res.ok;
     } catch (err) {
+        clearTimeout(timeout);
         console.error(`[recover-admin] writeNewAdminToken fetch error:`, err.message);
+        if (err.name === 'AbortError') {
+            throw new Error('Database timeout while updating admin token.');
+        }
         return false;
     }
 }
@@ -101,9 +109,14 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'groupId and either passphrase or email are required' });
     }
 
-    const group = await readGroup(groupId.trim());
-    if (!group) {
-        return res.status(404).json({ error: 'Group not found' });
+    let group;
+    try {
+        group = await readGroup(groupId.trim());
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+    } catch (err) {
+        return res.status(err.message.includes('timeout') ? 504 : 502).json({ error: err.message });
     }
 
     // ── Verify identity ──────────────────────────────────────────────────────────
@@ -124,9 +137,14 @@ module.exports = async function handler(req, res) {
     const newAdminToken = crypto.randomUUID();
     const newAdminHash = sha256(newAdminToken);
 
-    const updated = await writeNewAdminToken(groupId, newAdminHash);
-    if (!updated) {
-        return res.status(500).json({ error: 'Failed to update admin token in database' });
+    let updated;
+    try {
+        updated = await writeNewAdminToken(groupId, newAdminHash);
+        if (!updated) {
+            return res.status(500).json({ error: 'Failed to update admin token in database' });
+        }
+    } catch (err) {
+        return res.status(err.message.includes('timeout') ? 504 : 502).json({ error: err.message });
     }
 
     // ── Email recovery: also send the link by email ──────────────────────────────

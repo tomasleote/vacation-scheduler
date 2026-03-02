@@ -65,7 +65,14 @@ export function useParticipantActions(groupId, group, participants, setParticipa
       console.error('[Admin Panel] handleCreateParticipant failed:', err);
       // Revert optimistic participant from list, but KEEP form inputs so user can retry
       setParticipants(prev => prev.filter(p => p.id !== tempId));
-      if (err.message === 'Failed to fetch') {
+
+      const isOffline =
+        (typeof window !== 'undefined' && !window.navigator.onLine) ||
+        err.name === 'TypeError' ||
+        err.name === 'NetworkError' ||
+        (err.message && (err.message.includes('failed to fetch') || err.message.includes('network') || err.message === 'Failed to fetch'));
+
+      if (isOffline) {
         addNotification({ type: 'error', title: 'Create Failed', message: 'You appear to be offline. Check your network connection and try again.' });
       } else {
         addNotification({ type: 'error', title: 'Create Failed', message: err.message });
