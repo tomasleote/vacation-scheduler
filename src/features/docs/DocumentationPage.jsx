@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ArrowLeft, BookOpen, Users, Calendar, ShieldCheck, HelpCircle, Code } from 'lucide-react';
+import { ArrowLeft, BookOpen, Users, Calendar, ShieldCheck, HelpCircle, Code, TrendingUp } from 'lucide-react';
 
 export default function DocumentationPage({ onBack }) {
     // Scroll to top on mount
@@ -107,7 +107,7 @@ export default function DocumentationPage({ onBack }) {
                                 <h3 className="text-lg font-bold text-gray-200 mb-2">2. Adding Participants</h3>
                                 <p className="text-sm leading-relaxed mb-2">
                                     Participants can join organically via the <code className="bg-dark-800 text-pink-300 px-1 rounded">?group=xyz</code> share link, or the Admin can manually create boilerplate participants from the Admin Panel.
-                                    Names must be unique within a group (case-insensitive).
+                                    Names must be unique within a group (case-insensitive) and are restricted to <strong>20 characters</strong>.
                                 </p>
                             </div>
 
@@ -115,8 +115,16 @@ export default function DocumentationPage({ onBack }) {
                                 <h3 className="text-lg font-bold text-gray-200 mb-2">3. Submitting Availability</h3>
                                 <p className="text-sm leading-relaxed mb-2">
                                     When a participant opens the dashboard, they interact with a dynamic calendar that only permits selecting days within the group's start/end boundaries.
-                                    Upon clicking Save, their selected availability array is instantly synchronized to the cloud database.
+                                    <strong>Important:</strong> Your changes are only synchronized to the cloud <strong>after you click the "Submit Availability" or "Save Details" buttons</strong>.
+                                    Closing the tab before saving will result in the loss of unsaved selections.
                                 </p>
+                                <div className="bg-dark-900 border border-dark-700 p-4 rounded-xl mt-4 space-y-3">
+                                    <h4 className="text-sm font-bold text-blue-400 uppercase">Selection Modes</h4>
+                                    <ul className="text-sm space-y-2">
+                                        <li><span className="text-blue-300 font-semibold">Flexible:</span> Click individual dates to toggle your availability one day at a time. Ideal for when your schedule is scattered.</li>
+                                        <li><span className="text-blue-300 font-semibold">Block Mode:</span> Set a specific number of days (e.g., 4) and click a start date. The system will automatically select a continuous block of time for you.</li>
+                                    </ul>
+                                </div>
                             </div>
 
                             <div>
@@ -129,18 +137,55 @@ export default function DocumentationPage({ onBack }) {
                         </div>
                     </section>
 
-                    {/* 4. Features & Edge Cases */}
+                    {/* 4. Visual Example: Heatmap */}
+                    <section id="visual-example" className="space-y-6">
+                        <h2 className="text-2xl font-bold text-gray-100 flex items-center gap-2 border-b border-dark-700 pb-2">
+                            <TrendingUp className="text-blue-400" size={20} /> Understanding the Heatmap
+                        </h2>
+                        <p className="text-sm leading-relaxed">
+                            The Availability Heatmap (shown in the Admin Panel and Result view) uses color intensity to represent how many people are free on a given day. Here is a mocked visualization of how it looks with 5 participants:
+                        </p>
+
+                        <div className="bg-dark-900 border border-dark-700 p-6 rounded-2xl max-w-sm mx-auto">
+                            <div className="grid grid-cols-7 gap-2">
+                                {[...Array(14)].map((_, i) => {
+                                    const availability = [0, 1, 3, 5, 5, 5, 4, 2, 5, 3, 2, 5, 5, 4][i];
+                                    const colors = [
+                                        'bg-dark-800',
+                                        'bg-blue-900/60',
+                                        'bg-blue-800',
+                                        'bg-blue-600',
+                                        'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]'
+                                    ];
+                                    const colorIdx = availability === 5 ? 4 : availability === 4 ? 3 : availability >= 3 ? 2 : availability >= 1 ? 1 : 0;
+
+                                    return (
+                                        <div key={i} className={`aspect-square rounded-lg flex flex-col items-center justify-center text-[10px] font-bold ${colors[colorIdx]} ${availability >= 4 ? 'text-white' : 'text-blue-300'}`}>
+                                            <span>{i + 1}</span>
+                                            <span className="opacity-70">{availability}/5</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="mt-4 flex items-center justify-between text-[10px] text-gray-500 uppercase font-bold tracking-widest">
+                                <span>Low Availability</span>
+                                <span>High Availability</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* 5. Features & Edge Cases */}
                     <section id="features" className="space-y-6">
                         <h2 className="text-2xl font-bold text-gray-100 flex items-center gap-2 border-b border-dark-700 pb-2">
                             <ShieldCheck className="text-purple-400" size={20} /> Features & Edge Cases
                         </h2>
 
                         <ul className="list-disc pl-5 space-y-3 text-sm leading-relaxed">
-                            <li><strong>Name Limitations:</strong> Participant names are restricted to 100 characters. Group names are restricted to 50 characters. Duplicate names within the same group will trigger a validation error.</li>
-                            <li><strong>Editing Data:</strong> Modifying a participant's name or dates will immediately push changes to the server. Any Admin viewing the dashboard will see the overlap results change in real-time.</li>
-                            <li><strong>Link Persistence:</strong> If a participant accesses their personal schedule via a device, a local cookie (localStorage) securely remembers their identity. Revisiting the base group link will skip the creation form and drop them straight into their personalized view.</li>
+                            <li><strong>Name Limitations:</strong> Participant names are restricted to <strong>20 characters</strong>. Group names are restricted to <strong>30 characters</strong>. Descriptions can be up to <strong>500 characters</strong>.</li>
+                            <li><strong>Editing Data:</strong> Modifying a participant's name or dates will push changes to the server <strong>once the Save button is clicked</strong>. Any Admin viewing the dashboard will see the updated overlap results in real-time after the synchronization completes.</li>
+                            <li><strong>Link Persistence:</strong> If a participant accesses their personal schedule via a device, a local cache (localStorage) remembers their identity. Revisiting the base group link will skip the join form and drop them straight into their personalized view.</li>
                             <li><strong>Access Recovery Forms:</strong> If you lose your Admin link, don't worry. Clicking "Recover Admin Access" on the homepage allows you to regenerate it by searching your email or utilizing your group passphrase.</li>
-                            <li><strong>Offline Protection:</strong> Form state wipes are deferred until a network operation succeeds. If you submit availability on a train going through a tunnel, the app will retain your selection and gracefully alert you via a Toast error rather than instantly wiping your work.</li>
+                            <li><strong>Offline Protection:</strong> Form states are protected until a network operation succeeds. If you save availability while offline, the app will retain your selection and gracefully alert you via a Toast error rather than instantly wiping your work.</li>
                         </ul>
                     </section>
 

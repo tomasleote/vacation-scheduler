@@ -14,7 +14,7 @@ Participants can choose exact dates or indicate they need a continuous block of 
 Group creators get an exclusive Admin Panel to edit group details, remove participants, copy personal invite links, or send email reminders with a single click.
 
 ✅ **Real-Time Synchronization**  
-Powered by Firebase Realtime Database, when a participant updates their availability, the group's results update instantly for everyone watching.
+Powered by Firebase Realtime Database, once a participant saves their availability, the group's results update instantly for any Admin or participant viewing the dashboard.
 
 ✅ **Robust Access Recovery**  
 Lost your admin link? Recover access securely via a hashed passphrase or an email link. You can also securely search for all groups tied to your email.
