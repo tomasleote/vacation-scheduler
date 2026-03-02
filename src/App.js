@@ -6,6 +6,7 @@ import AdminPanel from './components/AdminPanel';
 import ParticipantView from './components/ParticipantView';
 import RecoverAdminForm from './components/RecoverAdminForm';
 import { useNotification } from './context/NotificationContext';
+import { useCopyToClipboard } from './hooks/useCopyToClipboard';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -531,14 +532,8 @@ function GroupCreatedScreen({ groupId, adminToken, onEnterAdmin, onBack }) {
   const baseUrl = window.location.origin;
   const participantLink = `${baseUrl}?group=${groupId}`;
   const adminLink = `${baseUrl}?group=${groupId}&admin=${adminToken}`;
-  const [copiedP, setCopiedP] = useState(false);
-  const [copiedA, setCopiedA] = useState(false);
-
-  const copy = (text, setFlag) => {
-    navigator.clipboard.writeText(text);
-    setFlag(true);
-    setTimeout(() => setFlag(false), 2000);
-  };
+  const { copy: copyP, copied: copiedP } = useCopyToClipboard();
+  const { copy: copyA, copied: copiedA } = useCopyToClipboard();
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4">
@@ -566,7 +561,7 @@ function GroupCreatedScreen({ groupId, adminToken, onEnterAdmin, onBack }) {
               className="flex-1 px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-gray-300"
             />
             <button
-              onClick={() => copy(participantLink, setCopiedP)}
+              onClick={() => copyP(participantLink)}
               className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg text-sm font-semibold transition-colors"
             >
               {copiedP ? 'Copied!' : 'Copy'}
@@ -585,7 +580,7 @@ function GroupCreatedScreen({ groupId, adminToken, onEnterAdmin, onBack }) {
               className="flex-1 px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-sm text-gray-300"
             />
             <button
-              onClick={() => copy(adminLink, setCopiedA)}
+              onClick={() => copyA(adminLink)}
               className="px-3 py-2 bg-dark-700 hover:bg-dark-800 text-gray-300 rounded-lg text-sm font-semibold border border-dark-700 transition-colors"
             >
               {copiedA ? 'Copied!' : 'Copy'}

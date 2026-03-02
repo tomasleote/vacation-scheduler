@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { addParticipant, updateParticipant, getParticipant, subscribeToGroup, subscribeToParticipants } from '../firebase';
+import { subscribeToGroup } from '../services/groupService';
+import { addParticipant, updateParticipant, getParticipant, subscribeToParticipants } from '../services/participantService';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import { getDatesBetween, calculateOverlap, getBestOverlapPeriods } from '../utils/overlap';
 import { useNotification } from '../context/NotificationContext';
 
@@ -269,14 +271,8 @@ function ParticipantView({ groupId, participantId: initialParticipantId, onBack 
 function ParticipantDashboard({ groupId, participantId, participantName, participantEmail, participantDuration, savedDays, group, onSubmit }) {
   const baseUrl = window.location.origin;
   const personalLink = `${baseUrl}?group=${groupId}&p=${participantId}`;
-  const [copied, setCopied] = useState(false);
+  const { copy, copied } = useCopyToClipboard();
   const [updating, setUpdating] = useState(false);
-
-  const copy = () => {
-    navigator.clipboard.writeText(personalLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <div className="space-y-4">
@@ -295,7 +291,7 @@ function ParticipantDashboard({ groupId, participantId, participantName, partici
               className="flex-1 px-3 py-2 border border-dark-700 rounded-lg text-sm bg-dark-800 text-gray-300"
             />
             <button
-              onClick={copy}
+              onClick={() => copy(personalLink)}
               className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg text-sm font-semibold transition-colors"
             >
               {copied ? 'Copied!' : 'Copy'}

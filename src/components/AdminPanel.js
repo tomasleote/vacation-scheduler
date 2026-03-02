@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { getGroup, updateGroup, getParticipants, deleteGroup, addParticipant, updateParticipant, deleteParticipant, getParticipant, validateAdminToken, subscribeToGroup, subscribeToParticipants, hashPhrase } from '../firebase';
+import { getGroup, updateGroup, deleteGroup, subscribeToGroup } from '../services/groupService';
+import { addParticipant, updateParticipant, deleteParticipant, getParticipant, getParticipants, subscribeToParticipants } from '../services/participantService';
+import { validateAdminToken, hashPhrase } from '../services/adminService';
 import { calculateOverlap, getBestOverlapPeriods, formatDateRange } from '../utils/overlap';
 import { exportToCSV } from '../utils/export';
 import { validateParticipantName, validateEmail, sanitizeName, sanitizeEmail, generateParticipantLink } from '../utils/participantValidation';
 import { CalendarRange, Users, Mail, Copy, CheckCircle2, ChevronDown, ChevronUp, Edit, X, Trash2, Download, Save, KeyRound, Eye, EyeOff, UserPlus, Link, Send } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import SlidingOverlapCalendar from './SlidingOverlapCalendar';
 import CalendarView from './CalendarView';
 
@@ -24,9 +27,9 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   const baseUrl = window.location.origin;
   const participantLink = `${baseUrl}?group=${groupId}`;
   const adminLink = adminToken ? `${baseUrl}?group=${groupId}&admin=${adminToken}` : null;
-  const [copiedPLink, setCopiedPLink] = useState(false);
-  const [copiedALink, setCopiedALink] = useState(false);
-  const [copiedGroupId, setCopiedGroupId] = useState(false);
+  const { copy: copyPLink, copied: copiedPLink } = useCopyToClipboard();
+  const { copy: copyALink, copied: copiedALink } = useCopyToClipboard();
+  const { copy: copyGroupId, copied: copiedGroupId } = useCopyToClipboard();
 
   const [adminParticipantId, setAdminParticipantId] = useState(null);
   const [adminSavedDays, setAdminSavedDays] = useState([]);
@@ -533,15 +536,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                         className="flex-1 px-3 py-2 border border-dark-700 rounded-lg text-sm bg-dark-800 text-gray-300"
                       />
                       <button
-                        onClick={async () => {
-                          try {
-                            await navigator.clipboard.writeText(participantLink);
-                            setCopiedPLink(true);
-                            setTimeout(() => setCopiedPLink(false), 2000);
-                          } catch (err) {
-                            addNotification({ type: 'error', title: 'Copy Failed', message: err.message || 'Could not copy to clipboard.' });
-                          }
-                        }}
+                        onClick={() => copyPLink(participantLink)}
                         className="px-3 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg text-sm font-semibold transition-colors"
                       >
                         {copiedPLink ? 'Copied!' : 'Copy'}
@@ -560,15 +555,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                           className="flex-1 px-3 py-2 border border-dark-700 rounded-lg text-sm bg-dark-800 text-gray-300"
                         />
                         <button
-                          onClick={async () => {
-                            try {
-                              await navigator.clipboard.writeText(adminLink);
-                              setCopiedALink(true);
-                              setTimeout(() => setCopiedALink(false), 2000);
-                            } catch (err) {
-                              addNotification({ type: 'error', title: 'Copy Failed', message: err.message || 'Could not copy to clipboard.' });
-                            }
-                          }}
+                          onClick={() => copyALink(adminLink)}
                           className="px-3 py-2 bg-dark-700 hover:bg-dark-800 text-gray-300 rounded-lg text-sm font-semibold border border-dark-700 transition-colors"
                         >
                           {copiedALink ? 'Copied!' : 'Copy'}
@@ -582,15 +569,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                           {groupId}
                         </code>
                         <button
-                          onClick={async () => {
-                            try {
-                              await navigator.clipboard.writeText(groupId);
-                              setCopiedGroupId(true);
-                              setTimeout(() => setCopiedGroupId(false), 2000);
-                            } catch (err) {
-                              addNotification({ type: 'error', title: 'Copy Failed', message: err.message || 'Could not copy to clipboard.' });
-                            }
-                          }}
+                          onClick={() => copyGroupId(groupId)}
                           className="px-3 py-1.5 bg-dark-700 hover:bg-dark-800 text-gray-300 rounded-lg text-xs font-semibold border border-dark-700 transition-colors flex items-center gap-1"
                         >
                           {copiedGroupId ? <CheckCircle2 size={14} className="text-blue-400" /> : <Copy size={14} />}

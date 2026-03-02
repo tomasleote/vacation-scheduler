@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { hashPhrase } from '../firebase';
+import { hashPhrase } from '../services/adminService';
 import { KeyRound, Mail, Eye, EyeOff, ArrowRight, Loader2, Search } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 

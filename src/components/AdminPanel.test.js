@@ -26,18 +26,24 @@ const mockValidateAdminToken = jest.fn();
 const mockSubscribeToGroup = jest.fn();
 const mockSubscribeToParticipants = jest.fn();
 
-jest.mock('../firebase', () => ({
+jest.mock('../services/groupService', () => ({
     getGroup: jest.fn(),
     updateGroup: jest.fn(),
-    getParticipants: jest.fn(),
     deleteGroup: jest.fn(),
+    subscribeToGroup: (...args) => mockSubscribeToGroup(...args),
+}));
+
+jest.mock('../services/participantService', () => ({
     addParticipant: (...args) => mockAddParticipant(...args),
     updateParticipant: (...args) => mockUpdateParticipant(...args),
     deleteParticipant: (...args) => mockDeleteParticipant(...args),
     getParticipant: (...args) => mockGetParticipant(...args),
-    validateAdminToken: (...args) => mockValidateAdminToken(...args),
-    subscribeToGroup: (...args) => mockSubscribeToGroup(...args),
+    getParticipants: jest.fn(),
     subscribeToParticipants: (...args) => mockSubscribeToParticipants(...args),
+}));
+
+jest.mock('../services/adminService', () => ({
+    validateAdminToken: (...args) => mockValidateAdminToken(...args),
     hashPhrase: jest.fn(),
 }));
 

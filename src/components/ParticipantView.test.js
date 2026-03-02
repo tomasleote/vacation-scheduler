@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ParticipantView from './ParticipantView';
-import * as firebase from '../firebase';
+import * as groupService from '../services/groupService';
+import * as participantService from '../services/participantService';
 import { useNotification } from '../context/NotificationContext';
 
 jest.mock('../context/NotificationContext', () => ({
@@ -10,13 +11,16 @@ jest.mock('../context/NotificationContext', () => ({
 
 const mockAddNotification = jest.fn();
 
-// Mock Firebase functions
-jest.mock('../firebase', () => ({
+// Mock service modules
+jest.mock('../services/groupService', () => ({
     subscribeToGroup: jest.fn(),
+}));
+
+jest.mock('../services/participantService', () => ({
     subscribeToParticipants: jest.fn(),
     addParticipant: jest.fn(),
     updateParticipant: jest.fn(),
-    getParticipant: jest.fn()
+    getParticipant: jest.fn(),
 }));
 
 const mockGroup = {
@@ -39,12 +43,12 @@ describe('ParticipantView - Duplicate Name Check', () => {
         useNotification.mockReturnValue({ addNotification: mockAddNotification });
 
         // Default mock behavior for successful subscription
-        firebase.subscribeToGroup.mockImplementation((id, cb) => {
+        groupService.subscribeToGroup.mockImplementation((id, cb) => {
             cb(mockGroup);
             return () => { };
         });
 
-        firebase.subscribeToParticipants.mockImplementation((id, cb) => {
+        participantService.subscribeToParticipants.mockImplementation((id, cb) => {
             cb(mockParticipants);
             return () => { };
         });
@@ -76,11 +80,11 @@ describe('ParticipantView - Duplicate Name Check', () => {
         });
 
         // Firebase addParticipant should NOT have been called
-        expect(firebase.addParticipant).not.toHaveBeenCalled();
+        expect(participantService.addParticipant).not.toHaveBeenCalled();
     });
 
     test('allows submission if name is unique', async () => {
-        firebase.addParticipant.mockResolvedValue('p3');
+        participantService.addParticipant.mockResolvedValue('p3');
 
         render(<ParticipantView groupId="group123" onBack={() => { }} />);
 
@@ -99,7 +103,7 @@ describe('ParticipantView - Duplicate Name Check', () => {
         fireEvent.click(submitButton);
 
         await waitFor(() => {
-            expect(firebase.addParticipant).toHaveBeenCalledWith('group123', expect.objectContaining({
+            expect(participantService.addParticipant).toHaveBeenCalledWith('group123', expect.objectContaining({
                 name: 'Charlie'
             }));
         });

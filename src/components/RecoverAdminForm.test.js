@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RecoverAdminForm from './RecoverAdminForm';
-import { hashPhrase } from '../firebase';
+import { hashPhrase } from '../services/adminService';
 import { useNotification } from '../context/NotificationContext';
 
 jest.mock('../context/NotificationContext', () => ({
@@ -11,8 +11,8 @@ jest.mock('../context/NotificationContext', () => ({
 
 const mockAddNotification = jest.fn();
 
-// Mock the firebase module — implementation set per-test in beforeEach
-jest.mock('../firebase', () => ({
+// Mock the admin service module — implementation set per-test in beforeEach
+jest.mock('../services/adminService', () => ({
     hashPhrase: jest.fn(),
 }));
 
