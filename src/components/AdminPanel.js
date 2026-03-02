@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getGroup, updateGroup, getParticipants, deleteGroup, addParticipant, updateParticipant, getParticipant, validateAdminToken, subscribeToGroup, subscribeToParticipants, hashPhrase } from '../firebase';
 import { calculateOverlap, getBestOverlapPeriods, formatDateRange } from '../utils/overlap';
 import { exportToCSV } from '../utils/export';
-import { CalendarRange, Users, Mail, Copy, CheckCircle2, ChevronDown, ChevronUp, Edit, X, Trash2, Download, Save, KeyRound } from 'lucide-react';
+import { CalendarRange, Users, Mail, Copy, CheckCircle2, ChevronDown, ChevronUp, Edit, X, Trash2, Download, Save, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import SlidingOverlapCalendar from './SlidingOverlapCalendar';
 import CalendarView from './CalendarView';
@@ -17,6 +17,7 @@ function AdminPanel({ groupId, adminToken, onBack }) {
   const [durationFilter, setDurationFilter] = useState('3');
   const [overlaps, setOverlaps] = useState([]);
   const [reminderSending, setReminderSending] = useState(false);
+  const [showPassphrase, setShowPassphrase] = useState(false);
   const { addNotification } = useNotification();
 
   const baseUrl = window.location.origin;
@@ -466,13 +467,24 @@ function AdminPanel({ groupId, adminToken, onBack }) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">Recovery Passphrase</label>
-                  <input
-                    type="password"
-                    value={editData.newPassphrase || ''}
-                    onChange={(e) => setEditData({ ...editData, newPassphrase: e.target.value })}
-                    className={inputClass}
-                    placeholder={group.recoveryPasswordHash ? "Enter to change existing passphrase" : "Set a new passphrase"}
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassphrase ? 'text' : 'password'}
+                      value={editData.newPassphrase || ''}
+                      onChange={(e) => setEditData({ ...editData, newPassphrase: e.target.value })}
+                      className={`${inputClass} pr-10`}
+                      placeholder={group.recoveryPasswordHash ? "Enter to change existing passphrase" : "Set a new passphrase"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassphrase(s => !s)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                      aria-label={showPassphrase ? 'Hide passphrase' : 'Show passphrase'}
+                      aria-pressed={showPassphrase}
+                    >
+                      {showPassphrase ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                   <p className="text-xs text-gray-500 mt-1">Leave blank to keep existing.</p>
                 </div>
               </div>
