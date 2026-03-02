@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { addParticipant, updateParticipant, deleteParticipant } from '../../../services/participantService';
 import { validateParticipantName, validateEmail, sanitizeName, sanitizeEmail, generateParticipantLink } from '../../../utils/participantValidation';
 import { useNotification } from '../../../context/NotificationContext';
@@ -30,7 +30,7 @@ export function useParticipantActions(groupId, group, participants, setParticipa
 
   const baseUrl = window.location.origin;
 
-  const handleCreateParticipant = async () => {
+  const handleCreateParticipant = useCallback(async () => {
     const name = sanitizeName(newParticipantName);
     const email = sanitizeEmail(newParticipantEmail);
 
@@ -66,16 +66,16 @@ export function useParticipantActions(groupId, group, participants, setParticipa
     } finally {
       setCreateLoading(false);
     }
-  };
+  }, [newParticipantName, newParticipantEmail, participants, groupId, setParticipants, addNotification]);
 
-  const openEditParticipant = (participant) => {
+  const openEditParticipant = useCallback((participant) => {
     setEditingParticipant(participant);
     setEditParticipantName(participant.name || '');
     setEditParticipantEmail(participant.email || '');
     setShowEditParticipant(true);
-  };
+  }, []);
 
-  const handleEditParticipant = async () => {
+  const handleEditParticipant = useCallback(async () => {
     if (!editingParticipant) return;
     const name = sanitizeName(editParticipantName);
     const email = sanitizeEmail(editParticipantEmail);
@@ -120,19 +120,19 @@ export function useParticipantActions(groupId, group, participants, setParticipa
     } finally {
       setEditLoading(false);
     }
-  };
+  }, [editingParticipant, editParticipantName, editParticipantEmail, participants, groupId, setParticipants, addNotification]);
 
-  const closeEditParticipant = () => {
+  const closeEditParticipant = useCallback(() => {
     setShowEditParticipant(false);
     setEditingParticipant(null);
-  };
+  }, []);
 
-  const openDeleteConfirmation = (participant) => {
+  const openDeleteConfirmation = useCallback((participant) => {
     setDeletingParticipant(participant);
     setShowDeleteConfirm(true);
-  };
+  }, []);
 
-  const handleDeleteParticipant = async () => {
+  const handleDeleteParticipant = useCallback(async () => {
     if (!deletingParticipant) return;
 
     setDeleteLoading(true);
@@ -156,14 +156,14 @@ export function useParticipantActions(groupId, group, participants, setParticipa
     } finally {
       setDeleteLoading(false);
     }
-  };
+  }, [deletingParticipant, groupId, setParticipants, addNotification]);
 
-  const closeDeleteConfirm = () => {
+  const closeDeleteConfirm = useCallback(() => {
     setShowDeleteConfirm(false);
     setDeletingParticipant(null);
-  };
+  }, []);
 
-  const handleCopyParticipantLink = async (participant) => {
+  const handleCopyParticipantLink = useCallback(async (participant) => {
     const link = generateParticipantLink(baseUrl, groupId, participant.id);
     try {
       await navigator.clipboard.writeText(link);
@@ -173,9 +173,9 @@ export function useParticipantActions(groupId, group, participants, setParticipa
     } catch (err) {
       addNotification({ type: 'error', title: 'Copy Failed', message: err.message || 'Could not copy to clipboard.' });
     }
-  };
+  }, [baseUrl, groupId, addNotification]);
 
-  const handleSendInvite = async (participant) => {
+  const handleSendInvite = useCallback(async (participant) => {
     if (!participant.email || !participant.email.trim()) {
       addNotification({ type: 'warning', title: 'No Email', message: `${participant.name} doesn't have an email address.` });
       return;
@@ -190,7 +190,7 @@ export function useParticipantActions(groupId, group, participants, setParticipa
           participantName: participant.name,
           participantEmail: participant.email,
           groupId,
-          groupName: group.name,
+          groupName: group?.name,
           participantId: participant.id,
           baseUrl: window.location.origin,
         })
@@ -207,7 +207,7 @@ export function useParticipantActions(groupId, group, participants, setParticipa
     } finally {
       setInviteSendingId(null);
     }
-  };
+  }, [groupId, group, addNotification]);
 
   return {
     // Create

@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import './index.css';
-import AdminPanel from './features/admin/AdminPage';
-import ParticipantView from './components/ParticipantView';
-import HomePage from './features/home/HomePage';
-import GroupCreatedScreen from './features/home/GroupCreatedScreen';
+import { GroupProvider } from './shared/context';
+import { LoadingSpinner } from './shared/ui';
+
+const AdminPanel = React.lazy(() => import('./features/admin/AdminPage'));
+const ParticipantView = React.lazy(() => import('./components/ParticipantView'));
+const HomePage = React.lazy(() => import('./features/home/HomePage'));
+const GroupCreatedScreen = React.lazy(() => import('./features/home/GroupCreatedScreen'));
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -94,34 +97,41 @@ function App() {
     window.history.pushState({}, '', `?group=${gId}&admin=${newAdminToken}`);
   };
 
+  const isAdmin = !!adminToken;
+
   return (
-    <div className="min-h-screen bg-dark-950 text-gray-50">
-      {currentPage === 'home' && (
-        <HomePage onCreateGroup={handleCreateGroup} onJoinGroup={handleJoinGroup} onRecoverAdmin={handleRecoverAdmin} />
-      )}
-      {currentPage === 'created' && (
-        <GroupCreatedScreen
-          groupId={groupId}
-          adminToken={adminToken}
-          onEnterAdmin={handleEnterAdmin}
-          onBack={handleBackHome}
-        />
-      )}
-      {currentPage === 'admin' && (
-        <AdminPanel
-          groupId={groupId}
-          adminToken={adminToken}
-          onBack={handleBackHome}
-        />
-      )}
-      {currentPage === 'participant' && (
-        <ParticipantView
-          groupId={groupId}
-          participantId={participantId}
-          onBack={handleBackHome}
-        />
-      )}
-    </div>
+    <GroupProvider groupId={groupId} adminToken={adminToken} isAdmin={isAdmin}>
+      <div className="min-h-screen bg-dark-950 text-gray-50">
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <LoadingSpinner label="Loading page..." size="lg" />
+          </div>
+        }>
+          {currentPage === 'home' && (
+            <HomePage onCreateGroup={handleCreateGroup} onJoinGroup={handleJoinGroup} onRecoverAdmin={handleRecoverAdmin} />
+          )}
+          {currentPage === 'created' && (
+            <GroupCreatedScreen
+              groupId={groupId}
+              adminToken={adminToken}
+              onEnterAdmin={handleEnterAdmin}
+              onBack={handleBackHome}
+            />
+          )}
+          {currentPage === 'admin' && (
+            <AdminPanel
+              onBack={handleBackHome}
+            />
+          )}
+          {currentPage === 'participant' && (
+            <ParticipantView
+              participantId={participantId}
+              onBack={handleBackHome}
+            />
+          )}
+        </Suspense>
+      </div>
+    </GroupProvider>
   );
 }
 

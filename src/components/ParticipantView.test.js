@@ -4,6 +4,7 @@ import ParticipantView from './ParticipantView';
 import * as groupService from '../services/groupService';
 import * as participantService from '../services/participantService';
 import { useNotification } from '../context/NotificationContext';
+import { GroupProvider } from '../shared/context';
 
 jest.mock('../context/NotificationContext', () => ({
     useNotification: jest.fn()
@@ -55,7 +56,11 @@ describe('ParticipantView - Duplicate Name Check', () => {
     });
 
     test('blocks submission and shows error if name already exists', async () => {
-        render(<ParticipantView groupId="group123" onBack={() => { }} />);
+        render(
+            <GroupProvider groupId="group123" adminToken={null} isAdmin={false}>
+                <ParticipantView onBack={() => { }} />
+            </GroupProvider>
+        );
 
         // Wait for internal loading to finish
         await waitFor(() => {
@@ -86,7 +91,11 @@ describe('ParticipantView - Duplicate Name Check', () => {
     test('allows submission if name is unique', async () => {
         participantService.addParticipant.mockResolvedValue('p3');
 
-        render(<ParticipantView groupId="group123" onBack={() => { }} />);
+        render(
+            <GroupProvider groupId="group123" adminToken={null} isAdmin={false}>
+                <ParticipantView onBack={() => { }} />
+            </GroupProvider>
+        );
 
         await waitFor(() => {
             expect(screen.queryByText(/Loading/i)).not.toBeInTheDocument();

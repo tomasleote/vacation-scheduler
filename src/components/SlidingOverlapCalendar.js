@@ -8,15 +8,32 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
     const [hoveredDate, setHoveredDate] = useState(null);
     const [lockedDate, setLockedDate] = useState(null);
     const [localDuration, setLocalDuration] = useState(duration);
+    const [debouncedDuration, setDebouncedDuration] = useState(duration);
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const dateRange = getDatesBetween(startDate, endDate);
 
     // Keep local duration in sync if props change from outside
     React.useEffect(() => {
         setLocalDuration(duration);
     }, [duration]);
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const dateRange = getDatesBetween(startDate, endDate);
+    // Debounce the duration input
+    React.useEffect(() => {
+        const handler = setTimeout(() => {
+            let val = parseInt(localDuration);
+            if (!isNaN(val) && val >= 1) {
+                if (val > (dateRange?.length || 100)) val = dateRange.length;
+                setDebouncedDuration(String(val));
+                if (onDurationChange && String(val) !== String(duration)) {
+                    onDurationChange(String(val));
+                }
+            }
+        }, 500);
+
+        return () => clearTimeout(handler);
+    }, [localDuration, dateRange?.length, duration, onDurationChange]);
 
     // 1. Calculate Daily Availability (Heatmap)
     const dailyAvailability = useMemo(() => {
@@ -152,14 +169,8 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                 value={localDuration}
                                 onChange={(e) => {
                                     const valStr = e.target.value;
+                                    // State is updated; debounced effect handles the callback
                                     setLocalDuration(valStr);
-
-                                    // Apply dynamically if it's a valid number
-                                    let val = parseInt(valStr);
-                                    if (!isNaN(val) && val >= 1) {
-                                        if (val > dateRange.length) val = dateRange.length;
-                                        onDurationChange(String(val));
-                                    }
                                 }}
                                 onBlur={() => {
                                     let val = parseInt(localDuration);

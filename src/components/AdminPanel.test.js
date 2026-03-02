@@ -64,6 +64,9 @@ jest.mock('../context/NotificationContext', () => ({
     useNotification: () => ({ addNotification: mockAddNotification }),
 }));
 
+// Import GroupProvider
+import { GroupProvider } from '../shared/context';
+
 // Mock child components to simplify rendering
 jest.mock('./SlidingOverlapCalendar', () => () => null);
 jest.mock('./CalendarView', () => () => null);
@@ -111,7 +114,11 @@ function renderAdminPanel() {
         return () => { };
     });
 
-    return render(<AdminPanel groupId="group-123" adminToken="token-abc" onBack={jest.fn()} />);
+    return render(
+        <GroupProvider groupId="group-123" adminToken="token-abc" isAdmin={true}>
+            <AdminPanel onBack={jest.fn()} />
+        </GroupProvider>
+    );
 }
 
 /**

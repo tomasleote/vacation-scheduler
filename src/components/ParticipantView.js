@@ -4,12 +4,14 @@ import { addParticipant, updateParticipant, getParticipant, subscribeToParticipa
 import { getDatesBetween, calculateOverlap, getBestOverlapPeriods } from '../utils/overlap';
 import { ReadOnlyInput, CopyButton, Button, LoadingSpinner, Card } from '../shared/ui';
 import { useNotification } from '../context/NotificationContext';
+import { useGroupContext } from '../shared/context';
 
 import CalendarView from './CalendarView';
 import SlidingOverlapCalendar from './SlidingOverlapCalendar';
 import { ChevronDown, ChevronUp, CalendarRange, Users } from 'lucide-react';
 
-function ParticipantView({ groupId, participantId: initialParticipantId, onBack }) {
+function ParticipantView({ participantId: initialParticipantId, onBack }) {
+  const { groupId } = useGroupContext();
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const { addNotification } = useNotification();

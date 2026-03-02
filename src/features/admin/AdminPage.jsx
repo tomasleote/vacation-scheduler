@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { updateGroup, deleteGroup } from '../../services/groupService';
 import { addParticipant, updateParticipant } from '../../services/participantService';
 import { hashPhrase } from '../../services/adminService';
 import { exportToCSV } from '../../utils/export';
 import { Download, Mail } from 'lucide-react';
 import { useNotification } from '../../context/NotificationContext';
+import { useGroupContext } from '../../shared/context';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
 import { Button, LoadingSpinner, Card } from '../../shared/ui';
 import { useGroupData } from './hooks/useGroupData';
@@ -14,7 +15,8 @@ import ParticipantTable from './ParticipantTable';
 import AdminAvailability from './AdminAvailability';
 import OverlapResults from './OverlapResults';
 
-function AdminPage({ groupId, adminToken, onBack }) {
+function AdminPage({ onBack }) {
+  const { groupId, adminToken } = useGroupContext();
   const { addNotification } = useNotification();
   const [editing, setEditing] = useState(false);
   const [showPassphrase, setShowPassphrase] = useState(false);
@@ -43,7 +45,7 @@ function AdminPage({ groupId, adminToken, onBack }) {
 
   const participantActions = useParticipantActions(groupId, group, participants, setParticipants);
 
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = useCallback(async () => {
     try {
       const updates = { ...editData };
       const normalized = updates.newPassphrase?.trim();
@@ -60,9 +62,9 @@ function AdminPage({ groupId, adminToken, onBack }) {
       console.error('[Admin Panel Error] handleSaveEdit failed:', err);
       addNotification({ type: 'error', title: 'Update Failed', message: err.message });
     }
-  };
+  }, [editData, groupId, group, setGroup, addNotification]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!window.confirm('Are you sure? This will delete the entire group and all data.')) return;
     try {
       await deleteGroup(groupId);
@@ -71,9 +73,9 @@ function AdminPage({ groupId, adminToken, onBack }) {
       console.error('[Admin Panel Error] handleDelete failed:', err);
       addNotification({ type: 'error', title: 'Delete Failed', message: err.message });
     }
-  };
+  }, [groupId, onBack, addNotification]);
 
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     try {
       if (group && participants?.length > 0) {
         exportToCSV(group, participants, overlaps);
@@ -82,9 +84,9 @@ function AdminPage({ groupId, adminToken, onBack }) {
       console.error('[Admin Panel Error] handleExport failed:', err);
       addNotification({ type: 'error', title: 'Export Failed', message: err.message });
     }
-  };
+  }, [group, participants, overlaps, addNotification]);
 
-  const handleSendReminder = async () => {
+  const handleSendReminder = useCallback(async () => {
     setReminderSending(true);
     try {
       const response = await fetch('/api/send-reminder', {
@@ -110,9 +112,9 @@ function AdminPage({ groupId, adminToken, onBack }) {
     } finally {
       setReminderSending(false);
     }
-  };
+  }, [groupId, group, participants, addNotification]);
 
-  const handleAdminAvailability = async (formData) => {
+  const handleAdminAvailability = useCallback(async (formData) => {
     try {
       const finalDays = formData.selectedDays || [];
 
@@ -138,7 +140,7 @@ function AdminPage({ groupId, adminToken, onBack }) {
             `vacation_admin_p_${groupId}`,
             JSON.stringify({ participantId, name: formData.name, email: formData.email, duration: formData.duration })
           );
-        } catch {}
+        } catch { }
       } else {
         await updateParticipant(groupId, adminParticipantId, {
           name: formData.name,
@@ -158,7 +160,7 @@ function AdminPage({ groupId, adminToken, onBack }) {
       console.error('[Admin Auth Error] handleAdminAvailability failed:', err);
       addNotification({ type: 'error', title: 'Error', message: err.message });
     }
-  };
+  }, [participants, adminParticipantId, groupId, setAdminParticipantId, setAdminSavedDays, setAdminName, setAdminEmail, setAdminDuration, addNotification]);
 
   if (loading) {
     return <LoadingSpinner label="Loading..." />;

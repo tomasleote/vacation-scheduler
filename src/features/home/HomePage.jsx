@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Users, Sparkles, ArrowRight, KeyRound } from 'lucide-react';
 import { Modal, Button, Card } from '../../shared/ui';
-import RecoverAdminForm from '../../components/RecoverAdminForm';
+import RecoverAdminForm from '../recovery/RecoverAdminForm';
 import CreateGroupForm from './CreateGroupForm';
 import JoinGroupForm from './JoinGroupForm';
 
