@@ -1,11 +1,18 @@
 import React from 'react';
 import { Mail, Github, BookOpen } from 'lucide-react';
 
-export function Footer({ onNavigateDocs }) {
+export function Footer({ onNavigateDocs, onNavigatePrivacy }) {
     const handleDocsClick = (e) => {
         if (onNavigateDocs) {
             e.preventDefault();
             onNavigateDocs('/docs');
+        }
+    };
+
+    const handlePrivacyClick = (e) => {
+        if (onNavigatePrivacy) {
+            e.preventDefault();
+            onNavigatePrivacy('/privacy');
         }
     };
 
@@ -70,7 +77,12 @@ export function Footer({ onNavigateDocs }) {
             <div className="max-w-6xl mx-auto pt-6 border-t border-dark-800 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500">
                 <p>&copy; {currentYear} Vacation Scheduler. All rights reserved.</p>
                 <div className="flex space-x-4 mt-2 md:mt-0">
-                    <span className="cursor-not-allowed hover:text-gray-400 transition-colors">Privacy Policy</span>
+                    <button
+                        onClick={handlePrivacyClick}
+                        className="hover:text-blue-400 transition-colors"
+                    >
+                        Privacy Policy
+                    </button>
                     <span className="cursor-not-allowed hover:text-gray-400 transition-colors">Terms of Service</span>
                 </div>
             </div>

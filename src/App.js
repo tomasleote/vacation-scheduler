@@ -1,13 +1,14 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import './index.css';
 import { GroupProvider } from './shared/context';
-import { LoadingSpinner, ErrorBoundary, Footer } from './shared/ui';
+import { LoadingSpinner, ErrorBoundary, Footer, StorageConsent } from './shared/ui';
 
 const AdminPanel = React.lazy(() => import('./features/admin/AdminPage'));
 const ParticipantView = React.lazy(() => import('./components/ParticipantView'));
 const HomePage = React.lazy(() => import('./features/home/HomePage'));
 const GroupCreatedScreen = React.lazy(() => import('./features/home/GroupCreatedScreen'));
 const DocumentationPage = React.lazy(() => import('./features/docs/DocumentationPage'));
+const PrivacyPolicy = React.lazy(() => import('./features/legal/PrivacyPolicy'));
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -19,6 +20,11 @@ function App() {
     const path = window.location.pathname;
     if (path === '/docs') {
       setCurrentPage('docs');
+      return;
+    }
+
+    if (path === '/privacy') {
+      setCurrentPage('privacy');
       return;
     }
 
@@ -150,13 +156,26 @@ function App() {
                 <DocumentationPage onBack={handleBackHome} />
               </ErrorBoundary>
             )}
+            {currentPage === 'privacy' && (
+              <ErrorBoundary>
+                <PrivacyPolicy onBack={handleBackHome} />
+              </ErrorBoundary>
+            )}
           </Suspense>
         </main>
-        <Footer onNavigateDocs={(path) => {
-          setCurrentPage('docs');
-          window.history.pushState({}, '', path);
-          window.scrollTo(0, 0);
-        }} />
+        <Footer
+          onNavigateDocs={(path) => {
+            setCurrentPage('docs');
+            window.history.pushState({}, '', path);
+            window.scrollTo(0, 0);
+          }}
+          onNavigatePrivacy={(path) => {
+            setCurrentPage('privacy');
+            window.history.pushState({}, '', path);
+            window.scrollTo(0, 0);
+          }}
+        />
+        <StorageConsent />
       </div>
     </GroupProvider>
   );

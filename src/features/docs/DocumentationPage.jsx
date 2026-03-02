@@ -229,6 +229,21 @@ export default function DocumentationPage({ onBack }) {
                             <p><strong>Data Persistence:</strong> Firebase Realtime Database utilizing transactional writes to prevent concurrency race conditions.</p>
                             <p><strong>Serverless APIs:</strong> Node.js serverless functions process outbound emails and handle sensitive crypto actions (passphrase validations).</p>
                             <p><strong>Resilience:</strong> Top-level React Error Boundaries prevent visual crashes. Explicit `navigator.onLine` checks ensure degraded stability without network connections.</p>
+                            <div className="pt-2 border-t border-dark-800 flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                <span>v1.0.0 Stable</span>
+                                <a
+                                    href="/privacy"
+                                    className="text-blue-500 hover:text-blue-400 font-bold"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (onBack) onBack();
+                                        window.history.pushState({}, '', '/privacy');
+                                        window.dispatchEvent(new Event('popstate'));
+                                    }}
+                                >
+                                    Privacy Policy &gt;
+                                </a>
+                            </div>
                         </div>
                     </section>
                 </article>

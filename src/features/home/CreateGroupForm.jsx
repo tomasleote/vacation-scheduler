@@ -125,6 +125,9 @@ function CreateGroupForm({ onSuccess, onCancel }) {
           maxLength="254"
           placeholder="your@email.com"
         />
+        <p className="text-[10px] text-gray-500 mt-1 leading-tight">
+          Used only for recovery and notifications. See our <a href="/privacy" className="text-blue-500 hover:underline" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/privacy'); window.dispatchEvent(new Event('popstate')); }}>Privacy Policy</a>.
+        </p>
       </div>
 
       <div>

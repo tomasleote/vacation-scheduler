@@ -323,12 +323,25 @@ function ParticipantDashboard({ groupId, participantId, participantName, partici
           </div>
         </div>
 
-        <button
-          onClick={() => setUpdating(u => !u)}
-          className="text-blue-400 hover:text-blue-300 text-sm font-semibold"
-        >
-          {updating ? '\u2191 Hide update form' : '\u270F Update your dates'}
-        </button>
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => setUpdating(u => !u)}
+            className="text-blue-400 hover:text-blue-300 text-sm font-semibold text-left w-fit"
+          >
+            {updating ? '\u2191 Hide update form' : '\u270F Update your dates'}
+          </button>
+          <button
+            onClick={() => {
+              if (window.confirm('This will remove your access to this group from this browser. You can still return using your personal link. Continue?')) {
+                localStorage.removeItem(`vacation_p_${groupId}`);
+                window.location.href = '/';
+              }
+            }}
+            className="text-gray-500 hover:text-rose-400 text-xs font-medium text-left w-fit transition-colors"
+          >
+            Clear my local data (Log out)
+          </button>
+        </div>
       </div>
 
       <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">

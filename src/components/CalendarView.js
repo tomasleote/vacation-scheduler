@@ -247,6 +247,10 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
             />
           </div>
 
+          <p className="w-full text-[10px] text-gray-500 mt-1 px-2 leading-tight">
+            Your details are stored to identify you within this group. See our <a href="/privacy" className="text-blue-500 hover:underline" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/privacy'); window.dispatchEvent(new Event('popstate')); }}>Privacy Policy</a>.
+          </p>
+
           {/* Duration Pill */}
           <div className="flex items-center gap-1.5 bg-dark-800 px-3 py-1.5 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500 transition-all shrink-0">
             <Clock size={16} className="text-gray-500" />
