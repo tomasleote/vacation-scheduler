@@ -43,10 +43,10 @@ export function useGroupData(groupId, adminToken, onBack) {
 
       if (!isMounted) return;
 
-      try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch { }
+      try { localStorage.setItem(`fad_admin_${groupId}`, adminToken); } catch { }
 
       try {
-        const stored = localStorage.getItem(`vacation_admin_p_${groupId}`);
+        const stored = localStorage.getItem(`fad_admin_p_${groupId}`);
         if (stored) {
           const { participantId, name, email, duration } = JSON.parse(stored);
           getParticipant(groupId, participantId).then(p => {

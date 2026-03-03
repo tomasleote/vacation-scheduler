@@ -5,14 +5,14 @@ import Footer from './Footer';
 describe('Footer Component', () => {
     it('renders the branding text and description', () => {
         render(<Footer />);
-        expect(screen.getByText('Vacation Scheduler')).toBeInTheDocument();
-        expect(screen.getByText(/A seamless way to organize group trips/i)).toBeInTheDocument();
+        expect(screen.getByText((content, element) => element.tagName === 'H3' && element.textContent === 'FindADate')).toBeInTheDocument();
+        expect(screen.getByText(/Find the best date for any group event/i)).toBeInTheDocument();
     });
 
     it('renders contact email mailto link', () => {
         render(<Footer />);
-        const link = screen.getByRole('link', { name: /vacationscheduler\.info@gmail\.com/i });
-        expect(link).toHaveAttribute('href', 'mailto:vacationscheduler.info@gmail.com');
+        const link = screen.getByRole('link', { name: /hello@findadate\.app/i });
+        expect(link).toHaveAttribute('href', 'mailto:hello@findadate.app');
     });
 
     it('renders documentation link and tests interaction', () => {

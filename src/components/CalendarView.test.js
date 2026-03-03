@@ -41,7 +41,7 @@ describe('CalendarView rendering', () => {
     renderCalendar();
     expect(screen.getByPlaceholderText('Your Name *')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Email (optional)')).toBeInTheDocument();
-    expect(screen.getByText('days trip')).toBeInTheDocument();
+    expect(screen.getByText('days')).toBeInTheDocument();
   });
 
   test('renders day-of-week headers', () => {

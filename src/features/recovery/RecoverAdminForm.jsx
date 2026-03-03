@@ -95,7 +95,7 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
                 <button
                     type="button"
                     onClick={() => switchTab('passphrase')}
-                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${tab === 'passphrase' ? 'bg-blue-500 text-white' : 'bg-dark-800 text-gray-400 hover:text-gray-200'
+                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${tab === 'passphrase' ? 'bg-brand-500 text-white' : 'bg-dark-800 text-gray-400 hover:text-gray-200'
                         }`}
                 >
                     <KeyRound size={12} /> Passphrase
@@ -103,7 +103,7 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
                 <button
                     type="button"
                     onClick={() => switchTab('email')}
-                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${tab === 'email' ? 'bg-blue-500 text-white' : 'bg-dark-800 text-gray-400 hover:text-gray-200'
+                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${tab === 'email' ? 'bg-brand-500 text-white' : 'bg-dark-800 text-gray-400 hover:text-gray-200'
                         }`}
                 >
                     <Mail size={12} /> Email link
@@ -111,7 +111,7 @@ function RecoverAdminForm({ onSuccess, onCancel }) {
                 <button
                     type="button"
                     onClick={() => switchTab('find')}
-                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${tab === 'find' ? 'bg-blue-500 text-white' : 'bg-dark-800 text-gray-400 hover:text-gray-200'
+                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${tab === 'find' ? 'bg-brand-500 text-white' : 'bg-dark-800 text-gray-400 hover:text-gray-200'
                         }`}
                 >
                     <Search size={12} /> Find groups

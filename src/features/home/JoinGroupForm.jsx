@@ -22,7 +22,7 @@ function JoinGroupForm({ onSuccess, onCancel }) {
         return;
       }
 
-      const savedToken = localStorage.getItem(`vacation_admin_${trimmedGroupId}`);
+      const savedToken = localStorage.getItem(`fad_admin_${trimmedGroupId}`);
       if (savedToken) {
         setIsAdminFound(true);
         setAdminToken(savedToken);

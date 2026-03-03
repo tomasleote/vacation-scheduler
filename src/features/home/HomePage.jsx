@@ -17,7 +17,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
       {/* Nav Bar */}
       <nav className="sticky top-0 z-50 bg-dark-900/80 backdrop-blur-xl border-b border-dark-700/50">
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-          <span className="text-lg font-bold tracking-tight text-gray-50">Vacation Scheduler</span>
+          <span className="text-lg font-bold tracking-tight text-gray-50">Find<span className="text-brand-500">A</span>Date</span>
           <div className="flex gap-3">
             <Button
               variant="ghost"
@@ -34,7 +34,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
               weight="semibold"
               onClick={() => { setShowCreate(true); setShowJoin(false); setShowRecover(false); }}
             >
-              Create Group
+              Create Event
             </Button>
             <Button
               variant="secondary"
@@ -42,7 +42,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
               weight="semibold"
               onClick={() => { setShowJoin(true); setShowCreate(false); setShowRecover(false); }}
             >
-              Join Group
+              Join Event
             </Button>
           </div>
         </div>
@@ -57,12 +57,22 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
           className="text-center max-w-2xl"
         >
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-50 mb-4">
-            Find your perfect{' '}
-            <span className="text-blue-400">vacation window.</span>
+            Find the best date for{' '}
+            <span className="text-brand-400">anything.</span>
           </h1>
-          <p className="text-lg text-gray-400 mb-10 max-w-lg mx-auto">
-            Everyone marks their dates. The algorithm finds when the most people overlap. No more back-and-forth.
+          <p className="text-lg text-gray-400 mb-8 max-w-lg mx-auto">
+            Vacation. Dinner. Party. Game night. Everyone marks their dates. We find the overlap.
           </p>
+
+          {/* Use case pills */}
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {['Vacation', 'Dinner', 'Birthday', 'Game Night', 'Team Offsite'].map((label) => (
+              <span key={label} className="px-3 py-1.5 rounded-full text-sm font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20">
+                {label}
+              </span>
+            ))}
+          </div>
+
           <div className="flex gap-4 justify-center">
             <Button
               variant="primary"
@@ -71,7 +81,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
               onClick={() => { setShowCreate(true); setShowJoin(false); setShowRecover(false); }}
               className="flex items-center gap-2"
             >
-              Create a Trip <ArrowRight size={18} />
+              Create Event <ArrowRight size={18} />
             </Button>
             <Button
               variant="secondary"
@@ -79,7 +89,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
               rounding="lg"
               onClick={() => { setShowJoin(true); setShowCreate(false); setShowRecover(false); }}
             >
-              Join a Trip
+              Join Event
             </Button>
           </div>
         </motion.div>
@@ -93,8 +103,8 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
         >
           {[
             { icon: <Calendar size={24} />, title: '1. Create', desc: 'Set a date range and share the link with your group.' },
-            { icon: <Users size={24} />, title: '2. Respond', desc: 'Everyone marks which days they\'re free on the calendar.' },
-            { icon: <Sparkles size={24} />, title: '3. Match', desc: 'The algorithm finds the best overlapping windows instantly.' },
+            { icon: <Users size={24} />, title: '2. Respond', desc: 'Everyone marks their free days on the calendar.' },
+            { icon: <Sparkles size={24} />, title: '3. Match', desc: 'The algorithm finds the best overlapping dates instantly.' },
           ].map((step, i) => (
             <motion.div
               key={i}
@@ -103,7 +113,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
               transition={{ duration: 0.4, delay: 0.3 + i * 0.1 }}
             >
               <Card variant="subtle" className="text-center h-full">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 mb-4">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-500/10 text-brand-400 mb-4">
                   {step.icon}
                 </div>
                 <h3 className="font-bold text-gray-50 mb-2">{step.title}</h3>
@@ -118,7 +128,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
       <Modal
         open={showCreate || showJoin || showRecover}
         onClose={closeAll}
-        title={showCreate ? 'Create a Trip' : showJoin ? 'Join a Trip' : 'Recover Admin Access'}
+        title={showCreate ? 'Create Event' : showJoin ? 'Join Event' : 'Recover Admin Access'}
         animated
       >
         {showCreate && (

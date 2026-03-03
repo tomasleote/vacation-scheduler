@@ -31,7 +31,7 @@ function CopyButton({
   const variantClass =
     variant === 'secondary'
       ? 'bg-dark-700 hover:bg-dark-800 text-gray-300 border border-dark-700'
-      : 'bg-blue-500 hover:bg-blue-400 text-white';
+      : 'bg-brand-500 hover:bg-brand-400 text-white';
 
   return (
     <button

@@ -36,7 +36,7 @@ function ConfirmDialog({
   const confirmClass =
     variant === 'danger'
       ? 'bg-rose-600 hover:bg-rose-500 text-white'
-      : 'bg-blue-500 hover:bg-blue-400 text-white';
+      : 'bg-brand-500 hover:bg-brand-400 text-white';
 
   return (
     <Modal open={open} onClose={onClose} maxWidth="sm">

@@ -67,7 +67,7 @@ describe('exportToCSV', () => {
     exportToCSV(group, participants, overlaps);
 
     const downloadCall = mockSetAttribute.mock.calls.find(c => c[0] === 'download');
-    expect(downloadCall[1]).toBe('vacation-scheduler-test-group-123.csv');
+    expect(downloadCall[1]).toBe('findadate-test-group-123.csv');
   });
 
   test('generates valid CSV data', () => {
@@ -82,7 +82,7 @@ describe('exportToCSV', () => {
     expect(parsed.data.length).toBeGreaterThan(0);
 
     // Check header row exists
-    expect(csvContent).toContain('Vacation Scheduler Export');
+    expect(csvContent).toContain('FindADate Export');
     expect(csvContent).toContain('Summer Trip');
     expect(csvContent).toContain('Alice');
     expect(csvContent).toContain('Bob');

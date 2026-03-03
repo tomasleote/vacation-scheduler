@@ -28,7 +28,7 @@ export default function DocumentationPage({ onBack }) {
                         <ArrowLeft size={20} />
                     </button>
                     <h1 className="text-3xl font-bold text-gray-50 flex items-center gap-3">
-                        <BookOpen className="text-blue-500" />
+                        <BookOpen className="text-brand-500" />
                         Documentation
                     </h1>
                 </div>
@@ -42,11 +42,11 @@ export default function DocumentationPage({ onBack }) {
                             Introduction
                         </h2>
                         <p className="leading-relaxed">
-                            <strong>Vacation Scheduler</strong> is a purpose-built tool designed to eliminate the friction in organizing group travel.
-                            Instead of relying on sprawling chat threads or rigid calendar invites, this app determines the optimal travel dates automatically by calculating overlapping free time among all participants.
+                            <strong>FindADate</strong> is a purpose-built tool designed to eliminate the friction in coordinating group events.
+                            Instead of relying on sprawling chat threads or rigid calendar invites, this app determines the optimal dates automatically by calculating overlapping free time among all participants.
                         </p>
                         <p className="leading-relaxed">
-                            Whether you are coordinating a weekend getaway with a small group of friends or a multi-week retreat with dozens of colleagues, the core concept remains the same:
+                            Whether you are planning a dinner with friends, a game night, a birthday party, a team offsite, or a multi-week group retreat, the core concept remains the same:
                             every participant submits their general availability, and the engine calculates the statistically best dates to satisfy the most people.
                         </p>
                     </section>
@@ -54,14 +54,14 @@ export default function DocumentationPage({ onBack }) {
                     {/* 2. Core Concepts */}
                     <section id="core-concepts" className="space-y-6">
                         <h2 className="text-2xl font-bold text-gray-100 flex items-center gap-2 border-b border-dark-700 pb-2">
-                            <Users className="text-blue-400" size={20} /> Core Concepts Explained
+                            <Users className="text-brand-400" size={20} /> Core Concepts Explained
                         </h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="bg-dark-900 border border-dark-700 rounded-xl p-5">
                                 <h3 className="font-bold text-gray-200 mb-2">Groups & Links</h3>
                                 <p className="text-sm leading-relaxed">
-                                    A <strong>Group</strong> represents an entire vacation event. Entering a group creates an isolated environment accessible via a unique <strong>Group ID</strong>. Participants can join the group via a direct share link holding this ID.
+                                    A <strong>Group</strong> represents an entire event. Entering a group creates an isolated environment accessible via a unique <strong>Group ID</strong>. Participants can join the group via a direct share link holding this ID.
                                 </p>
                             </div>
                             <div className="bg-dark-900 border border-dark-700 rounded-xl p-5">
@@ -73,15 +73,15 @@ export default function DocumentationPage({ onBack }) {
                             <div className="bg-dark-900 border border-dark-700 rounded-xl p-5">
                                 <h3 className="font-bold text-gray-200 mb-2">Participants & Availability</h3>
                                 <p className="text-sm leading-relaxed">
-                                    A <strong>Participant</strong> is an individual submitting their availability. Participants explicitly mark the exact days they are free to travel.
-                                    They can also specify if they only need a subset of those days (e.g., "I'm free all month, but I only want to stay for 4 consecutive days").
+                                    A <strong>Participant</strong> is an individual submitting their availability. Participants explicitly mark the exact days they are free to attend.
+                                    They can also specify if they only need a subset of those days (e.g., "I'm free all month, but I only want to attend for 4 consecutive days").
                                 </p>
                             </div>
                             <div className="bg-dark-900 border border-dark-700 rounded-xl p-5">
                                 <h3 className="font-bold text-gray-200 mb-2">Overlap Scheduling Engine</h3>
                                 <p className="text-sm leading-relaxed">
-                                    The scheduling logic cross-references all participant selected dates against their required trip duration.
-                                    If five participants want to travel for 3 days overlapping on an identical weekend, that period will achieve a 100% overlap score.
+                                    The scheduling logic cross-references all participant selected dates against their required event duration.
+                                    If five participants want to meet for 3 days overlapping on an identical weekend, that period will achieve a 100% overlap score.
                                 </p>
                             </div>
                         </div>
@@ -97,7 +97,7 @@ export default function DocumentationPage({ onBack }) {
                             <div>
                                 <h3 className="text-lg font-bold text-gray-200 mb-2">1. Creating a Group</h3>
                                 <p className="text-sm leading-relaxed mb-2">
-                                    When you create a group, you must specify a Start Date and End Date. This forms the absolute boundaries of the trip.
+                                    When you create a group, you must specify a Start Date and End Date. This forms the absolute boundaries of the event window.
                                     Technically, a unique namespace is generated alongside a secure cryptographic hash mapping you as the Admin.
                                     You control the group's lifespan and can delete it entirely at any time.
                                 </p>
@@ -119,10 +119,10 @@ export default function DocumentationPage({ onBack }) {
                                     Closing the tab before saving will result in the loss of unsaved selections.
                                 </p>
                                 <div className="bg-dark-900 border border-dark-700 p-4 rounded-xl mt-4 space-y-3">
-                                    <h4 className="text-sm font-bold text-blue-400 uppercase">Selection Modes</h4>
+                                    <h4 className="text-sm font-bold text-brand-400 uppercase">Selection Modes</h4>
                                     <ul className="text-sm space-y-2">
-                                        <li><span className="text-blue-300 font-semibold">Flexible:</span> Click individual dates to toggle your availability one day at a time. Ideal for when your schedule is scattered.</li>
-                                        <li><span className="text-blue-300 font-semibold">Block Mode:</span> Set a specific number of days (e.g., 4) and click a start date. The system will automatically select a continuous block of time for you.</li>
+                                        <li><span className="text-brand-300 font-semibold">Flexible:</span> Click individual dates to toggle your availability one day at a time. Ideal for when your schedule is scattered.</li>
+                                        <li><span className="text-brand-300 font-semibold">Block Mode:</span> Set a specific number of days (e.g., 4) and click a start date. The system will automatically select a continuous block of time for you.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -131,7 +131,7 @@ export default function DocumentationPage({ onBack }) {
                                 <h3 className="text-lg font-bold text-gray-200 mb-2">4. Reviewing Results</h3>
                                 <p className="text-sm leading-relaxed mb-2">
                                     The Admin Panel continuously aggregates the availability matrices. The "Overlap Results" tab visualizes periods where over 50% of the participants align.
-                                    If a consensus duration is found (e.g., most users want a 4-day trip), the Admin can filter the view exclusively for 4-day continuous overlapping gaps.
+                                    If a consensus duration is found (e.g., most users want a 4-day event), the Admin can filter the view exclusively for 4-day continuous overlapping gaps.
                                 </p>
                             </div>
                         </div>
@@ -140,7 +140,7 @@ export default function DocumentationPage({ onBack }) {
                     {/* 4. Visual Example: Heatmap */}
                     <section id="visual-example" className="space-y-6">
                         <h2 className="text-2xl font-bold text-gray-100 flex items-center gap-2 border-b border-dark-700 pb-2">
-                            <TrendingUp className="text-blue-400" size={20} /> Understanding the Heatmap
+                            <TrendingUp className="text-brand-400" size={20} /> Understanding the Heatmap
                         </h2>
                         <p className="text-sm leading-relaxed">
                             The Availability Heatmap (shown in the Admin Panel and Result view) uses color intensity to represent how many people are free on a given day. Here is a mocked visualization of how it looks with 5 participants:
@@ -152,15 +152,15 @@ export default function DocumentationPage({ onBack }) {
                                     const availability = [0, 1, 3, 5, 5, 5, 4, 2, 5, 3, 2, 5, 5, 4][i];
                                     const colors = [
                                         'bg-dark-800',
-                                        'bg-blue-900/60',
-                                        'bg-blue-800',
-                                        'bg-blue-600',
-                                        'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]'
+                                        'bg-brand-900/60',
+                                        'bg-amber-500',
+                                        'bg-brand-600',
+                                        'bg-brand-500 shadow-[0_0_10px_rgba(249,115,22,0.3)]'
                                     ];
                                     const colorIdx = availability === 5 ? 4 : availability === 4 ? 3 : availability >= 3 ? 2 : availability >= 1 ? 1 : 0;
 
                                     return (
-                                        <div key={i} className={`aspect-square rounded-lg flex flex-col items-center justify-center text-[10px] font-bold ${colors[colorIdx]} ${availability >= 4 ? 'text-white' : 'text-blue-300'}`}>
+                                        <div key={i} className={`aspect-square rounded-lg flex flex-col items-center justify-center text-[10px] font-bold ${colors[colorIdx]} ${availability >= 4 ? 'text-white' : 'text-brand-300'}`}>
                                             <span>{i + 1}</span>
                                             <span className="opacity-70">{availability}/5</span>
                                         </div>
@@ -233,7 +233,7 @@ export default function DocumentationPage({ onBack }) {
                                 <span>v1.0.0 Stable</span>
                                 <a
                                     href="/privacy"
-                                    className="text-blue-500 hover:text-blue-400 font-bold"
+                                    className="text-brand-500 hover:text-brand-400 font-bold"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         window.history.pushState({}, '', '/privacy');

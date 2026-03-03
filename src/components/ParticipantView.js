@@ -138,7 +138,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
 
         try {
           localStorage.setItem(
-            `vacation_p_${groupId}`,
+            `fad_p_${groupId}`,
             JSON.stringify({ participantId, name: formData.name })
           );
         } catch { }
@@ -200,7 +200,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
           <p className="text-rose-400 mb-6 font-medium">Group not found or could not be loaded.</p>
           <button
             onClick={onBack}
-            className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+            className="w-full bg-brand-500 hover:bg-brand-400 text-white font-bold py-2 px-4 rounded-lg transition-colors"
           >
             Go Home
           </button>
@@ -215,7 +215,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
       <div className="max-w-4xl mx-auto">
         <button
           onClick={onBack}
-          className="text-blue-400 hover:text-blue-300 font-semibold mb-8"
+          className="text-brand-400 hover:text-brand-300 font-semibold mb-8"
         >
           ← Back to Home
         </button>
@@ -228,7 +228,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
             <p className="text-gray-400 mb-4 italic">{group.description}</p>
           )}
           <p className="text-gray-400 mb-4">
-            {isSingleDayEvent(group?.eventType) ? 'Which days work for you?' : 'Select your available dates for the vacation'}
+            {isSingleDayEvent(group?.eventType) ? 'Which days work for you?' : 'Select the dates you\'re available'}
           </p>
           <div className="flex gap-4 text-sm text-gray-400 flex-wrap">
             <span className="flex items-center gap-1.5"><CalendarRange size={16} className="text-gray-500" /> {group.startDate} to {group.endDate}</span>
@@ -272,11 +272,11 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
                   <p className="text-gray-500">Be the first to join!</p>
                 ) : (
                   participants?.map((p, i) => (
-                    <div key={i} className="bg-dark-800 rounded p-3 border-l-4 border-blue-500">
+                    <div key={i} className="bg-dark-800 rounded p-3 border-l-4 border-brand-500">
                       <p className="font-semibold text-gray-50">
                         <TruncatedText text={p.name || 'Anonymous'} maxWidth="100%" />
                       </p>
-                      <p className="text-gray-400 text-xs">{p.duration}-day trip</p>
+                      <p className="text-gray-400 text-xs">{p.duration}-day duration</p>
                       <p className="text-gray-400 text-xs">{(p.availableDays || []).length} days available</p>
                     </div>
                   ))
@@ -331,14 +331,14 @@ function ParticipantDashboard({ groupId, participantId, participantName, partici
         <div className="flex flex-col gap-3">
           <button
             onClick={() => setUpdating(u => !u)}
-            className="text-blue-400 hover:text-blue-300 text-sm font-semibold text-left w-fit"
+            className="text-brand-400 hover:text-brand-300 text-sm font-semibold text-left w-fit"
           >
             {updating ? '\u2191 Hide update form' : '\u270F Update your dates'}
           </button>
           <button
             onClick={() => {
               if (window.confirm('This will remove your participant access to this group from this browser. You can still return using your personal link. Continue?')) {
-                localStorage.removeItem(`vacation_p_${groupId}`);
+                localStorage.removeItem(`fad_p_${groupId}`);
                 window.location.href = '/';
               }
             }}

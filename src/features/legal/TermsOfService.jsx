@@ -9,13 +9,13 @@ export default function TermsOfService({ onBack }) {
     const sections = [
         {
             title: "1. Acceptance of Terms",
-            icon: <Gavel size={20} className="text-blue-500" />,
-            content: "By accessing and using Vacation Scheduler, you agree to be bound by these Terms of Service. If you do not agree to these terms, please stop using the application immediately."
+            icon: <Gavel size={20} className="text-brand-500" />,
+            content: "By accessing and using FindADate, you agree to be bound by these Terms of Service. If you do not agree to these terms, please stop using the application immediately."
         },
         {
             title: "2. Description of Service",
-            icon: <Scale size={20} className="text-blue-400" />,
-            content: "Vacation Scheduler is a free-to-use utility provided \"as is\" to help coordinate group availability. We provide calculation tools and data persistence, but we do not guarantee the completeness or accuracy of any generated schedule."
+            icon: <Scale size={20} className="text-brand-400" />,
+            content: "FindADate is a free-to-use utility provided \"as is\" to help coordinate group availability. We provide calculation tools and data persistence, but we do not guarantee the completeness or accuracy of any generated schedule."
         },
         {
             title: "3. User Responsibilities",
@@ -26,7 +26,7 @@ export default function TermsOfService({ onBack }) {
             title: "4. No Warranty (Disclaimer)",
             icon: <ShieldAlert size={20} className="text-rose-500" />,
             isWarning: true,
-            content: "THE SERVICE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. TO THE MAXIMUM EXTENT PERMITTED BY LAW, VACATION SCHEDULER DISCLAIMS ALL WARRANTIES, INCLUDING ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE."
+            content: "THE SERVICE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. TO THE MAXIMUM EXTENT PERMITTED BY LAW, FINDADATE DISCLAIMS ALL WARRANTIES, INCLUDING ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE."
         },
         {
             title: "5. Limitation of Liability",
@@ -70,7 +70,7 @@ export default function TermsOfService({ onBack }) {
                 </div>
 
                 <div className="space-y-8 pb-20 font-sans">
-                    <p className="text-gray-400 border-l-4 border-blue-500 pl-4 py-1 italic">
+                    <p className="text-gray-400 border-l-4 border-brand-500 pl-4 py-1 italic">
                         Last Updated: March 2026. Please read these terms carefully before using the service.
                     </p>
 
@@ -90,8 +90,8 @@ export default function TermsOfService({ onBack }) {
 
                     <div className="bg-dark-950 p-6 rounded-xl border border-dark-800 text-center">
                         <p className="text-sm text-gray-500 mb-2">Questions about these terms?</p>
-                        <a href="mailto:vacationscheduler.info@gmail.com" className="text-blue-500 hover:text-blue-400 font-bold underline">
-                            vacationscheduler.info@gmail.com
+                        <a href="mailto:hello@findadate.app" className="text-brand-500 hover:text-brand-400 font-bold underline">
+                            hello@findadate.app
                         </a>
                     </div>
                 </div>

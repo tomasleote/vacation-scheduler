@@ -33,7 +33,7 @@ function GroupSettings({
             <TruncatedText text={group.name} />
           </h2>
           <div className="mb-3">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 [&>svg]:w-3.5 [&>svg]:h-3.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 [&>svg]:w-3.5 [&>svg]:h-3.5">
               {getEventConfig(group.eventType).icon}
               {getEventConfig(group.eventType).label}
             </span>
@@ -48,7 +48,7 @@ function GroupSettings({
         </div>
         <button
           onClick={() => setEditing(!editing)}
-          className="text-blue-400 hover:text-blue-300"
+          className="text-brand-400 hover:text-brand-300"
         >
           {editing ? <X size={24} /> : <Edit size={24} />}
         </button>
@@ -87,14 +87,14 @@ function GroupSettings({
                 Group ID:
               </label>
               <div className="flex gap-2">
-                <code className="flex-1 px-3 py-1.5 border border-dark-700 rounded-lg text-xs font-mono bg-dark-800 text-blue-400 flex items-center">
+                <code className="flex-1 px-3 py-1.5 border border-dark-700 rounded-lg text-xs font-mono bg-dark-800 text-brand-400 flex items-center">
                   {groupId}
                 </code>
                 <button
                   onClick={() => copyGroupId(groupId)}
                   className="px-3 py-1.5 bg-dark-700 hover:bg-dark-800 text-gray-300 rounded-lg text-xs font-semibold border border-dark-700 transition-colors flex items-center gap-1"
                 >
-                  {copiedGroupId ? <CheckCircle2 size={14} className="text-blue-400" /> : <Copy size={14} />}
+                  {copiedGroupId ? <CheckCircle2 size={14} className="text-brand-400" /> : <Copy size={14} />}
                   {copiedGroupId ? 'Copied' : 'Copy ID'}
                 </button>
               </div>
@@ -103,13 +103,13 @@ function GroupSettings({
           <div className="border-t border-dark-700/50 mt-4 pt-3 flex flex-col gap-2">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Recovery Options</span>
             <div className="flex items-center gap-1.5 text-sm">
-              <Mail size={16} className={group.adminEmail ? "text-blue-400" : "text-gray-600"} />
+              <Mail size={16} className={group.adminEmail ? "text-brand-400" : "text-gray-600"} />
               <span className={group.adminEmail ? "text-gray-300" : "text-gray-500 italic"}>
                 {group.adminEmail || "No admin email set"}
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-sm">
-              <KeyRound size={16} className={group.recoveryPasswordHash ? "text-blue-400" : "text-gray-600"} />
+              <KeyRound size={16} className={group.recoveryPasswordHash ? "text-brand-400" : "text-gray-600"} />
               <span className={group.recoveryPasswordHash ? "text-gray-300" : "text-gray-500 italic"}>
                 {group.recoveryPasswordHash ? "Passphrase is set" : "No passphrase set"}
               </span>
@@ -138,7 +138,7 @@ function GroupSettings({
             <textarea
               value={editData.description || ''}
               onChange={(e) => setEditData({ ...editData, description: e.target.value.slice(0, 500) })}
-              className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-gray-50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
+              className="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-gray-50 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-colors"
               rows="2"
               maxLength="500"
             />
@@ -208,7 +208,7 @@ function GroupSettings({
           <div className="flex gap-2 pt-4">
             <button
               onClick={onSaveEdit}
-              className="flex-1 bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+              className="flex-1 bg-brand-500 hover:bg-brand-400 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
             >
               <Save size={18} /> Save
             </button>

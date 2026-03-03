@@ -2,8 +2,8 @@ import React from 'react';
 
 const baseClass =
   'w-full px-3 bg-dark-800 border border-dark-700 rounded-lg text-gray-50 ' +
-  'placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 ' +
-  'focus:border-blue-500 transition-colors';
+  'placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 ' +
+  'focus:border-brand-500 transition-colors';
 
 const sizeMap = {
   default: 'py-2.5',

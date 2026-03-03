@@ -15,7 +15,7 @@ export function LoadingSpinner({ variant = 'default', label = 'Loading...', size
   if (variant === 'inline') {
     return (
       <span role="status" className="inline-flex items-center">
-        <RefreshCw className={`${sizeClass} animate-spin text-blue-400`} aria-hidden="true" />
+        <RefreshCw className={`${sizeClass} animate-spin text-brand-400`} aria-hidden="true" />
         <span className="sr-only">{label}</span>
       </span>
     );
@@ -25,7 +25,7 @@ export function LoadingSpinner({ variant = 'default', label = 'Loading...', size
   return (
     <div className="flex items-center justify-center min-h-screen" role="status">
       <div className="flex flex-col items-center gap-3">
-        <RefreshCw className={`${sizeClass} animate-spin text-blue-400`} aria-hidden="true" />
+        <RefreshCw className={`${sizeClass} animate-spin text-brand-400`} aria-hidden="true" />
         <div className="text-lg text-gray-400">{label}</div>
       </div>
     </div>

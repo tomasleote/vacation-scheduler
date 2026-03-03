@@ -32,7 +32,7 @@ const DayCell = React.memo(({ day, currentYear, currentMonth, monthName, isDateI
       className={`
         aspect-square p-2 text-sm md:text-base font-bold rounded-xl transition-all duration-200
         ${!inRange ? 'bg-dark-950 text-gray-600 cursor-not-allowed opacity-50' : ''}
-        ${selected ? 'bg-blue-500 text-white shadow-md shadow-blue-500/20 transform scale-[1.02]' : inRange ? 'bg-dark-800 border border-dark-700 hover:border-blue-500/50 hover:bg-blue-500/5 text-gray-300' : ''}
+        ${selected ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20 transform scale-[1.02]' : inRange ? 'bg-dark-800 border border-dark-700 hover:border-brand-500/50 hover:bg-brand-500/5 text-gray-300' : ''}
       `}
     >
       {day}
@@ -219,14 +219,14 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
           {/* Name Pill */}
           <div className="relative group flex-1 min-w-[180px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <User size={16} className="text-gray-500 group-hover:text-blue-400 transition-colors" />
+              <User size={16} className="text-gray-500 group-hover:text-brand-400 transition-colors" />
             </div>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value.slice(0, MAX_PARTICIPANT_NAME_LENGTH))}
               required
-              className="w-full bg-dark-800 hover:bg-dark-700 text-gray-50 font-medium pl-10 pr-4 py-2.5 rounded-full border border-dark-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+              className="w-full bg-dark-800 hover:bg-dark-700 text-gray-50 font-medium pl-10 pr-4 py-2.5 rounded-full border border-dark-700 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all"
               placeholder="Your Name *"
               maxLength={MAX_PARTICIPANT_NAME_LENGTH}
             />
@@ -235,24 +235,24 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
           {/* Email Pill */}
           <div className="relative group flex-1 min-w-[180px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Mail size={16} className="text-gray-500 group-hover:text-blue-400 transition-colors" />
+              <Mail size={16} className="text-gray-500 group-hover:text-brand-400 transition-colors" />
             </div>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               maxLength="254"
-              className="w-full bg-dark-800 hover:bg-dark-700 text-gray-50 font-medium pl-10 pr-4 py-2.5 rounded-full border border-dark-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+              className="w-full bg-dark-800 hover:bg-dark-700 text-gray-50 font-medium pl-10 pr-4 py-2.5 rounded-full border border-dark-700 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 transition-all"
               placeholder="Email (optional)"
             />
           </div>
 
           <p className="w-full text-[10px] text-gray-500 mt-1 px-2 leading-tight">
-            Your details are stored to identify you within this group. See our <a href="/privacy" className="text-blue-500 hover:underline" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/privacy'); window.dispatchEvent(new Event('popstate')); }}>Privacy Policy</a>.
+            Your details are stored to identify you within this group. See our <a href="/privacy" className="text-brand-500 hover:underline" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/privacy'); window.dispatchEvent(new Event('popstate')); }}>Privacy Policy</a>.
           </p>
 
           {!singleDay && (
-            <div className="flex items-center gap-1.5 bg-dark-800 px-3 py-1.5 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500 transition-all shrink-0">
+            <div className="flex items-center gap-1.5 bg-dark-800 px-3 py-1.5 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-brand-500/30 focus-within:border-brand-500 transition-all shrink-0">
               <Clock size={16} className="text-gray-500" />
               <input
                 type="number"
@@ -270,7 +270,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
                 }}
                 className="w-8 text-center bg-transparent font-bold text-gray-50 focus:outline-none p-0"
               />
-              <span className="text-gray-400 font-medium pr-2 text-sm">days trip</span>
+              <span className="text-gray-400 font-medium pr-2 text-sm">days</span>
             </div>
           )}
 
@@ -280,22 +280,22 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
               type="button"
               onClick={() => setBlockType('flexible')}
               className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${blockType === 'flexible'
-                ? 'bg-dark-700 text-blue-400 shadow-sm ring-1 ring-blue-500/20'
+                ? 'bg-dark-700 text-brand-400 shadow-sm ring-1 ring-brand-500/20'
                 : 'text-gray-500 hover:text-gray-300'
                 }`}
             >
-              <Sparkles size={16} className={blockType === 'flexible' ? 'text-blue-400' : 'text-gray-500'} />
+              <Sparkles size={16} className={blockType === 'flexible' ? 'text-brand-400' : 'text-gray-500'} />
               Flexible
             </button>
             <button
               type="button"
               onClick={() => setBlockType('custom')}
               className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${blockType !== 'flexible'
-                ? 'bg-dark-700 text-blue-400 shadow-sm ring-1 ring-blue-500/20'
+                ? 'bg-dark-700 text-brand-400 shadow-sm ring-1 ring-brand-500/20'
                 : 'text-gray-500 hover:text-gray-300'
                 }`}
             >
-              <CalendarRange size={16} className={blockType !== 'flexible' ? 'text-blue-400' : 'text-gray-500'} />
+              <CalendarRange size={16} className={blockType !== 'flexible' ? 'text-brand-400' : 'text-gray-500'} />
               Block
 
               {/* Embedded Block Size Input */}
@@ -313,7 +313,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
                     setCustomBlockSize(String(val));
                   }}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-8 text-center bg-blue-500/10 font-bold text-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 rounded-md p-0"
+                  className="w-8 text-center bg-brand-500/10 font-bold text-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400 rounded-md p-0"
                 />
               )}
             </button>
@@ -324,7 +324,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
             type="button"
             onClick={handleSaveDetails}
             disabled={loading}
-            className="flex items-center justify-center shrink-0 bg-dark-800 hover:bg-dark-700 text-gray-300 font-bold px-4 py-2 rounded-full transition-all border border-dark-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 disabled:opacity-50 h-[38px] my-auto"
+            className="flex items-center justify-center shrink-0 bg-dark-800 hover:bg-dark-700 text-gray-300 font-bold px-4 py-2 rounded-full transition-all border border-dark-700 focus:outline-none focus:ring-2 focus:ring-brand-500/30 disabled:opacity-50 h-[38px] my-auto"
           >
             {loading ? 'Saving...' : 'Save Details'}
           </button>
@@ -376,7 +376,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
 
         {/* Dynamic Selection Counter */}
         {selectedDays.length > 0 && (
-          <div className="bg-blue-500/10 text-blue-400 p-3 rounded-xl border border-blue-500/20 mt-6 flex justify-center items-center gap-2 font-medium">
+          <div className="bg-brand-500/10 text-brand-400 p-3 rounded-xl border border-brand-500/20 mt-6 flex justify-center items-center gap-2 font-medium">
             <span data-testid="day-count">
               <strong>{selectedDays.length}</strong> day{selectedDays.length !== 1 ? 's' : ''} selected
             </span>
@@ -388,7 +388,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
           <button
             type="submit"
             disabled={loading || selectedDays.length === 0}
-            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md shadow-blue-500/20 hover:shadow-lg focus:ring-2 focus:ring-blue-500/30 disabled:opacity-50 flex items-center justify-center gap-2 transform active:scale-95"
+            className="w-full sm:w-auto bg-brand-500 hover:bg-brand-400 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md shadow-brand-500/20 hover:shadow-lg focus:ring-2 focus:ring-brand-500/30 disabled:opacity-50 flex items-center justify-center gap-2 transform active:scale-95"
           >
             <Calendar size={18} />
             {loading ? 'Submitting...' : 'Submit Availability'}

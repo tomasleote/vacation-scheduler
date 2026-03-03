@@ -1,7 +1,7 @@
 import React from 'react';
 
 const variantMap = {
-  primary: 'bg-blue-500 hover:bg-blue-400 text-white',
+  primary: 'bg-brand-500 hover:bg-brand-400 text-white',
   secondary: 'bg-dark-800 hover:bg-dark-700 text-gray-300 border border-dark-700',
   danger: 'bg-rose-600 hover:bg-rose-500 text-white',
   success: 'bg-emerald-600 hover:bg-emerald-500 text-white',

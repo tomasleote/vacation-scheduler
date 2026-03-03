@@ -31,7 +31,7 @@ const ParticipantRow = React.memo(function ParticipantRow({
         <div className="flex items-center justify-end gap-1">
           <button
             onClick={() => onEdit(participant)}
-            className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
+            className="p-1.5 text-gray-400 hover:text-brand-400 hover:bg-brand-500/10 rounded-md transition-colors"
             title="Edit participant"
             data-testid={`edit-participant-${participant.id}`}
           >
@@ -56,7 +56,7 @@ const ParticipantRow = React.memo(function ParticipantRow({
           <button
             onClick={() => onSendInvite(participant)}
             disabled={!participant.email || !participant.email.trim() || inviteSendingId === participant.id}
-            className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 text-gray-400 hover:text-brand-400 hover:bg-brand-500/10 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             title={!participant.email || !participant.email.trim() ? 'No email address' : 'Send invite email'}
             data-testid={`send-invite-${participant.id}`}
           >
@@ -93,7 +93,7 @@ function ParticipantTable({ participants, actions }) {
         <h3 className="text-xl font-bold text-gray-50">Participants ({participants?.length || 0})</h3>
         <button
           onClick={() => setShowCreateParticipant(s => !s)}
-          className="bg-blue-500 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-lg text-sm flex items-center gap-2 transition-colors"
+          className="bg-brand-500 hover:bg-brand-400 text-white font-semibold py-2 px-4 rounded-lg text-sm flex items-center gap-2 transition-colors"
         >
           <UserPlus size={16} /> Add Participant
         </button>
@@ -132,7 +132,7 @@ function ParticipantTable({ participants, actions }) {
             <button
               onClick={handleCreateParticipant}
               disabled={createLoading || !newParticipantName.trim()}
-              className="bg-blue-500 hover:bg-blue-400 text-white font-semibold py-2 px-4 rounded-lg text-sm disabled:opacity-50 transition-colors flex items-center gap-1.5"
+              className="bg-brand-500 hover:bg-brand-400 text-white font-semibold py-2 px-4 rounded-lg text-sm disabled:opacity-50 transition-colors flex items-center gap-1.5"
               data-testid="create-participant-submit"
             >
               {createLoading ? 'Adding...' : 'Add'}
@@ -216,7 +216,7 @@ function ParticipantTable({ participants, actions }) {
             <button
               onClick={handleEditParticipant}
               disabled={editLoading || !editParticipantName.trim()}
-              className="flex-1 bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              className="flex-1 bg-brand-500 hover:bg-brand-400 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
               data-testid="edit-participant-save"
             >
               <Save size={18} /> {editLoading ? 'Saving...' : 'Save'}

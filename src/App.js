@@ -18,6 +18,29 @@ function App() {
   const [participantId, setParticipantId] = useState(null);
 
   useEffect(() => {
+    // One-time migration from old localStorage keys
+    try {
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith('vacation_admin_')) {
+          const newKey = key.replace('vacation_admin_', 'fad_admin_');
+          localStorage.setItem(newKey, localStorage.getItem(key));
+          localStorage.removeItem(key);
+        }
+        if (key.startsWith('vacation_p_')) {
+          const newKey = key.replace('vacation_p_', 'fad_p_');
+          localStorage.setItem(newKey, localStorage.getItem(key));
+          localStorage.removeItem(key);
+        }
+        if (key === 'vacation_storage_consent') {
+          localStorage.setItem('fad_storage_consent', localStorage.getItem(key));
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      console.error("localStorage migration vacation_admin_/vacation_p_ -> fad_admin_/fad_p_ failed:", error);
+    }
+
     const path = window.location.pathname;
     if (path === '/docs') {
       setCurrentPage('docs');
@@ -46,7 +69,7 @@ function App() {
     if (adminTok) {
       setAdminToken(adminTok);
       setCurrentPage('admin');
-      try { localStorage.setItem(`vacation_admin_${gId}`, adminTok); } catch { }
+      try { localStorage.setItem(`fad_admin_${gId}`, adminTok); } catch { }
       return;
     }
 
@@ -58,13 +81,13 @@ function App() {
 
     // localStorage fallback
     try {
-      const storedAdmin = localStorage.getItem(`vacation_admin_${gId}`);
+      const storedAdmin = localStorage.getItem(`fad_admin_${gId}`);
       if (storedAdmin) {
         setAdminToken(storedAdmin);
         setCurrentPage('admin');
         return;
       }
-      const storedParticipant = localStorage.getItem(`vacation_p_${gId}`);
+      const storedParticipant = localStorage.getItem(`fad_p_${gId}`);
       if (storedParticipant) {
         const { participantId: storedPId } = JSON.parse(storedParticipant);
         setParticipantId(storedPId);
@@ -80,13 +103,13 @@ function App() {
     setGroupId(groupId);
     setAdminToken(adminToken);
     // Persist token immediately so it survives page refresh before entering admin panel
-    try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch { }
+    try { localStorage.setItem(`fad_admin_${groupId}`, adminToken); } catch { }
     setCurrentPage('created');
   };
 
   const handleEnterAdmin = () => {
     setCurrentPage('admin');
-    try { localStorage.setItem(`vacation_admin_${groupId}`, adminToken); } catch { }
+    try { localStorage.setItem(`fad_admin_${groupId}`, adminToken); } catch { }
     window.history.pushState({}, '', `?group=${groupId}&admin=${adminToken}`);
   };
 
@@ -111,7 +134,7 @@ function App() {
   const handleRecoverAdmin = (gId, newAdminToken) => {
     setGroupId(gId);
     setAdminToken(newAdminToken);
-    try { localStorage.setItem(`vacation_admin_${gId}`, newAdminToken); } catch { }
+    try { localStorage.setItem(`fad_admin_${gId}`, newAdminToken); } catch { }
     setCurrentPage('admin');
     window.history.pushState({}, '', `?group=${gId}&admin=${newAdminToken}`);
   };

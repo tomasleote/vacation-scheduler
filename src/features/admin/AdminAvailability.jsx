@@ -21,7 +21,7 @@ function AdminAvailability({
         </h3>
         <button
           onClick={() => setShowAvailability(s => !s)}
-          className="text-blue-400 hover:text-blue-300 text-sm font-semibold"
+          className="text-brand-400 hover:text-brand-300 text-sm font-semibold"
         >
           {showAvailability ? 'Hide' : adminParticipantId ? 'Update' : 'Add'}
         </button>

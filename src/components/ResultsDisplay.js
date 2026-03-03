@@ -17,7 +17,7 @@ function ResultsDisplay({ overlaps }) {
   return (
     <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
       <h3 className="text-xl font-bold text-gray-50 mb-6 flex items-center gap-2">
-        <TrendingUp size={24} className="text-blue-400" />
+        <TrendingUp size={24} className="text-brand-400" />
         Top Overlap Periods
       </h3>
 
@@ -34,7 +34,7 @@ function ResultsDisplay({ overlaps }) {
           return (
             <div key={i} className="bg-dark-800 border border-dark-700 rounded-lg p-4 hover:border-dark-700 transition">
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-3xl font-bold text-blue-400">{overlap.availabilityPercent}%</span>
+                <span className="text-3xl font-bold text-brand-400">{overlap.availabilityPercent}%</span>
                 <span className="text-gray-400">available</span>
               </div>
 
@@ -45,7 +45,7 @@ function ResultsDisplay({ overlaps }) {
               <div className="space-y-2">
                 <div className="bg-dark-700 rounded-full h-2">
                   <div
-                    className="bg-blue-500 h-2 rounded-full transition-all"
+                    className="bg-brand-500 h-2 rounded-full transition-all"
                     style={{ width: `${overlap.availabilityPercent}%` }}
                   ></div>
                 </div>
@@ -60,8 +60,8 @@ function ResultsDisplay({ overlaps }) {
         })}
       </div>
 
-      <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-        <p className="text-sm text-blue-300 flex items-start gap-2">
+      <div className="mt-6 p-4 bg-brand-500/10 border border-brand-500/20 rounded-lg">
+        <p className="text-sm text-brand-300 flex items-start gap-2">
           <Lightbulb size={16} className="mt-0.5 shrink-0" />
           <span><strong>Tip:</strong> The highest percentage means the most people are available for that period.</span>
         </p>

@@ -132,7 +132,7 @@ function AdminPage({ onBack }) {
         setAdminParticipantId(participantId);
         try {
           localStorage.setItem(
-            `vacation_admin_p_${groupId}`,
+            `fad_admin_p_${groupId}`,
             JSON.stringify({ participantId, name: formData.name, email: formData.email, duration: formData.duration })
           );
         } catch { }
@@ -194,7 +194,7 @@ function AdminPage({ onBack }) {
         <div className="flex justify-between items-start mb-8">
           <button
             onClick={onBack}
-            className="text-blue-400 hover:text-blue-300 font-semibold"
+            className="text-brand-400 hover:text-brand-300 font-semibold"
           >
             ← Back to Home
           </button>
@@ -242,7 +242,7 @@ function AdminPage({ onBack }) {
               <button
                 onClick={handleSendReminder}
                 disabled={reminderSending || !participants?.some(p => p?.email && p.email.trim() !== '')}
-                className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+                className="w-full bg-brand-500 hover:bg-brand-400 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
                 title={!participants?.some(p => p?.email && p.email.trim() !== '') ? 'No participants have an email address' : ''}
               >
                 <Mail size={18} /> {reminderSending ? 'Sending...' : 'Send Reminder'}

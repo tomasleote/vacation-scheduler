@@ -143,10 +143,10 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
         if (count === 0) return 'bg-dark-800/50';
 
         const ratio = count / max;
-        if (ratio >= 0.9) return 'bg-blue-500 text-white font-bold shadow-[0_0_12px_rgba(59,130,246,0.3)]';
-        if (ratio >= 0.7) return 'bg-blue-600 text-white font-semibold';
-        if (ratio >= 0.4) return 'bg-blue-800 text-blue-200';
-        if (ratio > 0) return 'bg-blue-900/60 text-blue-300';
+        if (ratio >= 0.9) return 'bg-brand-500 text-white font-bold shadow-[0_0_12px_rgba(249,115,22,0.3)]';
+        if (ratio >= 0.7) return 'bg-brand-600 text-white font-semibold';
+        if (ratio >= 0.4) return 'bg-amber-500 text-amber-100';
+        if (ratio > 0) return 'bg-brand-900/60 text-brand-300';
         return 'bg-dark-800';
     };
 
@@ -181,11 +181,11 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
             <div className="w-full md:w-[60%] p-6 border-b md:border-b-0 md:border-r border-dark-700 bg-dark-900">
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-2">
-                        <CalendarIcon size={24} className="text-blue-400" />
+                        <CalendarIcon size={24} className="text-brand-400" />
                         <h3 className="text-xl font-bold text-gray-50">Availability Heatmap</h3>
                     </div>
                     {onDurationChange && !singleDay ? (
-                        <div className="flex items-center gap-1 bg-dark-800 pl-3 pr-1 py-1 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500">
+                        <div className="flex items-center gap-1 bg-dark-800 pl-3 pr-1 py-1 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-brand-500/30 focus-within:border-brand-500">
                             <input
                                 type="number"
                                 min="1"
@@ -208,7 +208,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                         e.target.blur();
                                     }
                                 }}
-                                className="w-10 text-center text-sm text-blue-400 font-bold bg-transparent outline-none p-0"
+                                className="w-10 text-center text-sm text-brand-400 font-bold bg-transparent outline-none p-0"
                             />
                             <span className="text-sm text-gray-400 font-medium whitespace-nowrap pr-2">
                                 -Day Period
@@ -269,15 +269,15 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                             disabled={!inRange || !wouldBeValidBlock}
                                             className={`
                         w-full h-full rounded-lg transition-all duration-200 flex flex-col items-center justify-center gap-1
-                         ${!inRange ? 'text-gray-600 cursor-not-allowed opacity-50' : 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:ring-offset-1 hover:ring-offset-dark-800'}
-                         ${isHighlighted ? 'ring-2 ring-blue-500 shadow-md transform scale-[1.02] z-10' : ''}
+                         ${!inRange ? 'text-gray-600 cursor-not-allowed opacity-50' : 'cursor-pointer hover:ring-2 hover:ring-brand-400 hover:ring-offset-1 hover:ring-offset-dark-800'}
+                         ${isHighlighted ? 'ring-2 ring-brand-500 shadow-md transform scale-[1.02] z-10' : ''}
                          ${inRange && !isHighlighted ? getHeatmapColor(count, maxParts) : ''}
-                         ${isHighlighted ? 'bg-blue-500 text-white font-bold' : ''}
+                         ${isHighlighted ? 'bg-brand-500 text-white font-bold' : ''}
                       `}
                                         >
                                             <span className="text-sm md:text-base">{day}</span>
                                             {inRange && maxParts > 0 && (
-                                                <span className={`text-[10px] md:text-xs leading-none ${isHighlighted ? 'text-blue-100' : 'opacity-70'}`}>
+                                                <span className={`text-[10px] md:text-xs leading-none ${isHighlighted ? 'text-brand-100' : 'opacity-70'}`}>
                                                     {count}/{maxParts}
                                                 </span>
                                             )}
@@ -287,7 +287,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                     )}
                                     {/* Highlight connecting bar for contiguous days */}
                                     {isHighlighted && !isEndOfBlock && (new Date(dateStr).getDay() !== 6) && (
-                                        <div className="absolute top-1/2 -right-1 md:-right-2 w-2 md:w-4 h-8 -translate-y-1/2 bg-blue-500 z-0"></div>
+                                        <div className="absolute top-1/2 -right-1 md:-right-2 w-2 md:w-4 h-8 -translate-y-1/2 bg-brand-500 z-0"></div>
                                     )}
                                 </div>
                             );
@@ -299,10 +299,10 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                         <span>Least Available</span>
                         <div className="flex gap-1">
                             <div className="w-4 h-4 rounded bg-dark-800"></div>
-                            <div className="w-4 h-4 rounded bg-blue-900/60"></div>
-                            <div className="w-4 h-4 rounded bg-blue-800"></div>
-                            <div className="w-4 h-4 rounded bg-blue-600"></div>
-                            <div className="w-4 h-4 rounded bg-blue-500"></div>
+                            <div className="w-4 h-4 rounded bg-brand-900/60"></div>
+                            <div className="w-4 h-4 rounded bg-amber-500"></div>
+                            <div className="w-4 h-4 rounded bg-brand-600"></div>
+                            <div className="w-4 h-4 rounded bg-brand-500"></div>
                         </div>
                         <span>Most Available</span>
                     </div>
@@ -318,14 +318,14 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                     <div className="animate-in fade-in duration-200 h-full flex flex-col">
                         <div className="flex justify-between items-start mb-6 pb-4 border-b border-dark-700">
                             <div>
-                                <h4 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">
+                                <h4 className="text-sm font-bold text-brand-400 uppercase tracking-wider mb-1">
                                     {lockedDate ? (singleDay ? "Selected Date" : "Selected Period") : (singleDay ? "Hovered Date" : "Hovered Period")}
                                 </h4>
                                 <div className="text-xl md:text-2xl font-bold text-gray-50">
                                     {formatDateRange(blockDetails.start, blockDetails.end)}
                                 </div>
                             </div>
-                            <div className="bg-blue-500/10 text-blue-400 px-3 py-2 rounded-lg text-center font-bold">
+                            <div className="bg-brand-500/10 text-brand-400 px-3 py-2 rounded-lg text-center font-bold">
                                 <div className="text-2xl leading-none">{blockDetails.available.length}</div>
                                 <div className="text-xs uppercase mt-1">Available</div>
                             </div>
@@ -409,7 +409,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                     /* State 2: No block is highlighted, show Top Rankings */
                     <div className="h-full flex flex-col">
                         <h4 className="flex items-center gap-2 text-lg font-bold text-gray-50 mb-6 pb-4 border-b border-dark-700">
-                            <TrendingUp size={20} className="text-blue-400" />
+                            <TrendingUp size={20} className="text-brand-400" />
                             {singleDay ? 'Top Overlap Dates' : 'Top Overlap Periods'}
                         </h4>
 
@@ -439,13 +439,13 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                                 setLockedDate(overlapStart.toISOString().split('T')[0]);
                                             }}
                                             className={`w-full text-left bg-dark-800 border rounded-xl p-4 transition-all duration-200
-                                                ${i === 0 ? 'border-2 border-blue-500/50 shadow-md hover:border-blue-400' : 'border-dark-700 hover:border-dark-700 hover:shadow-sm'}
+                                                ${i === 0 ? 'border-2 border-brand-500/50 shadow-md hover:border-brand-400' : 'border-dark-700 hover:border-dark-700 hover:shadow-sm'}
                                             `}
                                         >
                                             <div className="flex justify-between items-start mb-2">
                                                 <div className="flex items-center gap-2">
                                                     <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold
-                                                        ${i === 0 ? 'bg-blue-500 text-white' : 'bg-dark-700 text-gray-300'}
+                                                        ${i === 0 ? 'bg-brand-500 text-white' : 'bg-dark-700 text-gray-300'}
                                                     `}>
                                                         {i + 1}
                                                     </span>
@@ -453,7 +453,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                                                         {formatDateRange(overlap.startDate, overlap.endDate)}
                                                     </span>
                                                 </div>
-                                                <span className="text-sm font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
+                                                <span className="text-sm font-bold text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full">
                                                     {overlap.availabilityPercent}%
                                                 </span>
                                             </div>

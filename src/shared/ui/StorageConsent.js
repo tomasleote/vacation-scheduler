@@ -8,7 +8,7 @@ export function StorageConsent({ onNavigate }) {
         let consent = null;
         if (typeof window !== 'undefined') {
             try {
-                consent = localStorage.getItem('vacation_storage_consent');
+                consent = localStorage.getItem('fad_storage_consent');
             } catch (e) {
                 console.warn('[StorageConsent] Failed to read consent:', e);
             }
@@ -22,7 +22,7 @@ export function StorageConsent({ onNavigate }) {
 
     const handleAccept = () => {
         try {
-            localStorage.setItem('vacation_storage_consent', 'accepted');
+            localStorage.setItem('fad_storage_consent', 'accepted');
         } catch (e) {
             console.warn('[StorageConsent] Failed to save consent:', e);
         }
@@ -33,7 +33,7 @@ export function StorageConsent({ onNavigate }) {
         try {
             // "Declining" still dismisses the banner, but we note they didn't explicitly accept.
             // Under GDPR, we shouldn't keep pestering them if they say no.
-            localStorage.setItem('vacation_storage_consent', 'declined');
+            localStorage.setItem('fad_storage_consent', 'declined');
         } catch (e) {
             console.warn('[StorageConsent] Failed to save decline state:', e);
         }
@@ -44,10 +44,10 @@ export function StorageConsent({ onNavigate }) {
 
     return (
         <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:w-96 z-50 animate-in slide-in-from-bottom-8 duration-500">
-            <div className="bg-dark-900 border border-blue-500/30 shadow-2xl shadow-blue-500/10 rounded-2xl p-5 backdrop-blur-xl">
+            <div className="bg-dark-900 border border-brand-500/30 shadow-2xl shadow-brand-500/10 rounded-2xl p-5 backdrop-blur-xl">
                 <div className="flex items-start gap-4">
-                    <div className="bg-blue-500/10 p-2 rounded-lg shrink-0">
-                        <ShieldCheck className="text-blue-400" size={24} />
+                    <div className="bg-brand-500/10 p-2 rounded-lg shrink-0">
+                        <ShieldCheck className="text-brand-400" size={24} />
                     </div>
                     <div className="flex-1">
                         <div className="flex justify-between items-start mb-1">
@@ -68,7 +68,7 @@ export function StorageConsent({ onNavigate }) {
                             <div className="flex gap-2">
                                 <button
                                     onClick={handleAccept}
-                                    className="flex-1 bg-blue-500 hover:bg-blue-400 text-white text-sm font-bold py-2 rounded-lg transition-all shadow-lg shadow-blue-500/20"
+                                    className="flex-1 bg-brand-500 hover:bg-brand-400 text-white text-sm font-bold py-2 rounded-lg transition-all shadow-lg shadow-brand-500/20"
                                 >
                                     Accept
                                 </button>
@@ -89,7 +89,7 @@ export function StorageConsent({ onNavigate }) {
                                         window.dispatchEvent(new Event('popstate'));
                                     }
                                 }}
-                                className="text-[11px] text-blue-500 hover:text-blue-400 font-bold uppercase tracking-wider text-center mt-1"
+                                className="text-[11px] text-brand-500 hover:text-brand-400 font-bold uppercase tracking-wider text-center mt-1"
                             >
                                 Learn More about Privacy
                             </button>

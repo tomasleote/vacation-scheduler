@@ -18,10 +18,10 @@ function GroupCreatedScreen({ groupId, adminToken, onEnterAdmin, onBack }) {
       >
         <Card className="space-y-6 shadow-2xl rounded-2xl" variant="default">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 text-blue-400 mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-500/10 text-brand-400 mb-4">
               <span className="text-3xl">&#10003;</span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-50">Group created!</h1>
+            <h1 className="text-2xl font-bold text-gray-50">Event created!</h1>
           </div>
 
           <div>
@@ -50,7 +50,7 @@ function GroupCreatedScreen({ groupId, adminToken, onEnterAdmin, onBack }) {
           {/* Recovery info */}
           <Card variant="secondary">
             <p className="text-sm font-semibold text-gray-200 flex items-center gap-2">
-              <KeyRound size={15} className="text-blue-400" /> Lost your admin link?
+              <KeyRound size={15} className="text-brand-400" /> Lost your admin link?
             </p>
             <p className="text-xs text-gray-400 leading-relaxed">
               You can recover it anytime from the home page using:
@@ -59,7 +59,7 @@ function GroupCreatedScreen({ groupId, adminToken, onEnterAdmin, onBack }) {
               <li className="flex items-start gap-1.5">✦ <span><strong className="text-gray-200">Recovery passphrase</strong> — if you set one during group creation</span></li>
               <li className="flex items-start gap-1.5">✦ <span><strong className="text-gray-200">Email magic link</strong> — if you added an admin email</span></li>
             </ul>
-            <p className="text-xs text-blue-400/80 pt-1">Click <strong>"Recover"</strong> in the top nav of the home page.</p>
+            <p className="text-xs text-brand-400/80 pt-1">Click <strong>"Recover"</strong> in the top nav of the home page.</p>
           </Card>
 
           <Button

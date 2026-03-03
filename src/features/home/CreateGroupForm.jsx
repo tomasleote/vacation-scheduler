@@ -74,7 +74,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
             aria-label={type.label}
             onClick={() => setEventType(type.key)}
             className={`p-2 flex flex-col items-center justify-center rounded-lg border text-center transition-colors ${eventType === type.key
-              ? 'border-blue-500 bg-blue-500/10 text-blue-400'
+              ? 'border-brand-500 bg-brand-500/10 text-brand-400'
               : 'border-dark-700 bg-dark-800 text-gray-400 hover:border-gray-500'
               }`}
           >
@@ -141,7 +141,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
       </Card>
 
       <div>
-        <Label>Admin Email <span className="text-blue-400 text-xs">(recommended — enables email recovery)</span></Label>
+        <Label>Admin Email <span className="text-brand-400 text-xs">(recommended — enables email recovery)</span></Label>
         <Input
           type="email"
           value={adminEmail}
@@ -150,7 +150,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
           placeholder="your@email.com"
         />
         <p className="text-[10px] text-gray-500 mt-1 leading-tight">
-          Used only for recovery and notifications. See our <a href="/privacy" className="text-blue-500 hover:underline" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/privacy'); window.dispatchEvent(new Event('popstate')); }}>Privacy Policy</a>.
+          Used only for recovery and notifications. See our <a href="/privacy" className="text-brand-500 hover:underline" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/privacy'); window.dispatchEvent(new Event('popstate')); }}>Privacy Policy</a>.
         </p>
       </div>
 
