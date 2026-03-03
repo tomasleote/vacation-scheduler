@@ -1,369 +1,121 @@
-# API Documentation
+# API Documentation 🚀
 
-## Database API (Firebase Realtime Database)
+Internal services and data models for **Find A Day**.
 
-### Groups
+## 🏗️ Core Services
+
+### Group Service (`src/services/groupService.js`)
+
+Used for creating and managing group events.
 
 #### Create Group
-
 ```javascript
-import { createGroup } from './firebase';
+import { createGroup } from './services/groupService';
 
-const groupId = await createGroup({
-  name: 'Summer Vacation 2024',
-  startDate: '2024-06-01',
-  endDate: '2024-08-31',
-  adminEmail: 'admin@example.com'
+const { groupId, adminToken } = await createGroup({
+  name: 'Summer Trip 2026',
+  description: 'Optional group description',
+  startDate: '2026-06-01',
+  endDate: '2026-08-31',
+  eventType: 'vacation', // 'vacation'|'dinner'|'party'|'gamenight'|'team'|'other'
+  adminEmail: 'admin@example.com',
+  location: {
+    name: 'Beach Resort',
+    formattedAddress: '123 Ocean Drive, Miami, FL',
+    lat: 25.7617,
+    lng: -80.1918
+  }
 });
-```
-
-**Returns**: `string` - Group ID
-
-#### Get Group
-
-```javascript
-import { getGroup } from './firebase';
-
-const group = await getGroup(groupId);
-// Returns:
-// {
-//   id: string,
-//   name: string,
-//   startDate: string,
-//   endDate: string,
-//   adminEmail: string,
-//   createdAt: string
-// }
 ```
 
 #### Update Group
-
 ```javascript
-import { updateGroup } from './firebase';
+import { updateGroup } from './services/groupService';
 
 await updateGroup(groupId, {
-  name: 'Updated Group Name',
-  endDate: '2024-09-15'
+  name: 'Revised Trip Name',
+  description: 'Updated details...'
 });
 ```
 
-#### Delete Group
+---
 
-```javascript
-import { deleteGroup } from './firebase';
+### Participant Service (`src/services/participantService.js`)
 
-await deleteGroup(groupId);
-```
-
-### Participants
+Handles participant availability and basic profile data.
 
 #### Add Participant
-
 ```javascript
-import { addParticipant } from './firebase';
+import { addParticipant } from './services/participantService';
 
 const participantId = await addParticipant(groupId, {
   name: 'John Doe',
   email: 'john@example.com',
-  duration: 5,
-  blockType: 'flexible',
-  availableDays: ['2024-06-01', '2024-06-02', '2024-06-03']
+  duration: 5,           // Days intended to stay
+  blockType: 'flexible', // 'flexible' or exact continuous block
+  availableDays: ['2026-06-10', '2026-06-11', '2026-06-12']
 });
 ```
 
-**Returns**: `string` - Participant ID
+---
 
-#### Get Participants
-
-```javascript
-import { getParticipants } from './firebase';
-
-const participants = await getParticipants(groupId);
-// Returns: Array of participant objects
-```
-
-#### Delete Participant
-
-```javascript
-import { deleteParticipant } from './firebase';
-
-await deleteParticipant(groupId, participantId);
-```
-
-## Utility APIs
-
-### Overlap Calculation
-
-#### Calculate Overlap
-
-```javascript
-import { calculateOverlap } from './utils/overlap';
-
-const overlaps = calculateOverlap(
-  participants,      // Array of participant objects
-  '2024-06-01',      // Start date (YYYY-MM-DD)
-  '2024-08-31',      // End date (YYYY-MM-DD)
-  5                  // Duration in days
-);
-
-// Returns: Array of overlap objects
-// [{
-//   startDate: Date,
-//   endDate: Date,
-//   availableCount: number,
-//   totalParticipants: number,
-//   availabilityPercent: number,
-//   dayCount: number
-// }]
-```
-
-#### Get Best Overlap Periods
-
-```javascript
-import { getBestOverlapPeriods } from './utils/overlap';
-
-const topPeriods = getBestOverlapPeriods(overlaps, 5);
-// Returns first 5 best periods sorted by availability %
-```
-
-#### Format Date Range
-
-```javascript
-import { formatDateRange } from './utils/overlap';
-
-const formatted = formatDateRange(
-  new Date('2024-06-01'),
-  new Date('2024-06-05')
-);
-// Returns: "Jun 1 - 5"
-```
-
-#### Get Dates Between
-
-```javascript
-import { getDatesBetween } from './utils/overlap';
-
-const dates = getDatesBetween('2024-06-01', '2024-06-05');
-// Returns: ['2024-06-01', '2024-06-02', '2024-06-03', '2024-06-04', '2024-06-05']
-```
-
-### Export
-
-#### Export to CSV
-
-```javascript
-import { exportToCSV } from './utils/export';
-
-exportToCSV(group, participants, overlaps);
-// Triggers CSV download
-```
-
-## Cloud Functions API
-
-### Send Reminder Email
-
-**Endpoint**: `POST /api/send-reminder`
-
-**Request**:
-
-```json
-{
-  "groupId": "1707000000000",
-  "groupName": "Summer Trip 2024",
-  "adminEmail": "admin@example.com",
-  "participantCount": 5,
-  "daysRemaining": 45
-}
-```
-
-**Response**:
-
-```json
-{
-  "success": true,
-  "message": "Reminder sent"
-}
-```
-
-**Error Responses**:
-
-```json
-{
-  "error": "Admin email required"
-}
-```
-
-```json
-{
-  "error": "Failed to send email"
-}
-```
-
-## Data Models
+## 📊 Data Models
 
 ### Group
-
 ```typescript
 interface Group {
-  id: string;
-  name: string;
-  startDate: string;        // YYYY-MM-DD format
-  endDate: string;          // YYYY-MM-DD format
+  id: string;               // UUID
+  name: string;             // Max 100 chars
+  description?: string;     // Max 1000 chars
+  startDate: string;        // YYYY-MM-DD
+  endDate: string;          // YYYY-MM-DD
+  eventType: string;        // e.g., 'vacation'
   adminEmail?: string;
-  createdAt: string;        // ISO 8601 timestamp
+  adminTokenHash: string;   // SHA-256 hash of adminToken
+  createdAt: string;        // ISO 8601
+  location?: {
+    placeId?: string;
+    name?: string;
+    formattedAddress: string;
+    lat?: number;
+    lng?: number;
+  };
 }
 ```
 
 ### Participant
-
 ```typescript
 interface Participant {
-  id: string;
-  name: string;
+  id: string;               // UUID
+  name: string;             // Unique within group
   email?: string;
-  duration: number;         // Days (1-10)
-  blockType: 'flexible' | '3' | '4' | '5';
+  duration: number;         // Suggested trip length
+  blockType: string;        // 'flexible' or specific number
   availableDays: string[];  // Array of YYYY-MM-DD
-  createdAt: string;        // ISO 8601 timestamp
+  createdAt: string;        // ISO 8601
 }
 ```
 
-### Overlap
+---
 
-```typescript
-interface Overlap {
-  startDate: Date;
-  endDate: Date;
-  availableCount: number;
-  totalParticipants: number;
-  availabilityPercent: number;
-  dayCount: number;
-}
-```
+## 🌩️ Serverless API (`/api`)
 
-## Error Handling
+These routes handle sensitive operations like emailing and recovery.
 
-All API calls may throw errors. Wrap in try-catch:
+### Send Welcome/Invite
+**Endpoint**: `POST /api/send-welcome`
+**Payload**: `{ groupId, adminToken, groupName, startDate, endDate, adminEmail, baseUrl }`
 
-```javascript
-try {
-  const group = await getGroup(groupId);
-} catch (error) {
-  console.error('Failed to fetch group:', error.message);
-  // Handle error in UI
-}
-```
+### Recover Admin Links
+**Endpoint**: `POST /api/recover`
+**Payload**: `{ email, baseUrl }` or `{ groupId, email, baseUrl }`
 
-## Real-time Listeners
+---
 
-For real-time updates, use Firebase directly:
+## 🧮 Calculation Logic (`src/utils/overlap.js`)
 
-```javascript
-import { database } from './firebase';
-import { ref, onValue } from 'firebase/database';
-
-const groupRef = ref(database, `groups/${groupId}`);
-
-onValue(groupRef, (snapshot) => {
-  const group = snapshot.val();
-  console.log('Group updated:', group);
-});
-```
-
-## Batch Operations
-
-Update multiple fields:
-
-```javascript
-import { updateGroup } from './firebase';
-
-await updateGroup(groupId, {
-  name: 'New Name',
-  endDate: '2024-09-01',
-  adminEmail: 'newemail@example.com'
-});
-```
-
-## Pagination & Limits
-
-Firebase Realtime Database doesn't have built-in pagination. For large datasets:
-
-```javascript
-// Get first 100 participants
-const participants = await getParticipants(groupId);
-const paginated = participants.slice(0, 100);
-```
-
-## Rate Limiting
-
-Firebase free tier has rate limits:
-- Read/Write: 1 connection per 100ms
-- Storage: 1GB total
-
-## Caching
-
-No client-side caching implemented. Consider adding:
-
-```javascript
-const cache = {};
-
-async function getCachedGroup(groupId) {
-  if (cache[groupId]) return cache[groupId];
-  const group = await getGroup(groupId);
-  cache[groupId] = group;
-  return group;
-}
-```
-
-## Examples
-
-### Create and Populate a Group
-
-```javascript
-import { createGroup, addParticipant } from './firebase';
-
-// Create group
-const groupId = await createGroup({
-  name: 'Beach Vacation',
-  startDate: '2024-07-01',
-  endDate: '2024-07-31',
-  adminEmail: 'admin@example.com'
-});
-
-// Add participants
-await addParticipant(groupId, {
-  name: 'Alice',
-  email: 'alice@example.com',
-  duration: 5,
-  blockType: 'flexible',
-  availableDays: ['2024-07-05', '2024-07-06', '2024-07-07']
-});
-
-await addParticipant(groupId, {
-  name: 'Bob',
-  email: 'bob@example.com',
-  duration: 3,
-  blockType: '3',
-  availableDays: ['2024-07-06', '2024-07-07', '2024-07-08']
-});
-```
-
-### Calculate and Export Results
-
-```javascript
-import { calculateOverlap } from './utils/overlap';
-import { exportToCSV } from './utils/export';
-import { getGroup, getParticipants } from './firebase';
-
-const group = await getGroup(groupId);
-const participants = await getParticipants(groupId);
-
-const overlaps = calculateOverlap(
-  participants,
-  group.startDate,
-  group.endDate,
-  5  // Find 5-day periods
-);
-
-exportToCSV(group, participants, overlaps);
-```
+The core algorithm finds the best overlapping window by:
+1. Identifying all unique start dates within the group window.
+2. For each date, checking how many participants have a contiguous block of availability starting there.
+3. Ranking results by the highest number of available participants.
+4. Returning a sorted array of the best windows for the admin to review.
