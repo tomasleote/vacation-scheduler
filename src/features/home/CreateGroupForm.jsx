@@ -4,6 +4,7 @@ import { useNotification } from '../../context/NotificationContext';
 import { Input, Textarea, Label, Button, Card } from '../../shared/ui';
 import { apiCall } from '../../services/apiService';
 import { MAX_GROUP_NAME_LENGTH } from '../../utils/constants/validation';
+import { EVENT_TYPES, getEventConfig } from '../../utils/eventTypes';
 
 function CreateGroupForm({ onSuccess, onCancel }) {
   const [name, setName] = useState('');
@@ -14,7 +15,10 @@ function CreateGroupForm({ onSuccess, onCancel }) {
   const [passphrase, setPassphrase] = useState('');
   const [showPassphrase, setShowPassphrase] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [eventType, setEventType] = useState('vacation');
   const { addNotification } = useNotification();
+
+  const config = getEventConfig(eventType);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +33,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
     try {
       const { createGroup, hashPhrase } = await import('../../firebase');
       const recoveryPasswordHash = passphrase.trim() ? await hashPhrase(passphrase.trim()) : null;
-      const result = await createGroup({ name, description, startDate, endDate, adminEmail, recoveryPasswordHash });
+      const result = await createGroup({ name, description, startDate, endDate, eventType, adminEmail, recoveryPasswordHash });
       // Best-effort welcome email — does not block group creation
       if (adminEmail) {
         apiCall('/api/send-welcome', {
@@ -60,6 +64,23 @@ function CreateGroupForm({ onSuccess, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 mb-4">
+        {Object.values(EVENT_TYPES).map((type) => (
+          <button
+            key={type.key}
+            type="button"
+            onClick={() => setEventType(type.key)}
+            className={`p-2 flex flex-col items-center justify-center rounded-lg border text-center transition-colors ${eventType === type.key
+                ? 'border-blue-500 bg-blue-500/10 text-blue-400'
+                : 'border-dark-700 bg-dark-800 text-gray-400 hover:border-gray-500'
+              }`}
+          >
+            <span className="mb-1">{type.icon}</span>
+            <span className="text-[10px] font-medium leading-tight">{type.label}</span>
+          </button>
+        ))}
+      </div>
+
       <div>
         <Label>Group Name</Label>
         <Input
@@ -68,7 +89,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
           onChange={(e) => setName(e.target.value)}
           required
           maxLength={MAX_GROUP_NAME_LENGTH}
-          placeholder="e.g., Summer Trip 2024"
+          placeholder={config.placeholder}
         />
       </div>
 
@@ -79,7 +100,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
         <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value.slice(0, 500))}
-          placeholder="e.g., Beach trip to Hawaii, hiking adventure, etc."
+          placeholder={config.descriptionPlaceholder}
           rows="2"
           maxLength="500"
         />

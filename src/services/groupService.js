@@ -8,6 +8,7 @@ export const createGroup = async (groupData) => {
     const description = String(groupData.description || '').trim().slice(0, 1000);
     const startDate = String(groupData.startDate || '').slice(0, 10);
     const endDate = String(groupData.endDate || '').slice(0, 10);
+    const eventType = String(groupData.eventType || 'vacation').trim().slice(0, 50);
     const adminEmail = String(groupData.adminEmail || '').trim().slice(0, 255);
     const recoveryPasswordHash = groupData.recoveryPasswordHash
       ? String(groupData.recoveryPasswordHash).slice(0, 64)
@@ -29,6 +30,7 @@ export const createGroup = async (groupData) => {
       description,
       startDate,
       endDate,
+      eventType,
       adminEmail,
       createdAt: new Date().toISOString(),
       id: groupId,

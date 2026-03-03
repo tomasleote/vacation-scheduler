@@ -3,7 +3,7 @@ import { getDatesBetween, formatDateRange, getTopFilteredOverlaps } from '../uti
 import { Calendar as CalendarIcon, Users, Edit2, Play, ChevronLeft, ChevronRight, XIcon, PartyPopper, UserX, TrendingUp } from 'lucide-react';
 import { TruncatedText } from '../shared/ui';
 
-function SlidingOverlapCalendar({ startDate, endDate, participants, duration, overlaps, onDurationChange }) {
+function SlidingOverlapCalendar({ startDate, endDate, participants, duration, overlaps, onDurationChange, singleDay = false }) {
     const [currentMonth, setCurrentMonth] = useState(new Date(startDate).getMonth());
     const [currentYear, setCurrentYear] = useState(new Date(startDate).getFullYear());
     const [hoveredDate, setHoveredDate] = useState(null);
@@ -163,7 +163,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                         <CalendarIcon size={24} className="text-blue-400" />
                         <h3 className="text-xl font-bold text-gray-50">Availability Heatmap</h3>
                     </div>
-                    {onDurationChange ? (
+                    {onDurationChange && !singleDay ? (
                         <div className="flex items-center gap-1 bg-dark-800 pl-3 pr-1 py-1 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500">
                             <input
                                 type="number"
@@ -195,7 +195,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                         </div>
                     ) : (
                         <div className="text-sm text-gray-400 font-medium bg-dark-800 px-3 py-1 rounded-full border border-dark-700">
-                            {duration}-Day Period
+                            {singleDay ? 'Single Day' : `${duration}-Day Period`}
                         </div>
                     )}
                 </div>
@@ -298,7 +298,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                         <div className="flex justify-between items-start mb-6 pb-4 border-b border-dark-700">
                             <div>
                                 <h4 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-1">
-                                    {lockedDate ? "Selected Period" : "Hovered Period"}
+                                    {lockedDate ? (singleDay ? "Selected Date" : "Selected Period") : (singleDay ? "Hovered Date" : "Hovered Period")}
                                 </h4>
                                 <div className="text-xl md:text-2xl font-bold text-gray-50">
                                     {formatDateRange(blockDetails.start, blockDetails.end)}
@@ -384,7 +384,7 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                     <div className="h-full flex flex-col">
                         <h4 className="flex items-center gap-2 text-lg font-bold text-gray-50 mb-6 pb-4 border-b border-dark-700">
                             <TrendingUp size={20} className="text-blue-400" />
-                            Top Overlap Periods
+                            {singleDay ? 'Top Overlap Dates' : 'Top Overlap Periods'}
                         </h4>
 
                         {(() => {

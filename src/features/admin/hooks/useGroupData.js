@@ -73,6 +73,12 @@ export function useGroupData(groupId, adminToken, onBack) {
         if (data) {
           setGroup(data);
           setEditData(prev => Object.keys(prev).length === 0 ? data : prev);
+
+          const { isSingleDayEvent } = require('../../../utils/eventTypes');
+          if (isSingleDayEvent(data.eventType)) {
+            setDurationFilter('1');
+            setAdminDuration('1');
+          }
         } else {
           setGroup(null);
           setEditData({});

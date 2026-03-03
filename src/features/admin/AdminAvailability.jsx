@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import CalendarView from '../../components/CalendarView';
+import { isSingleDayEvent } from '../../utils/eventTypes';
 
 function AdminAvailability({
   group,
@@ -47,6 +48,7 @@ function AdminAvailability({
           initialName={adminName}
           initialEmail={adminEmail}
           initialDuration={adminDuration}
+          singleDay={isSingleDayEvent(group?.eventType)}
         />
       )}
     </div>
