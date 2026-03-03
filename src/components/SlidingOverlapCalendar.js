@@ -3,7 +3,7 @@ import { getDatesBetween, formatDateRange, getTopFilteredOverlaps } from '../uti
 import { Calendar as CalendarIcon, Users, Edit2, Play, ChevronLeft, ChevronRight, XIcon, PartyPopper, UserX, TrendingUp } from 'lucide-react';
 import { TruncatedText } from '../shared/ui';
 
-function SlidingOverlapCalendar({ startDate, endDate, participants, duration, overlaps, onDurationChange, singleDay = false }) {
+function SlidingOverlapCalendar({ startDate, endDate, participants, duration, overlaps, onDurationChange, singleDay = false, renderSelectedAction }) {
     const [currentMonth, setCurrentMonth] = useState(new Date(startDate).getMonth());
     const [currentYear, setCurrentYear] = useState(new Date(startDate).getFullYear());
     const [hoveredDate, setHoveredDate] = useState(null);
@@ -362,7 +362,12 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                         </div>
 
                         {lockedDate && (
-                            <div className="pt-4 mt-auto border-t border-dark-700">
+                            <div className="pt-4 mt-auto border-t border-dark-700 space-y-3">
+                                {renderSelectedAction && renderSelectedAction({
+                                    startDate: blockDetails.start,
+                                    endDate: blockDetails.end,
+                                    availableCount: blockDetails.available.length
+                                })}
                                 <button
                                     onClick={() => setLockedDate(null)}
                                     className="w-full py-2.5 bg-dark-800 hover:bg-dark-700 text-gray-300 font-bold rounded-lg border border-dark-700 transition"

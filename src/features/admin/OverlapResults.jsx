@@ -1,6 +1,7 @@
 import React from 'react';
 import SlidingOverlapCalendar from '../../components/SlidingOverlapCalendar';
 import { isSingleDayEvent } from '../../utils/eventTypes';
+import CalendarEventButton from './CalendarEventButton';
 
 function OverlapResults({ group, participants, overlaps, durationFilter, onDurationChange }) {
   if (!group || !group.startDate || !group.endDate || !overlaps?.length) return null;
@@ -15,6 +16,9 @@ function OverlapResults({ group, participants, overlaps, durationFilter, onDurat
         overlaps={overlaps}
         onDurationChange={onDurationChange}
         singleDay={isSingleDayEvent(group?.eventType)}
+        renderSelectedAction={(overlap) => (
+          <CalendarEventButton group={group} overlap={overlap} participantCount={participants?.length || 0} />
+        )}
       />
     </div>
   );
