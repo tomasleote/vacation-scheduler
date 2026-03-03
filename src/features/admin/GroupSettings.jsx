@@ -1,7 +1,8 @@
 import React from 'react';
 import { CalendarRange, Users, Mail, Copy, CheckCircle2, Edit, X, Save, KeyRound, Eye, EyeOff } from 'lucide-react';
-import { Input, Label, ReadOnlyInput, CopyButton, TruncatedText } from '../../shared/ui';
+import { CopyButton, ReadOnlyInput, TruncatedText, Input, Label, Card } from '../../shared/ui';
 import { MAX_GROUP_NAME_LENGTH } from '../../utils/constants/validation';
+import { getEventConfig } from '../../utils/eventTypes';
 
 function GroupSettings({
   group,
@@ -31,6 +32,12 @@ function GroupSettings({
           <h2 className="text-2xl font-bold text-gray-50 mb-2">
             <TruncatedText text={group.name} />
           </h2>
+          <div className="mb-3">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 [&>svg]:w-3.5 [&>svg]:h-3.5">
+              {getEventConfig(group.eventType).icon}
+              {getEventConfig(group.eventType).label}
+            </span>
+          </div>
           {group.description && (
             <p className="text-gray-400 text-sm mb-3">{group.description}</p>
           )}

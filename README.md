@@ -1,231 +1,108 @@
 # Vacation Scheduler
 
-A full-featured vacation scheduling app built with React and Firebase. Perfect for coordinating group vacations and finding the best dates when everyone is available.
+A web application designed to eliminate the headache of scheduling group vacations. Built with React and Firebase, this tool automatically calculates the optimal travel dates by finding the best overlap based on every participant's unique availability and desired trip duration.
 
-## Features
+## ✨ Core Features
 
-✅ **Admin Panel** - Create and manage vacation groups  
-✅ **Flexible Date Selection** - Pick individual days or select fixed-duration blocks (3/4/5 days)  
-✅ **Overlap Calculation** - Automatically calculates best matching periods by availability %  
-✅ **Participant Tracking** - See who's available and for how long  
-✅ **CSV Export** - Download all results and participant data  
-✅ **Email Reminders** - Send reminders to admin for follow-ups  
-✅ **Mobile Responsive** - Clean, modern UI that works on all devices  
-✅ **Real-time Updates** - Firebase Realtime Database for instant sync  
+✅ **Smart Overlap Engine**  
+Automatically analyzes all participant calendars to find the absolute best travel windows (ranked by highest availability percentage).
 
-## Tech Stack
+✅ **Flexible Scheduling Options**  
+Participants can choose exact dates or indicate they need a continuous block of time (e.g., any 3, 4, or 5 consecutive days within a month).
 
-- **Frontend**: React 18, Tailwind CSS, Lucide Icons
-- **Backend**: Firebase (Realtime Database, Cloud Functions, Hosting)
-- **Email**: Nodemailer + Cloud Functions
-- **Export**: PapaParse for CSV generation
+✅ **Admin Dashboard & Management**  
+Group creators get an exclusive Admin Panel to edit group details, remove participants, copy personal invite links, or send email reminders with a single click.
 
-## Local Setup
+✅ **Real-Time Synchronization**  
+Powered by Firebase Realtime Database, once a participant saves their availability, the group's results update instantly for any Admin or participant viewing the dashboard.
+
+✅ **Robust Access Recovery**  
+Lost your admin link? Recover access securely via a hashed passphrase or an email link. You can also securely search for all groups tied to your email.
+
+✅ **Data Export & Analytics**  
+Export participant lists, individual availability, and the top overlap periods directly to CSV for offline coordination.
+
+✅ **Offline Resistance & Error Handling**  
+Built with resilient offline detection, optimistic UI updates, and strict error boundaries. You won't lose your data if your network drops on a train or a plane.
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 18, Tailwind CSS, Lucide Icons, Framer Motion
+- **Database**: Firebase Realtime Database
+- **API & Serverless**: Vercel Serverless Functions (`/api/*` routes)
+- **Emails**: Nodemailer (via Serverless API endpoints)
+- **Data Export**: PapaParse
+
+## 🚀 How It Works
+
+### 1. Create a Group (Admin Flow)
+- Set a **Group Name**, **Start Date**, and **End Date** (the total possible window for the trip).
+- Provide an **Admin Email** and **Passphrase** (highly recommended for recovering your admin privileges later).
+- Share the generated **Group ID** or **Invite Link** with your friends.
+
+### 2. Add Availability (Participant Flow)
+- Users join via the group link.
+- They enter their name and email (optional).
+- Using the interactive calendar, they paint the days they are free to travel.
+
+### 3. Review Results & Finalize
+- The admin accesses the dashboard and views the **Overlap Results** tab.
+- The system highlights the top periods where the highest percentage of the group can travel together.
+- Once a date is decided, the Admin can export the data to CSV and book the trip!
+
+## 💻 Local Setup & Development
 
 ### Prerequisites
-
 - Node.js 18+
 - npm or yarn
-- Firebase account
+- A Firebase project (Realtime Database enabled)
+- A Gmail account with App Passwords (for email notifications)
 
-### Installation
-
+### 1. Clone & Install
 ```bash
-# Clone or navigate to project
+git clone https://github.com/your-repo/vacation-scheduler.git
 cd vacation-scheduler
-
-# Install dependencies
 npm install
-
-# Install Firebase tools globally
-npm install -g firebase-tools
-
-# Install Cloud Functions dependencies
-cd functions && npm install && cd ..
 ```
 
-### Configuration
+### 2. Environment Variables
+Create a `.env.local` file in the root directory and populate it with your Firebase and Email credentials:
 
-1. Create a Firebase project at [https://console.firebase.google.com](https://console.firebase.google.com)
+```env
+REACT_APP_FIREBASE_API_KEY="your-api-key"
+REACT_APP_FIREBASE_AUTH_DOMAIN="your-app.firebaseapp.com"
+REACT_APP_FIREBASE_DATABASE_URL="https://your-app-default-rtdb.firebaseio.com"
+REACT_APP_FIREBASE_PROJECT_ID="your-project-id"
+REACT_APP_FIREBASE_STORAGE_BUCKET="your-app.appspot.com"
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID="123456789"
+REACT_APP_FIREBASE_APP_ID="1:123456789:web:abcdef123456"
 
-2. Set up:
-   - Realtime Database (Start in test mode)
-   - Enable Hosting
-   - Create Cloud Functions
-
-3. Copy `.env.example` to `.env.local` and fill in your Firebase credentials:
-
-```bash
-cp .env.example .env.local
+# Email Configuration (for API routes)
+EMAIL_SERVICE="gmail"
+EMAIL_USER="your-email@gmail.com"
+EMAIL_PASSWORD="your-app-password"
 ```
 
-4. Get your Firebase config:
-   - Go to Project Settings → Service Accounts → Web app credentials
-   - Copy the config values to `.env.local`
-
-5. Initialize Firebase locally:
-
+### 3. Run the Development Server
 ```bash
-firebase login
-firebase init
-```
-
-### Running Locally
-
-```bash
-# Start the React dev server
 npm start
-
-# In another terminal, start Firebase emulator (optional)
-firebase emulators:start
 ```
+The app will be available at `http://localhost:3000`. API routes (like `/api/send-invite`) will run via `react-scripts` proxy if configured, or can be tested natively when deployed.
 
-Visit `http://localhost:3000`
+## 🚢 Deployment
 
-## Deployment
+This application is optimized for deployment on **Vercel** or **Netlify**, as it relies on Serverless Functions located in the `api/` directory.
 
-### Deploy to Firebase Hosting
+### Deploying to Vercel
+1. Push your code to GitHub.
+2. Import the repository into Vercel.
+3. Add all the environment variables from your `.env.local` file into the Vercel project settings.
+4. Deploy! Vercel will automatically host the React frontend and map the `api/` folder to serverless endpoints.
 
-```bash
-# Build the React app
-npm run build
+## 📄 License
 
-# Deploy to Firebase
-firebase deploy
+MIT License. See the `LICENSE` file for more details.
 
-# Or deploy only hosting
-firebase deploy --only hosting
-```
+## 🤝 Support & Contributions
 
-### Deploy Cloud Functions
-
-```bash
-cd functions
-
-# Set environment variables
-firebase functions:config:set \
-  email.service="gmail" \
-  email.user="your-email@gmail.com" \
-  email.password="your-app-password"
-
-cd ..
-
-# Deploy
-firebase deploy --only functions
-```
-
-## Usage
-
-### Create a Group (Admin)
-
-1. Click "Create Group"
-2. Enter group name, start/end dates
-3. Share the resulting **Group ID** with participants
-4. View results in Admin Panel
-
-### Join a Group (Participant)
-
-1. Click "Join Group"
-2. Paste the Group ID
-3. Enter your name and email
-4. Select available dates (flexible or fixed blocks)
-5. Submit
-
-### Admin Panel
-
-- View all participants and their availability
-- Filter results by duration (1-10 days)
-- See overlap statistics
-- Export results to CSV
-- Send email reminders
-- Edit group settings
-
-## Overlap Algorithm
-
-The app calculates the best vacation periods by:
-
-1. Checking all possible date ranges of the selected duration
-2. Counting how many participants are available for each range
-3. Calculating availability percentage (available / total participants)
-4. Ranking by highest availability %
-
-**No date wrapping**: If a block spans a month boundary, it's capped at month end.
-
-## File Structure
-
-```
-vacation-scheduler/
-├── src/
-│   ├── App.js                 # Main app component
-│   ├── firebase.js            # Firebase config & API
-│   ├── index.css              # Tailwind styles
-│   ├── components/
-│   │   ├── AdminPanel.js      # Admin dashboard
-│   │   ├── ParticipantView.js # Participant interface
-│   │   ├── CalendarView.js    # Calendar & selection
-│   │   ├── ResultsDisplay.js  # Results visualization
-│   │   └── ParticipantForm.js # Form wrapper
-│   └── utils/
-│       ├── overlap.js         # Overlap calculation logic
-│       └── export.js          # CSV export utilities
-├── functions/
-│   └── index.js               # Cloud Functions
-├── public/
-│   └── index.html             # HTML entry point
-├── firebase.json              # Firebase config
-├── database.rules.json        # Firestore rules
-├── tailwind.config.js         # Tailwind config
-└── package.json               # Dependencies
-```
-
-## Database Schema
-
-```
-groups/
-  {groupId}/
-    id: string
-    name: string
-    startDate: string (YYYY-MM-DD)
-    endDate: string (YYYY-MM-DD)
-    adminEmail: string (optional)
-    createdAt: string (ISO)
-    participants/
-      {participantId}/
-        id: string
-        name: string
-        email: string (optional)
-        duration: number (days)
-        blockType: string (flexible|3|4|5)
-        availableDays: array of strings (YYYY-MM-DD)
-        createdAt: string (ISO)
-```
-
-## Environment Variables
-
-```
-REACT_APP_FIREBASE_API_KEY
-REACT_APP_FIREBASE_AUTH_DOMAIN
-REACT_APP_FIREBASE_PROJECT_ID
-REACT_APP_FIREBASE_STORAGE_BUCKET
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID
-REACT_APP_FIREBASE_DATABASE_URL
-EMAIL_SERVICE
-EMAIL_USER
-EMAIL_PASSWORD
-```
-
-## Email Reminders
-
-To enable email reminders:
-
-1. Use Gmail with [App Passwords](https://support.google.com/accounts/answer/185833)
-2. Set email environment variables in Cloud Functions
-3. Call `POST /api/send-reminder` from the admin panel
-
-## License
-
-MIT
-
-## Support
-
-For issues or questions, create an issue in the GitHub repository.
+Found a bug or want to suggest an improvement? Please open an issue or submit a pull request!

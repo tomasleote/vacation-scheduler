@@ -5,6 +5,7 @@ import { getDatesBetween, calculateOverlap, getBestOverlapPeriods } from '../uti
 import { ReadOnlyInput, CopyButton, Button, LoadingSpinner, Card, TruncatedText } from '../shared/ui';
 import { useNotification } from '../context/NotificationContext';
 import { useGroupContext } from '../shared/context';
+import { isSingleDayEvent } from '../utils/eventTypes';
 
 import CalendarView from './CalendarView';
 import SlidingOverlapCalendar from './SlidingOverlapCalendar';
@@ -226,7 +227,9 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
           {group.description && (
             <p className="text-gray-400 mb-4 italic">{group.description}</p>
           )}
-          <p className="text-gray-400 mb-4">Select your available dates for the vacation</p>
+          <p className="text-gray-400 mb-4">
+            {isSingleDayEvent(group?.eventType) ? 'Which days work for you?' : 'Select your available dates for the vacation'}
+          </p>
           <div className="flex gap-4 text-sm text-gray-400 flex-wrap">
             <span className="flex items-center gap-1.5"><CalendarRange size={16} className="text-gray-500" /> {group.startDate} to {group.endDate}</span>
             <span className="flex items-center gap-1.5"><Users size={16} className="text-gray-500" /> {participants?.length || 0} people attending</span>
@@ -254,6 +257,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
                   endDate={group.endDate}
                   onSubmit={handleSubmit}
                   savedDays={savedDays}
+                  singleDay={isSingleDayEvent(group?.eventType)}
                 />
               </div>
             )}
@@ -292,6 +296,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
               duration={heatmapDuration || '3'}
               overlaps={getBestOverlapPeriods(overlaps, 10)}
               onDurationChange={setHeatmapDuration}
+              singleDay={isSingleDayEvent(group?.eventType)}
             />
           </div>
         )}
@@ -323,12 +328,25 @@ function ParticipantDashboard({ groupId, participantId, participantName, partici
           </div>
         </div>
 
-        <button
-          onClick={() => setUpdating(u => !u)}
-          className="text-blue-400 hover:text-blue-300 text-sm font-semibold"
-        >
-          {updating ? '\u2191 Hide update form' : '\u270F Update your dates'}
-        </button>
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => setUpdating(u => !u)}
+            className="text-blue-400 hover:text-blue-300 text-sm font-semibold text-left w-fit"
+          >
+            {updating ? '\u2191 Hide update form' : '\u270F Update your dates'}
+          </button>
+          <button
+            onClick={() => {
+              if (window.confirm('This will remove your participant access to this group from this browser. You can still return using your personal link. Continue?')) {
+                localStorage.removeItem(`vacation_p_${groupId}`);
+                window.location.href = '/';
+              }
+            }}
+            className="text-gray-500 hover:text-rose-400 text-xs font-medium text-left w-fit transition-colors"
+          >
+            Clear local access for this group
+          </button>
+        </div>
       </div>
 
       <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
@@ -342,6 +360,7 @@ function ParticipantDashboard({ groupId, participantId, participantName, partici
           initialName={participantName}
           initialEmail={participantEmail}
           initialDuration={participantDuration}
+          singleDay={isSingleDayEvent(group?.eventType)}
         />
       </div>
     </div>

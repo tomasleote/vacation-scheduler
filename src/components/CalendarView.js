@@ -40,7 +40,7 @@ const DayCell = React.memo(({ day, currentYear, currentMonth, monthName, isDateI
   );
 });
 
-function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialName = '', initialEmail = '', initialDuration = '3' }) {
+function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialName = '', initialEmail = '', initialDuration = '3', singleDay = false }) {
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
   const [duration, setDuration] = useState(initialDuration);
@@ -149,8 +149,8 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
       await onSubmit({
         name,
         email,
-        duration: parseInt(localDuration),
-        blockType: blockType === 'flexible' ? 'flexible' : String(customBlockSize),
+        duration: singleDay ? 1 : parseInt(localDuration),
+        blockType: singleDay ? 'flexible' : (blockType === 'flexible' ? 'flexible' : String(customBlockSize)),
         selectedDays: selectedDays.sort()
       });
       setIsDirty(false);
@@ -175,8 +175,8 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
       await onSubmit({
         name,
         email,
-        duration: parseInt(localDuration),
-        blockType: blockType === 'flexible' ? 'flexible' : String(customBlockSize),
+        duration: singleDay ? 1 : parseInt(localDuration),
+        blockType: singleDay ? 'flexible' : (blockType === 'flexible' ? 'flexible' : String(customBlockSize)),
         selectedDays: savedDays // "Save Details" doesn't submit days, so keep the existing ones
       });
     } catch (err) {
@@ -247,27 +247,32 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
             />
           </div>
 
-          {/* Duration Pill */}
-          <div className="flex items-center gap-1.5 bg-dark-800 px-3 py-1.5 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500 transition-all shrink-0">
-            <Clock size={16} className="text-gray-500" />
-            <input
-              type="number"
-              min="1"
-              max={dateRange.length}
-              value={localDuration}
-              onChange={(e) => setLocalDuration(e.target.value)}
-              onBlur={() => {
-                let val = parseInt(localDuration);
-                if (isNaN(val) || val < 1) val = 1;
-                if (val > dateRange.length) val = dateRange.length;
-                const strVal = String(val);
-                setLocalDuration(strVal);
-                setDuration(strVal);
-              }}
-              className="w-8 text-center bg-transparent font-bold text-gray-50 focus:outline-none p-0"
-            />
-            <span className="text-gray-400 font-medium pr-2 text-sm">days trip</span>
-          </div>
+          <p className="w-full text-[10px] text-gray-500 mt-1 px-2 leading-tight">
+            Your details are stored to identify you within this group. See our <a href="/privacy" className="text-blue-500 hover:underline" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/privacy'); window.dispatchEvent(new Event('popstate')); }}>Privacy Policy</a>.
+          </p>
+
+          {!singleDay && (
+            <div className="flex items-center gap-1.5 bg-dark-800 px-3 py-1.5 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500 transition-all shrink-0">
+              <Clock size={16} className="text-gray-500" />
+              <input
+                type="number"
+                min="1"
+                max={dateRange.length}
+                value={localDuration}
+                onChange={(e) => setLocalDuration(e.target.value)}
+                onBlur={() => {
+                  let val = parseInt(localDuration);
+                  if (isNaN(val) || val < 1) val = 1;
+                  if (val > dateRange.length) val = dateRange.length;
+                  const strVal = String(val);
+                  setLocalDuration(strVal);
+                  setDuration(strVal);
+                }}
+                className="w-8 text-center bg-transparent font-bold text-gray-50 focus:outline-none p-0"
+              />
+              <span className="text-gray-400 font-medium pr-2 text-sm">days trip</span>
+            </div>
+          )}
 
           {/* Segmented Control - Selection Mode */}
           <div className="flex items-center bg-dark-800 p-1 rounded-full border border-dark-700 shrink-0">
@@ -392,7 +397,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
 
       </div>
       {/* --- END CALENDAR GRID AREA --- */}
-    </form>
+    </form >
   );
 }
 
