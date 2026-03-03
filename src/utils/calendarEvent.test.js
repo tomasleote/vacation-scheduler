@@ -128,7 +128,7 @@ describe('calendarEvent Utilities', () => {
             expect(details.description).toContain('Saturday, August 1, 2026');
             expect(details.description).toContain('Monday, August 10, 2026');
             expect(details.description).toContain('4/5 participants available');
-            expect(details.description).toContain('findadate.app');
+            expect(details.description).toContain('findaday.app');
         });
 
         it('handles missing optional fields safely', () => {
@@ -136,7 +136,7 @@ describe('calendarEvent Utilities', () => {
             const overlap = { startDate: '2026-01-01' };
             const details = buildCalendarEventDetails(group, overlap, 2);
 
-            expect(details.title).toBe('FindADate Event');
+            expect(details.title).toBe('Find A Day Event');
             expect(details.startDate).toBe('2026-01-01');
             expect(details.endDate).toBe('2026-01-01');
             expect(details.description).toContain('0/2 participants available');

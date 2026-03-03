@@ -2,10 +2,22 @@
   "rules": {
     "groups": {
       "$groupId": {
-        ".read": true,
-        ".write": true,
+        ".read": "true",
+        ".write": "true",
         "adminTokenHash": {
           ".write": "!data.exists()"
+        },
+        "id": {
+          ".write": "!data.exists()"
+        },
+        "createdAt": {
+          ".write": "!data.exists()"
+        },
+        "participants": {
+          ".read": "true",
+          "$participantId": {
+            ".write": "true"
+          }
         }
       }
     }

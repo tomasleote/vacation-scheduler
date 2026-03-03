@@ -2,13 +2,13 @@ import Papa from 'papaparse';
 
 export const exportToCSV = (group, participants, overlaps) => {
   const data = [];
-  
-  data.push(['FindADate Export']);
+
+  data.push(['Find A Day Export']);
   data.push(['Group:', group.name]);
   data.push(['Date Range:', `${group.startDate} to ${group.endDate}`]);
   data.push(['Created:', new Date(group.createdAt).toLocaleString()]);
   data.push([]);
-  
+
   data.push(['PARTICIPANTS']);
   data.push(['Name', 'Email', 'Duration', 'Available Days']);
   participants.forEach(p => {
@@ -19,7 +19,7 @@ export const exportToCSV = (group, participants, overlaps) => {
       (p.availableDays || []).join(', ') || 'None'
     ]);
   });
-  
+
   data.push([]);
   data.push(['TOP OVERLAP PERIODS']);
   data.push(['Start Date', 'End Date', 'Duration', 'Available Count', 'Total Participants', 'Availability %']);
@@ -33,9 +33,9 @@ export const exportToCSV = (group, participants, overlaps) => {
       `${o.availabilityPercent}%`
     ]);
   });
-  
+
   const csv = Papa.unparse(data);
-  downloadCSV(csv, `findadate-${group.id}.csv`);
+  downloadCSV(csv, `findaday-${group.id}.csv`);
 };
 
 const downloadCSV = (csv, filename) => {

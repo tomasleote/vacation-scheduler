@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://findadate.app/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://findadate.app/vacation-planner</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://findadate.app/doodle-alternative</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://findadate.app/when2meet-alternative</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://findadate.app/find-a-date-for-dinner</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://findadate.app/group-event-planner</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://findadate.app/team-scheduling</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://findadate.app/party-planner</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://findadate.app/game-night-planner</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://findadate.app/docs</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://findadate.app/privacy</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
-  <url><loc>https://findadate.app/terms</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://findaday.app/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
+  <url><loc>https://findaday.app/vacation-planner</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://findaday.app/doodle-alternative</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://findaday.app/when2meet-alternative</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://findaday.app/find-a-day-for-dinner</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://findaday.app/group-event-planner</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://findaday.app/team-scheduling</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://findaday.app/party-planner</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://findaday.app/game-night-planner</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://findaday.app/docs</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://findaday.app/privacy</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://findaday.app/terms</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
 </urlset>

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { HelmetProvider } from 'react-helmet-async';
 import '@testing-library/jest-dom';
 
 // ─── Mocks ────────────────────────────────────────────────────────
@@ -115,9 +116,11 @@ function renderAdminPanel() {
     });
 
     return render(
-        <GroupProvider groupId="group-123" adminToken="token-abc" isAdmin={true}>
-            <AdminPanel onBack={jest.fn()} />
-        </GroupProvider>
+        <HelmetProvider>
+            <GroupProvider groupId="group-123" adminToken="token-abc" isAdmin={true}>
+                <AdminPanel onBack={jest.fn()} />
+            </GroupProvider>
+        </HelmetProvider>
     );
 }
 

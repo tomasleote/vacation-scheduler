@@ -32,19 +32,19 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>FindADate — Find the Best Date for Any Group Event</title>
+        <title>Find A Day — Find the Best Day for Any Group Event</title>
         <meta name="description" content="Everyone marks their availability. The algorithm finds the overlap. Free, no sign-up required." />
-        <link rel="canonical" href="https://findadate.app/" />
-        <meta property="og:title" content="FindADate — Find the Best Date for Any Group Event" />
+        <link rel="canonical" href="https://findaday.app/" />
+        <meta property="og:title" content="Find A Day — Find the Best Day for Any Group Event" />
         <meta property="og:description" content="Everyone marks their availability. The algorithm finds the overlap. Free, no sign-up required." />
-        <meta property="og:url" content="https://findadate.app/" />
+        <meta property="og:url" content="https://findaday.app/" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://findadate.app/logo.png" />
-        <meta property="og:site_name" content="FindADate" />
+        <meta property="og:image" content="https://findaday.app/logo.png" />
+        <meta property="og:site_name" content="Find A Day" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="FindADate — Find the Best Date for Any Group Event" />
+        <meta name="twitter:title" content="Find A Day — Find the Best Day for Any Group Event" />
         <meta name="twitter:description" content="Stop texting. Start planning. Free group date finder." />
-        <meta name="twitter:image" content="https://findadate.app/logo.png" />
+        <meta name="twitter:image" content="https://findaday.app/logo.png" />
       </Helmet>
       {/* Nav Bar */}
       <Header
@@ -62,7 +62,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
           className="text-center max-w-2xl"
         >
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-50 mb-4">
-            Find the best date for{' '}
+            Find the best day for{' '}
             <span className="text-brand-400">anything.</span>
           </h1>
           <p className="text-lg text-gray-400 mb-8 max-w-lg mx-auto">

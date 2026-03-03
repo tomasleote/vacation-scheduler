@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { KeyRound, Eye, EyeOff } from 'lucide-react';
 import { useNotification } from '../../context/NotificationContext';
-import { Input, Textarea, Label, Button, Card } from '../../shared/ui';
+import { Input, Textarea, Label, Button, Card, LocationInput, CalendarPicker } from '../../shared/ui';
+import { todayYMD } from '../../utils/dateUtils';
 import { apiCall } from '../../services/apiService';
 import { MAX_GROUP_NAME_LENGTH } from '../../utils/constants/validation';
 import { EVENT_TYPES, getEventConfig } from '../../utils/eventTypes';
@@ -10,6 +11,7 @@ import { Link } from 'react-router-dom';
 function CreateGroupForm({ onSuccess, onCancel }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [location, setLocation] = useState(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
@@ -24,6 +26,11 @@ function CreateGroupForm({ onSuccess, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!startDate || !endDate) {
+      addNotification({ type: 'error', message: 'Please select both start and end dates.' });
+      return;
+    }
+
     if (new Date(endDate) < new Date(startDate)) {
       addNotification({ type: 'error', message: 'End Date cannot be before Start Date.' });
       return;
@@ -34,7 +41,16 @@ function CreateGroupForm({ onSuccess, onCancel }) {
     try {
       const { createGroup, hashPhrase } = await import('../../firebase');
       const recoveryPasswordHash = passphrase.trim() ? await hashPhrase(passphrase.trim()) : null;
-      const result = await createGroup({ name, description, startDate, endDate, eventType, adminEmail, recoveryPasswordHash });
+      const result = await createGroup({
+        name,
+        description,
+        location,
+        startDate,
+        endDate,
+        eventType,
+        adminEmail,
+        recoveryPasswordHash
+      });
       // Best-effort welcome email — does not block group creation
       if (adminEmail) {
         apiCall('/api/send-welcome', {
@@ -110,25 +126,37 @@ function CreateGroupForm({ onSuccess, onCancel }) {
         />
       </div>
 
+      <div>
+        <LocationInput
+          value={location}
+          onSelect={setLocation}
+          placeholder="Where will it take place?"
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <Label>Start Date</Label>
-          <Input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <Label>End Date</Label>
-          <Input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            required
-          />
-        </div>
+        <CalendarPicker
+          label="Start Date"
+          id="start-date"
+          value={startDate}
+          onChange={(v) => {
+            setStartDate(v);
+            // Reset end date if it's now before the new start date
+            if (endDate && v && endDate < v) setEndDate('');
+          }}
+          minDate={todayYMD()}
+          required
+          placeholder="Start date"
+        />
+        <CalendarPicker
+          label="End Date"
+          id="end-date"
+          value={endDate}
+          onChange={setEndDate}
+          minDate={startDate || todayYMD()}
+          required
+          placeholder="End date"
+        />
       </div>
 
       <Card variant="info" className="p-3">
@@ -200,6 +228,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
         </Button>
       </div>
     </form>
+
   );
 }
 

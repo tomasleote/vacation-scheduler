@@ -26,10 +26,30 @@ export const createGroup = async (groupData) => {
     if (!adminTokenHash) {
       throw new Error('Failed to generate admin token hash');
     }
+    const sanitizeLocation = (loc) => {
+      if (!loc || typeof loc !== 'object') return null;
+      const s = (val, max = 255) => typeof val === 'string' ? val.trim().slice(0, max) : null;
+      const n = (val) => typeof val === 'number' && !isNaN(val) ? Number(val.toFixed(6)) : null;
+      return {
+        placeId: s(loc.placeId),
+        name: s(loc.name),
+        formattedAddress: s(loc.formattedAddress, 500),
+        street: s(loc.street),
+        city: s(loc.city),
+        state: s(loc.state),
+        country: s(loc.country),
+        zip: s(loc.zip, 20),
+        lat: n(loc.lat),
+        lng: n(loc.lng),
+      };
+    };
+
+    const location = sanitizeLocation(groupData.location);
     const groupRef = ref(database, `groups/${groupId}`);
     const groupPayload = {
       name,
       description,
+      location,
       startDate,
       endDate,
       eventType,

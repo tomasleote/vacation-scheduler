@@ -1,6 +1,7 @@
 import React from 'react';
 import { CalendarRange, Users, Mail, Copy, CheckCircle2, Edit, X, Save, KeyRound, Eye, EyeOff } from 'lucide-react';
-import { CopyButton, ReadOnlyInput, TruncatedText, Input, Label, Card } from '../../shared/ui';
+import { CopyButton, ReadOnlyInput, TruncatedText, Input, Label, Card, LocationInput, LocationDisplay, CalendarPicker, Button } from '../../shared/ui';
+import { todayYMD } from '../../utils/dateUtils';
 import { MAX_GROUP_NAME_LENGTH } from '../../utils/constants/validation';
 import { getEventConfig } from '../../utils/eventTypes';
 
@@ -115,6 +116,11 @@ function GroupSettings({
               </span>
             </div>
           </div>
+          {group.location && (
+            <div className="mt-3 pt-3 border-t border-dark-700/50">
+              <LocationDisplay location={group.location} />
+            </div>
+          )}
         </div>
       )}
 
@@ -144,26 +150,36 @@ function GroupSettings({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label size="compact">Start Date</Label>
-              <Input
-                type="date"
-                size="compact"
-                value={editData.startDate}
-                onChange={(e) => setEditData({ ...editData, startDate: e.target.value })}
-              />
-            </div>
+          <div>
+            <LocationInput
+              value={editData.location || null}
+              onSelect={(location) => setEditData({ ...editData, location })}
+              onError={(error) => console.error('Location error:', error)}
+            />
+            <p className="text-xs text-gray-500 mt-1">Where will you meet? City, address, or restaurant.</p>
+          </div>
 
-            <div>
-              <Label size="compact">End Date</Label>
-              <Input
-                type="date"
-                size="compact"
-                value={editData.endDate}
-                onChange={(e) => setEditData({ ...editData, endDate: e.target.value })}
-              />
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <CalendarPicker
+              label="Start Date"
+              id="edit-start-date"
+              value={editData.startDate}
+              onChange={(v) => {
+                const next = { ...editData, startDate: v };
+                if (editData.endDate && v && editData.endDate < v) next.endDate = '';
+                setEditData(next);
+              }}
+              minDate={todayYMD()}
+              placeholder="Start date"
+            />
+            <CalendarPicker
+              label="End Date"
+              id="edit-end-date"
+              value={editData.endDate}
+              onChange={(v) => setEditData({ ...editData, endDate: v })}
+              minDate={editData.startDate || todayYMD()}
+              placeholder="End date"
+            />
           </div>
 
           <div className="border-t border-dark-700/50 pt-4 mt-2 space-y-4">
@@ -206,18 +222,12 @@ function GroupSettings({
           </div>
 
           <div className="flex gap-2 pt-4">
-            <button
-              onClick={onSaveEdit}
-              className="flex-1 bg-brand-500 hover:bg-brand-400 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
-            >
-              <Save size={18} /> Save
-            </button>
-            <button
-              onClick={() => setEditing(false)}
-              className="flex-1 bg-dark-800 hover:bg-dark-700 text-gray-300 font-bold py-2 px-4 rounded-lg border border-dark-700 transition-colors"
-            >
+            <Button variant="primary" fullWidth onClick={onSaveEdit}>
+              <Save size={18} className="inline mr-1.5" /> Save
+            </Button>
+            <Button variant="secondary" fullWidth onClick={() => setEditing(false)}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       )}

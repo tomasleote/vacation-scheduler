@@ -30,6 +30,7 @@ export default function LandingPage({ type }) {
     }, [type]);
 
     if (!content) return null;
+    const SITE_URL = 'https://findaday.app';
 
     const PageIcon = ICON_MAP[type] || CalendarRange;
 
@@ -38,17 +39,17 @@ export default function LandingPage({ type }) {
             <Helmet>
                 <title>{content.title}</title>
                 <meta name="description" content={content.metaDescription} />
-                <link rel="canonical" href={`https://findadate.app/${content.slug}`} />
+                <link rel="canonical" href={`${SITE_URL}/${content.slug}`} />
                 <meta property="og:title" content={content.title} />
                 <meta property="og:description" content={content.metaDescription} />
-                <meta property="og:url" content={`https://findadate.app/${content.slug}`} />
+                <meta property="og:url" content={`${SITE_URL}/${content.slug}`} />
                 <meta property="og:type" content="website" />
-                <meta property="og:image" content="https://findadate.app/logo.png" />
-                <meta property="og:site_name" content="FindADate" />
+                <meta property="og:image" content={`${SITE_URL}/logo.png`} />
+                <meta property="og:site_name" content="Find A Day" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={content.title} />
                 <meta name="twitter:description" content={content.metaDescription} />
-                <meta name="twitter:image" content="https://findadate.app/logo.png" />
+                <meta name="twitter:image" content={`${SITE_URL}/logo.png`} />
             </Helmet>
 
             <SchemaMarkup type={type} content={content} />

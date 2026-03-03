@@ -37,7 +37,7 @@ export default function PrivacyPolicy({ onBack }) {
                 <article className="space-y-12 pb-20">
                     <section className="space-y-4">
                         <p className="leading-relaxed text-lg">
-                            At FindADate, we believe your data should be handled with transparency and respect. This policy explains how we collect and process your information when you use our service.
+                            At Find A Day, we believe your data should be handled with transparency and respect. This policy explains how we collect and process your information when you use our service.
                         </p>
                     </section>
 
@@ -102,7 +102,7 @@ export default function PrivacyPolicy({ onBack }) {
                     <section className="space-y-4 bg-dark-950 p-6 rounded-xl border border-dark-800">
                         <h3 className="text-lg font-bold text-gray-100">Contact</h3>
                         <p className="text-sm">
-                            Questions about your privacy? Contact us at: <a href="mailto:hello@findadate.app" className="text-brand-400 hover:underline">hello@findadate.app</a>
+                            Questions about your privacy? Contact us at: <a href="mailto:hello@findaday.app" className="text-brand-400 hover:underline">hello@findaday.app</a>
                         </p>
                     </section>
                 </article>

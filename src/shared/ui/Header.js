@@ -24,7 +24,7 @@ export function Header({ onRecover, onCreate, onJoin }) {
         <nav className="w-full max-w-6xl mx-auto px-6 py-6 flex items-center justify-between z-50 relative bg-transparent">
             <Link to="/" className="text-xl font-bold tracking-tight hover:opacity-80 transition-opacity flex items-center gap-2 text-white">
                 <span className="text-brand-500"><CalendarRange size={24} /></span>
-                <span>Find<span className="text-brand-500">A</span>Date</span>
+                <span>Find <span className="text-brand-500">A</span> Day</span>
             </Link>
             <div className="flex items-center gap-4">
                 <button

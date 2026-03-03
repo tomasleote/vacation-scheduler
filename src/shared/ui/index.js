@@ -8,5 +8,8 @@ export { default as Card } from './Card';
 export { default as TruncatedText } from './TruncatedText';
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as Footer } from './Footer';
+export { default as LocationInput } from './LocationInput';
+export { default as LocationDisplay } from './LocationDisplay';
 export { StorageConsent } from './StorageConsent';
 export { Header } from './Header';
+export { default as CalendarPicker } from './CalendarPicker';

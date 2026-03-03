@@ -12,7 +12,7 @@ describe('Footer', () => {
 
     it('renders the FAD logo correctly', () => {
         renderFooter();
-        expect(screen.getByText((content, element) => element.tagName === 'H3' && element.textContent === 'FindADate')).toBeInTheDocument();
+        expect(screen.getByText((content, element) => element.tagName === 'H3' && element.textContent === 'Find A Day')).toBeInTheDocument();
     });
 
     it('renders all resource links', () => {
@@ -25,7 +25,7 @@ describe('Footer', () => {
     it('renders all contact links', () => {
         renderFooter();
         // Mail
-        expect(screen.getByText('hello@findadate.app')).toBeInTheDocument();
+        expect(screen.getByText('hello@findaday.app')).toBeInTheDocument();
     });
 
     it('renders legal links', () => {

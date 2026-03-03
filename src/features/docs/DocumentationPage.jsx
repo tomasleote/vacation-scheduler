@@ -45,7 +45,7 @@ export default function DocumentationPage({ onBack }) {
                             Introduction
                         </h2>
                         <p className="leading-relaxed">
-                            <strong>FindADate</strong> is a purpose-built tool designed to eliminate the friction in coordinating group events.
+                            <strong>Find A Day</strong> is a purpose-built tool designed to eliminate the friction in coordinating group events.
                             Instead of relying on sprawling chat threads or rigid calendar invites, this app determines the optimal dates automatically by calculating overlapping free time among all participants.
                         </p>
                         <p className="leading-relaxed">

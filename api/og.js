@@ -52,7 +52,7 @@ function buildMetaHTML({ title, description, image, url }) {
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:image" content="${escapeHtml(image)}" />
   <meta property="og:url" content="${escapeHtml(url)}" />
-  <meta property="og:site_name" content="FindADate" />
+  <meta property="og:site_name" content="Find A Day" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -103,7 +103,7 @@ module.exports = async function handler(req, res) {
     const groupId = urlObj.searchParams.get('group');
     const isAdmin = urlObj.searchParams.has('admin');
 
-    let title = 'FindADate — Find the Best Date for Any Group Event';
+    let title = 'Find A Day — Find the Best Days for Any Group Event';
     let description = 'Everyone marks their availability. The algorithm finds the overlap. Free, no sign-up required.';
     let image = `${protocol}://${host}/og-image-default.png`;
 
@@ -123,11 +123,12 @@ module.exports = async function handler(req, res) {
                         // Truncate name safely to max 60 chars to avoid preview bugs
                         const cleanName = group.name.length > 60 ? group.name.substring(0, 60) + '...' : group.name;
                         if (isAdmin) {
-                            title = `${cleanName} — Admin Dashboard | FindADate`;
-                            description = `Manage your event and see availability results for "${cleanName}" on FindADate.`;
+                            title = `${cleanName} — Admin Dashboard | Find A Day`;
+                            description = `Manage your event and see availability results for "${cleanName}" on Find A Day.`;
                         } else {
                             title = `You're invited to pick dates for "${cleanName}"`;
-                            description = `Mark your available dates for ${cleanName}. No sign-up needed. Powered by FindADate.`;
+                            const locSuffix = group.location?.formattedAddress ? ` in ${group.location.formattedAddress}` : '';
+                            description = `Mark your available dates for ${cleanName}${locSuffix}. No sign-up needed. Powered by Find A Day.`;
                             image = `${protocol}://${host}/og-image-invite.png`;
                         }
                     }
@@ -140,37 +141,37 @@ module.exports = async function handler(req, res) {
         // Static meta for landing pages
         const LANDING_PAGE_META = {
             '/vacation-planner': {
-                title: "Group Vacation Planner — Find When Everyone's Free | FindADate",
-                description: "Planning a group trip? Everyone marks their free dates. FindADate finds the best overlapping vacation window instantly. Free, no account needed.",
+                title: "Group Vacation Planner — Find When Everyone's Free | Find A Day",
+                description: "Planning a group trip? Everyone marks their free dates. Find A Day finds the best overlapping vacation window instantly. Free, no account needed.",
                 image: '/og-image-vacation.png',
             },
             '/doodle-alternative': {
-                title: 'Best Free Doodle Alternative 2026 | FindADate',
-                description: "Tired of Doodle's ads and paywalls? FindADate is a free, ad-free group scheduling tool with visual heatmaps, multi-day support, and zero sign-up.",
+                title: 'Best Free Doodle Alternative 2026 | Find A Day',
+                description: "Tired of Doodle's ads and paywalls? Find A Day is a free, ad-free group scheduling tool with visual heatmaps, multi-day support, and zero sign-up.",
             },
             '/when2meet-alternative': {
-                title: 'When2Meet Alternative That Works on Mobile | FindADate',
-                description: "When2Meet, but modern. FindADate works on every device, supports multi-day events, and doesn't abandon you after the poll.",
+                title: 'When2Meet Alternative That Works on Mobile | Find A Day',
+                description: "When2Meet, but modern. Find A Day works on every device, supports multi-day events, and doesn't abandon you after the poll.",
             },
             '/find-a-date-for-dinner': {
-                title: 'Find a Date for Dinner With Friends | FindADate',
-                description: 'Stop going back and forth in the group chat. Everyone marks their free evenings. FindADate shows you the best night for dinner in seconds.',
+                title: 'Find A Day for Dinner With Friends | Find A Day',
+                description: 'Stop going back and forth in the group chat. Everyone marks their free evenings. Find A Day shows you the best night for dinner in seconds.',
             },
             '/group-event-planner': {
-                title: 'Group Event Date Finder | FindADate',
-                description: "Find the best date for any group event. Everyone marks availability, FindADate finds the overlap.",
+                title: 'Group Event Date Finder | Find A Day',
+                description: "Find the best days for any group event. Everyone marks availability, Find A Day finds the overlap.",
             },
             '/team-scheduling': {
-                title: 'Team Offsite & Retreat Date Planner | FindADate',
+                title: 'Team Offsite & Retreat Date Planner | Find A Day',
                 description: 'Coordinate team offsite dates across timezones. Visual availability heatmap shows the best window. Free for teams of any size.',
             },
             '/party-planner': {
-                title: 'Birthday & Party Date Finder | FindADate',
+                title: 'Birthday & Party Date Finder | Find A Day',
                 description: 'Planning a birthday or celebration? Find the date that works for the most guests. Share a link, collect availability, see the best match.',
             },
             '/game-night-planner': {
-                title: 'Game Night Scheduler | FindADate',
-                description: "Coordinating game night with 6+ players? Skip the group chat chaos. Everyone marks availability, FindADate finds the overlap.",
+                title: 'Game Night Scheduler | Find A Day',
+                description: "Coordinating game night with 6+ players? Skip the group chat chaos. Everyone marks availability, Find A Day finds the overlap.",
             },
         };
 
