@@ -4,7 +4,7 @@ const path = require('path');
 
 // Initialize Firebase (use REST API to avoid SDK dependency weight in serverless)
 // Use the same config as the rest of the application
-const DB_URL = process.env.REACT_APP_FIREBASE_DATABASE_URL || 'https://vacation-scheduler.firebaseio.com';
+const DB_URL = process.env.REACT_APP_FIREBASE_DATABASE_URL;
 
 const CRAWLER_USER_AGENTS = [
     'facebookexternalhit',
@@ -65,7 +65,6 @@ function buildMetaHTML({ title, description, image, url }) {
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
-  <script>window.location.href = "${escapeHtml(url)}";</script>
 </body>
 </html>`;
 }
@@ -82,8 +81,8 @@ module.exports = async function handler(req, res) {
             res.setHeader('Content-Type', 'text/html');
             return res.status(200).send(html);
         } catch (err) {
-            console.error('Failed to read build/index.html:', err);
-            return res.redirect(307, '/');
+            console.error('Failed to read build/app.html:', err);
+            return res.status(500).send('Application failed to load properly.');
         }
     }
 
@@ -98,7 +97,9 @@ module.exports = async function handler(req, res) {
         urlObj = { pathname: '/', searchParams: new URLSearchParams() };
     }
 
-    const pathname = urlObj.pathname;
+    const p = urlObj.searchParams.get('p');
+    // If vercel rewrite passes p, use it as pathname to support nested routes properly
+    const pathname = p ? (p.startsWith('/') ? p : `/${p}`) : urlObj.pathname;
     const groupId = urlObj.searchParams.get('group');
     const isAdmin = urlObj.searchParams.has('admin');
 
@@ -108,27 +109,32 @@ module.exports = async function handler(req, res) {
 
     // Dynamic meta for group links
     if (groupId) {
-        try {
-            const dbUrl = `${DB_URL.replace(/\/$/, '')}/groups/${groupId}.json`;
-            const groupRes = await fetch(dbUrl, { signal: AbortSignal.timeout(5000) });
+        // Sanitize groupId to prevent traversal or malicious input
+        if (typeof groupId !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(groupId)) {
+            console.warn(`[api/og] Rejected invalid groupId: ${groupId}`);
+        } else if (DB_URL) {
+            try {
+                const dbUrl = `${DB_URL.replace(/\/$/, '')}/groups/${encodeURIComponent(groupId)}.json`;
+                const groupRes = await fetch(dbUrl, { signal: AbortSignal.timeout(5000) });
 
-            if (groupRes.ok) {
-                const group = await groupRes.json();
-                if (group && group.name) {
-                    // Truncate name safely to max 60 chars to avoid preview bugs
-                    const cleanName = group.name.length > 60 ? group.name.substring(0, 60) + '...' : group.name;
-                    if (isAdmin) {
-                        title = `${cleanName} — Admin Dashboard | FindADate`;
-                        description = `Manage your event and see availability results for "${cleanName}" on FindADate.`;
-                    } else {
-                        title = `You're invited to pick dates for "${cleanName}"`;
-                        description = `Mark your available dates for ${cleanName}. No sign-up needed. Powered by FindADate.`;
-                        image = `${protocol}://${host}/og-image-invite.png`;
+                if (groupRes.ok) {
+                    const group = await groupRes.json();
+                    if (group && group.name) {
+                        // Truncate name safely to max 60 chars to avoid preview bugs
+                        const cleanName = group.name.length > 60 ? group.name.substring(0, 60) + '...' : group.name;
+                        if (isAdmin) {
+                            title = `${cleanName} — Admin Dashboard | FindADate`;
+                            description = `Manage your event and see availability results for "${cleanName}" on FindADate.`;
+                        } else {
+                            title = `You're invited to pick dates for "${cleanName}"`;
+                            description = `Mark your available dates for ${cleanName}. No sign-up needed. Powered by FindADate.`;
+                            image = `${protocol}://${host}/og-image-invite.png`;
+                        }
                     }
                 }
+            } catch (err) {
+                console.error('Failed to fetch group for OG tags:', err);
             }
-        } catch (err) {
-            console.error('Failed to fetch group for OG tags:', err);
         }
     } else {
         // Static meta for landing pages
