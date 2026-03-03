@@ -149,14 +149,16 @@ export function buildCalendarEventDetails(group, overlap, participantCount) {
     const endDate = overlap.endDate || overlap.startDate; // single-day events have same start/end
 
     const availableCount = overlap.count || overlap.availableCount || 0;
+    const location = group.location?.formattedAddress || null;
 
     const description = [
         `${title}`,
         group.description ? `\n${group.description}` : '',
         `\nDate: ${formatDateLong(startDate)}${startDate !== endDate ? ` — ${formatDateLong(endDate)}` : ''}`,
         `\n${availableCount}/${participantCount} participants available`,
+        location ? `\nLocation: ${location}` : '',
         `\n\nOrganized with FindADate — findadate.app`,
     ].join('');
 
-    return { title, description, startDate, endDate };
+    return { title, description, startDate, endDate, location };
 }

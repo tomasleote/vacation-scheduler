@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { MapPin, AlertCircle, Loader2 } from 'lucide-react';
-import { searchPlaces, getPlaceDetails, parseManualLocation, isPlacesAPIAvailable, QuotaExceededError, APIError } from '../../services/locationService';
+import { searchPlaces, getPlaceDetails, parseManualLocation, QuotaExceededError, APIError } from '../../services/locationService';
 import Input from './Input';
 import { Label } from './Input';
 
@@ -28,7 +28,7 @@ function LocationInput({
   const [showPredictions, setShowPredictions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [allowAutocomplete, setAllowAutocomplete] = useState(isPlacesAPIAvailable());
+  const [allowAutocomplete, setAllowAutocomplete] = useState(true);
   const searchTimeoutRef = useRef(null);
   const blurTimeoutRef = useRef(null);
 

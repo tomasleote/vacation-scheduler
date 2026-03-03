@@ -12,7 +12,7 @@ function CalendarEventButton({ group, overlap, participantCount }) {
     const triggerRef = useRef(null);
     const menuRef = useRef(null);
 
-    const { title, description, startDate, endDate } = buildCalendarEventDetails(
+    const { title, description, startDate, endDate, location } = buildCalendarEventDetails(
         group,
         overlap,
         participantCount
@@ -29,7 +29,7 @@ function CalendarEventButton({ group, overlap, participantCount }) {
 
     const handleGoogleCalendar = (e) => {
         e.stopPropagation();
-        const url = generateGoogleCalendarUrl({ title, description, startDate, endDate });
+        const url = generateGoogleCalendarUrl({ title, description, startDate, endDate, location });
         window.open(url, '_blank', 'noopener,noreferrer');
         setShowOptions(false);
         triggerRef.current?.focus();
@@ -37,7 +37,7 @@ function CalendarEventButton({ group, overlap, participantCount }) {
 
     const handleICSDownload = (e) => {
         e.stopPropagation();
-        const icsContent = generateICSContent({ title, description, startDate, endDate });
+        const icsContent = generateICSContent({ title, description, startDate, endDate, location });
         const filename = `${title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.ics`;
         downloadICSFile(icsContent, filename);
         setShowOptions(false);

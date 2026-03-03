@@ -11,8 +11,6 @@ describe('LocationInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Mock API availability by default
-    locationService.isPlacesAPIAvailable.mockReturnValue(true);
   });
 
   test('renders input field', () => {

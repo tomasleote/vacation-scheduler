@@ -1,559 +1,231 @@
-/**
- * Tests for locationService.js
- *
- * Tests the Google Places API integration with free tier quota protection.
- * Verifies error handling and graceful degradation when quota is exceeded.
- */
+import { searchPlaces, getPlaceDetails, parseManualLocation, QuotaExceededError, APIError } from './locationService';
+
+global.fetch = jest.fn();
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  process.env.REACT_APP_GOOGLE_PLACES_API_KEY = 'test-api-key';
+});
 
 describe('locationService', () => {
-  beforeEach(() => {
-    // Reset window.google before each test
-    delete window.google;
-    jest.resetModules();
-  });
-
-  describe('isPlacesAPIAvailable', () => {
-    test('returns true if Google Places API is loaded', () => {
-      window.google = {
-        maps: {
-          places: {
-            AutocompleteService: jest.fn()
-          }
-        }
-      };
-      const { isPlacesAPIAvailable } = require('./locationService');
-      expect(isPlacesAPIAvailable()).toBe(true);
-    });
-
-    test('returns false if Google Places API is not loaded', () => {
-      delete window.google;
-      jest.resetModules();
-      const { isPlacesAPIAvailable } = require('./locationService');
-      expect(isPlacesAPIAvailable()).toBe(false);
-    });
-
-    test('returns false if google.maps is missing', () => {
-      window.google = {};
-      jest.resetModules();
-      const { isPlacesAPIAvailable } = require('./locationService');
-      expect(isPlacesAPIAvailable()).toBe(false);
-    });
-
-    test('returns false if google.maps.places is missing', () => {
-      window.google = { maps: {} };
-      jest.resetModules();
-      const { isPlacesAPIAvailable } = require('./locationService');
-      expect(isPlacesAPIAvailable()).toBe(false);
-    });
-  });
-
   describe('searchPlaces', () => {
-    beforeEach(() => {
-      window.google = {
-        maps: {
-          places: {
-            AutocompleteService: jest.fn(() => ({
-              getPlacePredictions: jest.fn()
-            }))
-          }
-        }
-      };
+    test('returns empty array for query shorter than 2 characters', async () => {
+      expect(await searchPlaces('')).toEqual([]);
+      expect(await searchPlaces('a')).toEqual([]);
+      expect(fetch).not.toHaveBeenCalled();
     });
 
-    test('throws APIError if API not available', async () => {
-      delete window.google;
-      jest.resetModules();
-      const { searchPlaces, APIError } = require('./locationService');
-
-      await expect(searchPlaces('test')).rejects.toThrow(APIError);
-    });
-
-    test('returns empty array for empty query', async () => {
-      const { searchPlaces } = require('./locationService');
-      const results = await searchPlaces('');
-      expect(results).toEqual([]);
-    });
-
-    test('returns empty array for whitespace-only query', async () => {
-      const { searchPlaces } = require('./locationService');
-      const results = await searchPlaces('   ');
-      expect(results).toEqual([]);
-    });
-
-    test('returns empty array for single character query', async () => {
-      const { searchPlaces } = require('./locationService');
-      const results = await searchPlaces('a');
-      expect(results).toEqual([]);
-    });
-
-    test('returns empty array for null query', async () => {
-      const { searchPlaces } = require('./locationService');
-      const results = await searchPlaces(null);
-      expect(results).toEqual([]);
-    });
-
-    test('throws QuotaExceededError on OVER_QUERY_LIMIT', async () => {
-      const mockGetPlacePredictions = jest.fn().mockResolvedValue({
-        status: 'OVER_QUERY_LIMIT',
-        predictions: []
+    test('returns normalized predictions on success', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          suggestions: [
+            {
+              placePrediction: {
+                placeId: 'place1',
+                structuredFormat: {
+                  mainText: { text: 'Mountain View' },
+                  secondaryText: { text: 'CA, USA' },
+                },
+                text: { text: 'Mountain View, CA, USA' },
+              },
+            },
+          ],
+        }),
       });
-      window.google.maps.places.AutocompleteService = jest.fn(() => ({
-        getPlacePredictions: mockGetPlacePredictions
-      }));
-      jest.resetModules();
-      const { searchPlaces, QuotaExceededError } = require('./locationService');
-
-      await expect(searchPlaces('Mountain View')).rejects.toThrow(QuotaExceededError);
-    });
-
-    test('throws APIError on other API status errors', async () => {
-      const mockGetPlacePredictions = jest.fn().mockResolvedValue({
-        status: 'REQUEST_DENIED',
-        predictions: []
-      });
-      window.google.maps.places.AutocompleteService = jest.fn(() => ({
-        getPlacePredictions: mockGetPlacePredictions
-      }));
-      jest.resetModules();
-      const { searchPlaces, APIError } = require('./locationService');
-
-      await expect(searchPlaces('test')).rejects.toThrow(APIError);
-    });
-
-    test('returns predictions on OK status', async () => {
-      const mockPredictions = [
-        {
-          place_id: 'place1',
-          main_text: 'Mountain View',
-          secondary_text: 'CA, USA'
-        }
-      ];
-      const mockGetPlacePredictions = jest.fn().mockResolvedValue({
-        status: 'OK',
-        predictions: mockPredictions
-      });
-      window.google.maps.places.AutocompleteService = jest.fn(() => ({
-        getPlacePredictions: mockGetPlacePredictions
-      }));
-      jest.resetModules();
-      const { searchPlaces } = require('./locationService');
 
       const results = await searchPlaces('Mountain View');
-      expect(results).toEqual(mockPredictions);
+      expect(results).toEqual([
+        { place_id: 'place1', main_text: 'Mountain View', secondary_text: 'CA, USA' },
+      ]);
     });
 
-    test('returns predictions on ZERO_RESULTS status', async () => {
-      const mockGetPlacePredictions = jest.fn().mockResolvedValue({
-        status: 'ZERO_RESULTS',
-        predictions: []
+    test('returns empty array when suggestions is empty', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ suggestions: [] }),
       });
-      window.google.maps.places.AutocompleteService = jest.fn(() => ({
-        getPlacePredictions: mockGetPlacePredictions
-      }));
-      jest.resetModules();
-      const { searchPlaces } = require('./locationService');
 
-      const results = await searchPlaces('xyz123nonsense');
+      const results = await searchPlaces('xyzzy');
       expect(results).toEqual([]);
     });
 
-    test('calls AutocompleteService with correct request format', async () => {
-      const mockGetPlacePredictions = jest.fn().mockResolvedValue({
-        status: 'OK',
-        predictions: []
-      });
-      const mockService = {
-        getPlacePredictions: mockGetPlacePredictions
-      };
-      window.google.maps.places.AutocompleteService = jest.fn(() => mockService);
-      jest.resetModules();
-      const { searchPlaces } = require('./locationService');
-
-      await searchPlaces('Paris');
-      expect(mockGetPlacePredictions).toHaveBeenCalledWith({ input: 'Paris' });
+    test('throws QuotaExceededError on HTTP 429', async () => {
+      fetch.mockResolvedValueOnce({ ok: false, status: 429 });
+      await expect(searchPlaces('test query')).rejects.toThrow(QuotaExceededError);
     });
 
-    test('wraps network errors in APIError', async () => {
-      const mockGetPlacePredictions = jest.fn().mockRejectedValue(
-        new Error('Network error')
-      );
-      window.google.maps.places.AutocompleteService = jest.fn(() => ({
-        getPlacePredictions: mockGetPlacePredictions
-      }));
-      jest.resetModules();
-      const { searchPlaces, APIError } = require('./locationService');
+    test('throws APIError on other HTTP errors', async () => {
+      fetch.mockResolvedValueOnce({ ok: false, status: 500 });
+      await expect(searchPlaces('test query')).rejects.toThrow(APIError);
+    });
 
-      await expect(searchPlaces('test')).rejects.toThrow(APIError);
+    test('throws APIError on network failure', async () => {
+      fetch.mockRejectedValueOnce(new Error('Network error'));
+      await expect(searchPlaces('test query')).rejects.toThrow(APIError);
+    });
+
+    test('throws APIError when API key is not configured', async () => {
+      delete process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
+      await expect(searchPlaces('test query')).rejects.toThrow(APIError);
+    });
+
+    test('sends correct request to Places API', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ suggestions: [] }),
+      });
+
+      await searchPlaces('Paris');
+
+      expect(fetch).toHaveBeenCalledWith(
+        'https://places.googleapis.com/v1/places:autocomplete',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'X-Goog-Api-Key': 'test-api-key',
+            'Content-Type': 'application/json',
+          }),
+          body: JSON.stringify({ input: 'Paris' }),
+        })
+      );
     });
   });
 
   describe('getPlaceDetails', () => {
-    beforeEach(() => {
-      window.google = {
-        maps: {
-          places: {
-            AutocompleteService: jest.fn(),
-            PlacesService: jest.fn()
-          }
-        }
-      };
-      // Mock document.createElement
-      document.createElement = jest.fn(() => ({}));
+    const mockPlaceResponse = {
+      id: 'place1',
+      formattedAddress: '1600 Amphitheatre Pkwy, Mountain View, CA 94043',
+      displayName: { text: 'Googleplex' },
+      location: { latitude: 37.4224, longitude: -122.0842 },
+      addressComponents: [
+        { longText: 'Mountain View', types: ['locality'] },
+        { longText: 'United States', types: ['country'] },
+        { longText: '94043', types: ['postal_code'] },
+        { longText: 'Amphitheatre Pkwy', types: ['route'] },
+      ],
+      types: ['point_of_interest'],
+    };
+
+    test('returns structured location data on success', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockPlaceResponse,
+      });
+
+      const result = await getPlaceDetails('place1');
+      expect(result).toEqual({
+        placeId: 'place1',
+        formattedAddress: '1600 Amphitheatre Pkwy, Mountain View, CA 94043',
+        name: 'Googleplex',
+        city: 'Mountain View',
+        country: 'United States',
+        postalCode: '94043',
+        street: 'Amphitheatre Pkwy',
+        lat: 37.4224,
+        lng: -122.0842,
+        types: ['point_of_interest'],
+      });
     });
 
-    test('throws APIError if API not available', async () => {
-      delete window.google;
-      jest.resetModules();
-      const { getPlaceDetails, APIError } = require('./locationService');
-
-      await expect(getPlaceDetails('place1')).rejects.toThrow(APIError);
-    });
-
-    test('throws APIError if placeId is empty', async () => {
-      const { getPlaceDetails, APIError } = require('./locationService');
+    test('throws APIError if placeId is missing', async () => {
       await expect(getPlaceDetails('')).rejects.toThrow(APIError);
-    });
-
-    test('throws APIError if placeId is null', async () => {
-      const { getPlaceDetails, APIError } = require('./locationService');
       await expect(getPlaceDetails(null)).rejects.toThrow(APIError);
     });
 
-    test('throws QuotaExceededError on OVER_QUERY_LIMIT status', async () => {
-      let capturedCallback;
-      const mockGetDetails = jest.fn((request, callback) => {
-        capturedCallback = callback;
-      });
-
-      window.google.maps.places.PlacesService = jest.fn(() => ({
-        getDetails: mockGetDetails
-      }));
-      const { getPlaceDetails, QuotaExceededError } = require('./locationService');
-
-      const promise = getPlaceDetails('place1');
-      // Simulate API callback with quota error
-      if (capturedCallback) {
-        capturedCallback(null, 'OVER_QUERY_LIMIT');
-      }
-
-      await expect(promise).rejects.toThrow(QuotaExceededError);
+    test('throws QuotaExceededError on HTTP 429', async () => {
+      fetch.mockResolvedValueOnce({ ok: false, status: 429 });
+      await expect(getPlaceDetails('place1')).rejects.toThrow(QuotaExceededError);
     });
 
-    test('throws APIError on other status errors', async () => {
-      let capturedCallback;
-      const mockGetDetails = jest.fn((request, callback) => {
-        capturedCallback = callback;
-      });
-
-      window.google.maps.places.PlacesService = jest.fn(() => ({
-        getDetails: mockGetDetails
-      }));
-      const { getPlaceDetails, APIError } = require('./locationService');
-
-      const promise = getPlaceDetails('place1');
-      if (capturedCallback) {
-        capturedCallback(null, 'ZERO_RESULTS');
-      }
-
-      await expect(promise).rejects.toThrow(APIError);
+    test('throws APIError on other HTTP errors', async () => {
+      fetch.mockResolvedValueOnce({ ok: false, status: 404 });
+      await expect(getPlaceDetails('place1')).rejects.toThrow(APIError);
     });
 
-    test('throws APIError when place is null', async () => {
-      let capturedCallback;
-      const mockGetDetails = jest.fn((request, callback) => {
-        capturedCallback = callback;
-      });
-
-      window.google.maps.places.PlacesService = jest.fn(() => ({
-        getDetails: mockGetDetails
-      }));
-      const { getPlaceDetails, APIError } = require('./locationService');
-
-      const promise = getPlaceDetails('place1');
-      if (capturedCallback) {
-        capturedCallback(null, 'OK');
-      }
-
-      await expect(promise).rejects.toThrow(APIError);
-    });
-
-    test('returns structured place details on success', async () => {
-      let capturedCallback;
-      const mockGetDetails = jest.fn((request, callback) => {
-        capturedCallback = callback;
-      });
-
-      const mockPlace = {
-        place_id: 'place1',
-        formatted_address: '123 Main St, San Francisco, CA 94102, USA',
-        name: 'Test Location',
-        address_components: [
-          { types: ['route'], long_name: '123 Main St' },
-          { types: ['locality'], long_name: 'San Francisco' },
-          { types: ['postal_code'], long_name: '94102' },
-          { types: ['country'], long_name: 'United States' }
-        ],
-        geometry: {
-          location: {
-            lat: () => 37.7749,
-            lng: () => -122.4194
-          }
-        },
-        types: ['point_of_interest']
-      };
-
-      window.google.maps.places.PlacesService = jest.fn(() => ({
-        getDetails: mockGetDetails
-      }));
-      const { getPlaceDetails } = require('./locationService');
-
-      const promise = getPlaceDetails('place1');
-      if (capturedCallback) {
-        capturedCallback(mockPlace, 'OK');
-      }
-
-      const result = await promise;
-      expect(result).toEqual({
-        placeId: 'place1',
-        formattedAddress: '123 Main St, San Francisco, CA 94102, USA',
-        name: 'Test Location',
-        country: 'United States',
-        city: 'San Francisco',
-        street: '123 Main St',
-        postalCode: '94102',
-        lat: 37.7749,
-        lng: -122.4194,
-        types: ['point_of_interest']
-      });
+    test('throws APIError on network failure', async () => {
+      fetch.mockRejectedValueOnce(new Error('Network error'));
+      await expect(getPlaceDetails('place1')).rejects.toThrow(APIError);
     });
 
     test('handles missing address components gracefully', async () => {
-      let capturedCallback;
-      const mockGetDetails = jest.fn((request, callback) => {
-        capturedCallback = callback;
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          id: 'place1',
+          formattedAddress: 'Some Place',
+          displayName: { text: 'Some Place' },
+          location: null,
+          addressComponents: [],
+          types: [],
+        }),
       });
 
-      const mockPlace = {
-        place_id: 'place2',
-        formatted_address: 'Some address',
-        name: 'Test',
-        address_components: [],
-        geometry: {
-          location: {
-            lat: () => 0,
-            lng: () => 0
-          }
-        },
-        types: []
-      };
-
-      window.google.maps.places.PlacesService = jest.fn(() => ({
-        getDetails: mockGetDetails
-      }));
-      const { getPlaceDetails } = require('./locationService');
-
-      const promise = getPlaceDetails('place2');
-      if (capturedCallback) {
-        capturedCallback(mockPlace, 'OK');
-      }
-
-      const result = await promise;
-      expect(result.country).toBe('');
+      const result = await getPlaceDetails('place1');
       expect(result.city).toBe('');
-      expect(result.street).toBe('');
-      expect(result.postalCode).toBe('');
+      expect(result.country).toBe('');
+      expect(result.lat).toBeNull();
+      expect(result.lng).toBeNull();
     });
 
-    test('requests correct fields from PlacesService', async () => {
-      const mockGetDetails = jest.fn((request, callback) => {
-        callback(null, 'OK');
+    test('sends correct request with fields parameter', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockPlaceResponse,
       });
 
-      window.google.maps.places.PlacesService = jest.fn(() => ({
-        getDetails: mockGetDetails
-      }));
-      const { getPlaceDetails, APIError } = require('./locationService');
+      await getPlaceDetails('place1');
 
-      try {
-        await getPlaceDetails('place1');
-      } catch (e) {
-        // Expected to throw APIError
-        expect(e instanceof APIError).toBe(true);
-      }
-
-      // Verify the request was made with correct fields
-      expect(mockGetDetails).toHaveBeenCalledTimes(1);
-      const callArgs = mockGetDetails.mock.calls[0][0];
-      expect(callArgs.placeId).toBe('place1');
-      expect(callArgs.fields).toEqual([
-        'formatted_address',
-        'geometry',
-        'address_components',
-        'name',
-        'types',
-        'place_id'
-      ]);
-    });
-
-    test('wraps unexpected errors in APIError', async () => {
-      window.google.maps.places.PlacesService = jest.fn(() => {
-        throw new Error('Service initialization failed');
-      });
-      const { getPlaceDetails, APIError } = require('./locationService');
-
-      await expect(getPlaceDetails('place1')).rejects.toThrow(APIError);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('places/place1'),
+        expect.objectContaining({
+          headers: expect.objectContaining({ 'X-Goog-Api-Key': 'test-api-key' }),
+        })
+      );
     });
   });
 
   describe('parseManualLocation', () => {
-    let parseManualLocation;
-
-    beforeEach(() => {
-      jest.resetModules();
-      const module = require('./locationService');
-      parseManualLocation = module.parseManualLocation;
+    test('returns null for empty input', () => {
+      expect(parseManualLocation('')).toBeNull();
+      expect(parseManualLocation('   ')).toBeNull();
+      expect(parseManualLocation(null)).toBeNull();
     });
 
-    test('returns null for empty string', () => {
-      const result = parseManualLocation('');
-      expect(result).toBeNull();
-    });
-
-    test('returns null for whitespace-only string', () => {
-      const result = parseManualLocation('   ');
-      expect(result).toBeNull();
-    });
-
-    test('returns null for null input', () => {
-      const result = parseManualLocation(null);
-      expect(result).toBeNull();
-    });
-
-    test('returns null for undefined input', () => {
-      const result = parseManualLocation(undefined);
-      expect(result).toBeNull();
-    });
-
-    test('returns structured location object for valid text', () => {
+    test('returns minimal location object for valid text', () => {
       const result = parseManualLocation('Paris, France');
       expect(result).toEqual({
         formattedAddress: 'Paris, France',
-        name: null,
-        placeId: null,
-        lat: null,
-        lng: null,
-        country: null,
-        city: null,
-        street: null,
-        postalCode: null,
-        types: []
+        name: null, placeId: null,
+        lat: null, lng: null,
+        country: null, city: null,
+        street: null, postalCode: null,
+        types: [],
       });
     });
 
     test('trims whitespace from input', () => {
-      const result = parseManualLocation('  Tokyo, Japan  ');
-      expect(result.formattedAddress).toBe('Tokyo, Japan');
-    });
-
-    test('preserves internal spaces', () => {
-      const result = parseManualLocation('New York City');
-      expect(result.formattedAddress).toBe('New York City');
-    });
-
-    test('returns location with all null/empty fields except formattedAddress', () => {
-      const result = parseManualLocation('Custom location');
-      expect(result.placeId).toBeNull();
-      expect(result.lat).toBeNull();
-      expect(result.lng).toBeNull();
-      expect(result.country).toBeNull();
-      expect(result.city).toBeNull();
-      expect(result.street).toBeNull();
-      expect(result.postalCode).toBeNull();
-      expect(result.types).toEqual([]);
+      expect(parseManualLocation('  Rome  ').formattedAddress).toBe('Rome');
     });
   });
 
-  describe('Custom Error Classes', () => {
-    let QuotaExceededError, APIError;
-
-    beforeEach(() => {
-      jest.resetModules();
-      const module = require('./locationService');
-      QuotaExceededError = module.QuotaExceededError;
-      APIError = module.APIError;
+  describe('error classes', () => {
+    test('QuotaExceededError has correct name', () => {
+      const err = new QuotaExceededError();
+      expect(err.name).toBe('QuotaExceededError');
+      expect(err instanceof Error).toBe(true);
     });
 
-    test('QuotaExceededError has correct name and message', () => {
-      const error = new QuotaExceededError('Custom message');
-      expect(error.name).toBe('QuotaExceededError');
-      expect(error.message).toBe('Custom message');
-      expect(error instanceof Error).toBe(true);
-    });
-
-    test('QuotaExceededError uses default message', () => {
-      const error = new QuotaExceededError();
-      expect(error.message).toBe('Google Places API quota exceeded');
-    });
-
-    test('APIError has correct name and message', () => {
-      const error = new APIError('Custom error');
-      expect(error.name).toBe('APIError');
-      expect(error.message).toBe('Custom error');
-      expect(error instanceof Error).toBe(true);
-    });
-
-    test('APIError uses default message', () => {
-      const error = new APIError();
-      expect(error.message).toBe('Google Places API error');
-    });
-
-    test('errors can be caught with instanceof', () => {
-      const quotaError = new QuotaExceededError();
-      const apiError = new APIError();
-
-      expect(quotaError instanceof QuotaExceededError).toBe(true);
-      expect(apiError instanceof APIError).toBe(true);
-      expect(quotaError instanceof APIError).toBe(false);
-    });
-  });
-
-  describe('Integration: Error handling flow', () => {
-    beforeEach(() => {
-      // Set up window.google fresh for integration tests
-      window.google = {
-        maps: {
-          places: {
-            AutocompleteService: jest.fn(),
-            PlacesService: jest.fn()
-          }
-        }
-      };
-    });
-
-    test('searchPlaces propagates QuotaExceededError unchanged', async () => {
-      const mockGetPlacePredictions = jest.fn().mockResolvedValue({
-        status: 'OVER_QUERY_LIMIT'
-      });
-      window.google.maps.places.AutocompleteService = jest.fn(() => ({
-        getPlacePredictions: mockGetPlacePredictions
-      }));
-
-      const { searchPlaces } = require('./locationService');
-      await expect(searchPlaces('query')).rejects.toThrow('Google Places API quota exceeded');
-    });
-
-    test('getPlaceDetails propagates QuotaExceededError unchanged', async () => {
-      const mockGetDetails = jest.fn((request, callback) => {
-        // Invoke callback with OVER_QUERY_LIMIT status asynchronously
-        setTimeout(() => callback(null, 'OVER_QUERY_LIMIT'), 0);
-      });
-
-      window.google.maps.places.PlacesService = jest.fn(() => ({
-        getDetails: mockGetDetails
-      }));
-
-      const { getPlaceDetails } = require('./locationService');
-      await expect(getPlaceDetails('place1')).rejects.toThrow('Google Places API quota exceeded');
+    test('APIError has correct name and accepts custom message', () => {
+      const err = new APIError('custom');
+      expect(err.name).toBe('APIError');
+      expect(err.message).toBe('custom');
     });
   });
 });
