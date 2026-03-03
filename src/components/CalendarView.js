@@ -3,6 +3,7 @@ import { getDatesBetween } from '../utils/overlap';
 import { Calendar, User, Mail, Clock, Sparkles, CalendarRange } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import { MAX_PARTICIPANT_NAME_LENGTH } from '../utils/constants/validation';
+import { Link } from 'react-router-dom';
 
 const DayCell = React.memo(({ day, currentYear, currentMonth, monthName, isDateInRange, isDaySelected, onDayClick }) => {
   if (!day) {
@@ -248,7 +249,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
           </div>
 
           <p className="w-full text-[10px] text-gray-500 mt-1 px-2 leading-tight">
-            Your details are stored to identify you within this group. See our <a href="/privacy" className="text-brand-500 hover:underline" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/privacy'); window.dispatchEvent(new Event('popstate')); }}>Privacy Policy</a>.
+            Your details are stored to identify you within this group. See our <Link to="/privacy" className="text-brand-500 hover:underline">Privacy Policy</Link>.
           </p>
 
           {!singleDay && (

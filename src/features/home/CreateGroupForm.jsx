@@ -5,6 +5,7 @@ import { Input, Textarea, Label, Button, Card } from '../../shared/ui';
 import { apiCall } from '../../services/apiService';
 import { MAX_GROUP_NAME_LENGTH } from '../../utils/constants/validation';
 import { EVENT_TYPES, getEventConfig } from '../../utils/eventTypes';
+import { Link } from 'react-router-dom';
 
 function CreateGroupForm({ onSuccess, onCancel }) {
   const [name, setName] = useState('');
@@ -63,8 +64,8 @@ function CreateGroupForm({ onSuccess, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 mb-4" role="radiogroup" aria-label="Event Type">
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 mb-3" role="radiogroup" aria-label="Event Type">
         {Object.values(EVENT_TYPES).map((type) => (
           <button
             key={type.key}
@@ -104,7 +105,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
           value={description}
           onChange={(e) => setDescription(e.target.value.slice(0, 500))}
           placeholder={config.descriptionPlaceholder}
-          rows="2"
+          rows="1"
           maxLength="500"
         />
       </div>
@@ -130,14 +131,16 @@ function CreateGroupForm({ onSuccess, onCancel }) {
         </div>
       </div>
 
-      {/* Recovery options info */}
-      <Card variant="info" className="space-y-2">
-        <p className="text-xs font-semibold text-blue-300 flex items-center gap-1.5">
-          <KeyRound size={12} /> Admin link recovery (optional)
-        </p>
-        <p className="text-xs text-gray-400 leading-relaxed">
-          If you lose your admin link, you can recover it using a <strong className="text-gray-200">passphrase</strong> or your <strong className="text-gray-200">email</strong>. We strongly recommend setting at least one.
-        </p>
+      <Card variant="info" className="p-3">
+        <div className="flex items-start gap-2">
+          <KeyRound size={14} className="text-blue-400 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-xs font-semibold text-blue-300">Admin link recovery (optional)</p>
+            <p className="text-[11px] text-gray-400 leading-tight">
+              If you lose your admin link, you can recover it using a <strong className="text-gray-200">passphrase</strong> or your <strong className="text-gray-200">email</strong>. We strongly recommend setting at least one.
+            </p>
+          </div>
+        </div>
       </Card>
 
       <div>
@@ -150,7 +153,7 @@ function CreateGroupForm({ onSuccess, onCancel }) {
           placeholder="your@email.com"
         />
         <p className="text-[10px] text-gray-500 mt-1 leading-tight">
-          Used only for recovery and notifications. See our <a href="/privacy" className="text-brand-500 hover:underline" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/privacy'); window.dispatchEvent(new Event('popstate')); }}>Privacy Policy</a>.
+          Used only for recovery and notifications. See our <Link to="/privacy" className="text-brand-500 hover:underline">Privacy Policy</Link>.
         </p>
       </div>
 

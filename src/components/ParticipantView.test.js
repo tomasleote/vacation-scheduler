@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import ParticipantView from './ParticipantView';
 import * as groupService from '../services/groupService';
 import * as participantService from '../services/participantService';
@@ -57,9 +58,11 @@ describe('ParticipantView - Duplicate Name Check', () => {
 
     test('blocks submission and shows error if name already exists', async () => {
         render(
-            <GroupProvider groupId="group123" adminToken={null} isAdmin={false}>
-                <ParticipantView onBack={() => { }} />
-            </GroupProvider>
+            <MemoryRouter>
+                <GroupProvider groupId="group123" adminToken={null} isAdmin={false}>
+                    <ParticipantView onBack={() => { }} />
+                </GroupProvider>
+            </MemoryRouter>
         );
 
         // Wait for internal loading to finish
@@ -92,9 +95,11 @@ describe('ParticipantView - Duplicate Name Check', () => {
         participantService.addParticipant.mockResolvedValue('p3');
 
         render(
-            <GroupProvider groupId="group123" adminToken={null} isAdmin={false}>
-                <ParticipantView onBack={() => { }} />
-            </GroupProvider>
+            <MemoryRouter>
+                <GroupProvider groupId="group123" adminToken={null} isAdmin={false}>
+                    <ParticipantView onBack={() => { }} />
+                </GroupProvider>
+            </MemoryRouter>
         );
 
         await waitFor(() => {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mail, Github, BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function Footer({ onNavigateDocs, onNavigatePrivacy, onNavigateTerms }) {
     const handleDocsClick = (e) => {
@@ -39,14 +40,14 @@ export function Footer({ onNavigateDocs, onNavigatePrivacy, onNavigateTerms }) {
                     <h4 className="text-sm font-semibold text-gray-200 uppercase tracking-wider">Resources</h4>
                     <ul className="space-y-2">
                         <li>
-                            <a
-                                href="/docs"
+                            <Link
+                                to="/docs"
                                 onClick={handleDocsClick}
                                 className="text-sm text-gray-400 hover:text-brand-400 transition-colors flex items-center gap-2 group"
                             >
                                 <BookOpen size={14} className="group-hover:text-brand-400 transition-colors" />
                                 Documentation
-                            </a>
+                            </Link>
                         </li>
                         <li>
                             <a
@@ -84,20 +85,20 @@ export function Footer({ onNavigateDocs, onNavigatePrivacy, onNavigateTerms }) {
             <div className="max-w-6xl mx-auto pt-6 border-t border-dark-800 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500">
                 <p>&copy; {currentYear} FindADate. All rights reserved.</p>
                 <div className="flex space-x-4 mt-2 md:mt-0">
-                    <a
-                        href="/privacy"
+                    <Link
+                        to="/privacy"
                         onClick={handlePrivacyClick}
                         className="hover:text-brand-400 transition-colors"
                     >
                         Privacy Policy
-                    </a>
-                    <a
-                        href="/terms"
+                    </Link>
+                    <Link
+                        to="/terms"
                         onClick={handleTermsClick}
                         className="hover:text-brand-400 transition-colors"
                     >
                         Terms of Service
-                    </a>
+                    </Link>
                 </div>
             </div>
         </footer>

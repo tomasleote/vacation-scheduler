@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function StorageConsent({ onNavigate }) {
     const [isVisible, setIsVisible] = useState(false);
@@ -88,20 +89,13 @@ export function StorageConsent({ onNavigate }) {
                                     Decline
                                 </button>
                             </div>
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    if (onNavigate) {
-                                        onNavigate('/privacy');
-                                    } else {
-                                        window.history.pushState({}, '', '/privacy');
-                                        window.dispatchEvent(new Event('popstate'));
-                                    }
-                                }}
+                            <Link
+                                to="/privacy"
+                                onClick={() => setIsVisible(false)}
                                 className="text-[11px] text-brand-500 hover:text-brand-400 font-bold uppercase tracking-wider text-center mt-1"
                             >
                                 Learn More about Privacy
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>

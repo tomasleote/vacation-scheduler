@@ -1,52 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Users, Sparkles, ArrowRight, KeyRound } from 'lucide-react';
-import { Modal, Button, Card } from '../../shared/ui';
+import { Modal, Button, Card, Header } from '../../shared/ui';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import RecoverAdminForm from '../recovery/RecoverAdminForm';
 import CreateGroupForm from './CreateGroupForm';
 import JoinGroupForm from './JoinGroupForm';
 
 function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [showRecover, setShowRecover] = useState(false);
+
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'create') { setShowCreate(true); setShowJoin(false); setShowRecover(false); }
+    else if (action === 'join') { setShowJoin(true); setShowCreate(false); setShowRecover(false); }
+    else if (action === 'recover') { setShowRecover(true); setShowCreate(false); setShowJoin(false); }
+    else { setShowCreate(false); setShowJoin(false); setShowRecover(false); } // Handle default/no-action case
+
+    if (action) {
+      searchParams.delete('action');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const closeAll = () => { setShowCreate(false); setShowJoin(false); setShowRecover(false); };
   return (
     <div className="min-h-screen flex flex-col">
       {/* Nav Bar */}
-      <nav className="sticky top-0 z-50 bg-dark-900/80 backdrop-blur-xl border-b border-dark-700/50">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-          <span className="text-lg font-bold tracking-tight text-gray-50">Find<span className="text-brand-500">A</span>Date</span>
-          <div className="flex gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              weight="semibold"
-              onClick={() => { setShowRecover(true); setShowCreate(false); setShowJoin(false); }}
-              className="flex items-center gap-1.5"
-            >
-              <KeyRound size={14} /> Recover
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              weight="semibold"
-              onClick={() => { setShowCreate(true); setShowJoin(false); setShowRecover(false); }}
-            >
-              Create Event
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              weight="semibold"
-              onClick={() => { setShowJoin(true); setShowCreate(false); setShowRecover(false); }}
-            >
-              Join Event
-            </Button>
-          </div>
-        </div>
-      </nav>
+      <Header
+        onCreate={() => { setShowCreate(true); setShowJoin(false); setShowRecover(false); }}
+        onJoin={() => { setShowJoin(true); setShowCreate(false); setShowRecover(false); }}
+        onRecover={() => { setShowRecover(true); setShowCreate(false); setShowJoin(false); }}
+      />
 
       {/* Hero */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-20">
@@ -129,6 +118,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
         open={showCreate || showJoin || showRecover}
         onClose={closeAll}
         title={showCreate ? 'Create Event' : showJoin ? 'Join Event' : 'Recover Admin Access'}
+        maxWidth={showCreate ? 'lg' : 'md'}
         animated
       >
         {showCreate && (

@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import DocumentationPage from './DocumentationPage';
 
 describe('DocumentationPage Component', () => {
@@ -9,7 +10,11 @@ describe('DocumentationPage Component', () => {
     });
 
     it('renders the header and core concepts', () => {
-        render(<DocumentationPage />);
+        render(
+            <MemoryRouter>
+                <DocumentationPage />
+            </MemoryRouter>
+        );
         // Header
         expect(screen.getByRole('heading', { level: 1, name: /Documentation/i })).toBeInTheDocument();
 
@@ -24,7 +29,11 @@ describe('DocumentationPage Component', () => {
 
     it('calls onBack when back button is clicked (if provided)', () => {
         const handleBack = jest.fn();
-        render(<DocumentationPage onBack={handleBack} />);
+        render(
+            <MemoryRouter>
+                <DocumentationPage onBack={handleBack} />
+            </MemoryRouter>
+        );
 
         const backBtn = screen.getByRole('button', { name: /Go Back/i });
         fireEvent.click(backBtn);

@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import './index.css';
 import { GroupProvider } from './shared/context';
 import { LoadingSpinner, ErrorBoundary, Footer, StorageConsent } from './shared/ui';
+import { Routes, Route, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 
 const AdminPanel = React.lazy(() => import('./features/admin/AdminPage'));
 const ParticipantView = React.lazy(() => import('./components/ParticipantView'));
@@ -10,12 +11,20 @@ const GroupCreatedScreen = React.lazy(() => import('./features/home/GroupCreated
 const DocumentationPage = React.lazy(() => import('./features/docs/DocumentationPage'));
 const PrivacyPolicy = React.lazy(() => import('./features/legal/PrivacyPolicy'));
 const TermsOfService = React.lazy(() => import('./features/legal/TermsOfService'));
+const LandingPage = React.lazy(() => import('./features/landing/LandingPage'));
 
-function App() {
+function RootHandler() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const gId = searchParams.get('group');
+  const adminTok = searchParams.get('admin');
+  const pId = searchParams.get('p');
+
+  const [groupId, setGroupId] = useState(gId || null);
+  const [adminToken, setAdminToken] = useState(adminTok || null);
+  const [participantId, setParticipantId] = useState(pId || null);
   const [currentPage, setCurrentPage] = useState('home');
-  const [groupId, setGroupId] = useState(null);
-  const [adminToken, setAdminToken] = useState(null);
-  const [participantId, setParticipantId] = useState(null);
 
   useEffect(() => {
     // One-time migration from old localStorage keys
@@ -45,68 +54,50 @@ function App() {
       console.error("localStorage migration vacation_admin_/vacation_p_ -> fad_admin_/fad_p_ failed:", error);
     }
 
-    const path = window.location.pathname;
-    if (path === '/docs') {
-      setCurrentPage('docs');
-      return;
-    }
-
-    if (path === '/privacy') {
-      setCurrentPage('privacy');
-      return;
-    }
-
-    if (path === '/terms') {
-      setCurrentPage('terms');
-      return;
-    }
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const gId = urlParams.get('group');
-    const adminTok = urlParams.get('admin');
-    const pId = urlParams.get('p');
-
-    if (!gId) return;
-
-    setGroupId(gId);
-
-    if (adminTok) {
-      setAdminToken(adminTok);
-      setCurrentPage('admin');
-      try { localStorage.setItem(`fad_admin_${gId}`, adminTok); } catch { }
-      return;
-    }
-
-    if (pId) {
-      setParticipantId(pId);
-      setCurrentPage('participant');
-      return;
-    }
-
-    // localStorage fallback
-    try {
-      const storedAdmin = localStorage.getItem(`fad_admin_${gId}`);
-      if (storedAdmin) {
-        setAdminToken(storedAdmin);
+    if (gId) {
+      setGroupId(gId);
+      if (adminTok) {
+        setAdminToken(adminTok);
         setCurrentPage('admin');
+        try { localStorage.setItem(`fad_admin_${gId}`, adminTok); } catch { }
         return;
       }
-      const storedParticipant = localStorage.getItem(`fad_p_${gId}`);
-      if (storedParticipant) {
-        const { participantId: storedPId } = JSON.parse(storedParticipant);
-        setParticipantId(storedPId);
+      if (pId) {
+        setParticipantId(pId);
         setCurrentPage('participant');
         return;
       }
-    } catch { }
 
-    setCurrentPage('participant');
-  }, []);
+      // localStorage fallback
+      try {
+        const storedAdmin = localStorage.getItem(`fad_admin_${gId}`);
+        if (storedAdmin) {
+          setAdminToken(storedAdmin);
+          setCurrentPage('admin');
+          return;
+        }
+        const storedParticipant = localStorage.getItem(`fad_p_${gId}`);
+        if (storedParticipant) {
+          const { participantId: storedPId } = JSON.parse(storedParticipant);
+          setParticipantId(storedPId);
+          setCurrentPage('participant');
+          return;
+        }
+      } catch { }
+
+      setAdminToken(null);
+      setParticipantId(null);
+      setCurrentPage('participant');
+    } else {
+      setAdminToken(null);
+      setParticipantId(null);
+      setCurrentPage('home');
+    }
+  }, [gId, adminTok, pId]);
 
   const handleCreateGroup = ({ groupId, adminToken }) => {
     setGroupId(groupId);
     setAdminToken(adminToken);
-    // Persist token immediately so it survives page refresh before entering admin panel
     try { localStorage.setItem(`fad_admin_${groupId}`, adminToken); } catch { }
     setCurrentPage('created');
   };
@@ -114,17 +105,19 @@ function App() {
   const handleEnterAdmin = () => {
     setCurrentPage('admin');
     try { localStorage.setItem(`fad_admin_${groupId}`, adminToken); } catch { }
-    window.history.pushState({}, '', `?group=${groupId}&admin=${adminToken}`);
+    navigate(`/?group=${groupId}&admin=${adminToken}`);
   };
 
-  const handleJoinGroup = (gId, optAdminToken) => {
+  const handleJoinGroup = (joinGId, optAdminToken) => {
     if (optAdminToken) {
-      handleRecoverAdmin(gId, optAdminToken);
+      handleRecoverAdmin(joinGId, optAdminToken);
       return;
     }
-    setGroupId(gId);
+    setGroupId(joinGId);
+    setAdminToken(null);
+    setParticipantId(null);
     setCurrentPage('participant');
-    window.history.pushState({}, '', `?group=${gId}`);
+    navigate(`/?group=${joinGId}`);
   };
 
   const handleBackHome = () => {
@@ -132,101 +125,100 @@ function App() {
     setGroupId(null);
     setAdminToken(null);
     setParticipantId(null);
-    window.history.pushState({}, '', '/');
+    navigate('/');
   };
 
-  const handleRecoverAdmin = (gId, newAdminToken) => {
-    setGroupId(gId);
+  const handleRecoverAdmin = (recGId, newAdminToken) => {
+    setGroupId(recGId);
     setAdminToken(newAdminToken);
-    try { localStorage.setItem(`fad_admin_${gId}`, newAdminToken); } catch { }
+    try { localStorage.setItem(`fad_admin_${recGId}`, newAdminToken); } catch { }
     setCurrentPage('admin');
-    window.history.pushState({}, '', `?group=${gId}&admin=${newAdminToken}`);
+    navigate(`/?group=${recGId}&admin=${newAdminToken}`);
   };
 
   const isAdmin = !!adminToken;
 
   return (
     <GroupProvider groupId={groupId} adminToken={adminToken} isAdmin={isAdmin}>
-      <div className="min-h-screen bg-dark-950 text-gray-50 flex flex-col">
-        <main className="flex-grow flex flex-col">
-          <Suspense fallback={
-            <div className="flex-grow flex items-center justify-center">
-              <LoadingSpinner label="Loading page..." size="lg" />
-            </div>
-          }>
-            {currentPage === 'home' && (
-              <ErrorBoundary>
-                <HomePage onCreateGroup={handleCreateGroup} onJoinGroup={handleJoinGroup} onRecoverAdmin={handleRecoverAdmin} />
-              </ErrorBoundary>
-            )}
-            {currentPage === 'created' && (
-              <ErrorBoundary>
-                <GroupCreatedScreen
-                  groupId={groupId}
-                  adminToken={adminToken}
-                  onEnterAdmin={handleEnterAdmin}
-                  onBack={handleBackHome}
-                />
-              </ErrorBoundary>
-            )}
-            {currentPage === 'admin' && (
-              <ErrorBoundary>
-                <AdminPanel
-                  onBack={handleBackHome}
-                />
-              </ErrorBoundary>
-            )}
-            {currentPage === 'participant' && (
-              <ErrorBoundary>
-                <ParticipantView
-                  participantId={participantId}
-                  onBack={handleBackHome}
-                />
-              </ErrorBoundary>
-            )}
-            {currentPage === 'docs' && (
-              <ErrorBoundary>
-                <DocumentationPage onBack={handleBackHome} />
-              </ErrorBoundary>
-            )}
-            {currentPage === 'privacy' && (
-              <ErrorBoundary>
-                <PrivacyPolicy onBack={handleBackHome} />
-              </ErrorBoundary>
-            )}
-            {currentPage === 'terms' && (
-              <ErrorBoundary>
-                <TermsOfService onBack={handleBackHome} />
-              </ErrorBoundary>
-            )}
-          </Suspense>
-        </main>
-        <Footer
-          onNavigateDocs={(path) => {
-            setCurrentPage('docs');
-            window.history.pushState({}, '', path);
-            window.scrollTo(0, 0);
-          }}
-          onNavigatePrivacy={(path) => {
-            setCurrentPage('privacy');
-            window.history.pushState({}, '', path);
-            window.scrollTo(0, 0);
-          }}
-          onNavigateTerms={(path) => {
-            setCurrentPage('terms');
-            window.history.pushState({}, '', path);
-            window.scrollTo(0, 0);
-          }}
-        />
-        <StorageConsent onNavigate={(path) => {
-          const page = path.includes('privacy') ? 'privacy' : path.includes('terms') ? 'terms' : 'home';
-          setCurrentPage(page);
-          window.history.pushState({}, '', path);
-          window.scrollTo(0, 0);
-        }} />
-      </div>
+      {currentPage === 'home' && (
+        <ErrorBoundary>
+          <HomePage onCreateGroup={handleCreateGroup} onJoinGroup={handleJoinGroup} onRecoverAdmin={handleRecoverAdmin} />
+        </ErrorBoundary>
+      )}
+      {currentPage === 'created' && (
+        <ErrorBoundary>
+          <GroupCreatedScreen
+            groupId={groupId}
+            adminToken={adminToken}
+            onEnterAdmin={handleEnterAdmin}
+            onBack={handleBackHome}
+          />
+        </ErrorBoundary>
+      )}
+      {currentPage === 'admin' && (
+        <ErrorBoundary>
+          <AdminPanel
+            onBack={handleBackHome}
+          />
+        </ErrorBoundary>
+      )}
+      {currentPage === 'participant' && (
+        <ErrorBoundary>
+          <ParticipantView
+            participantId={participantId}
+            onBack={handleBackHome}
+          />
+        </ErrorBoundary>
+      )}
     </GroupProvider>
   );
+}
+
+function MainLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Need to scroll to top on path change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  return (
+    <div className="min-h-screen bg-dark-950 text-gray-50 flex flex-col">
+      <main className="flex-grow flex flex-col">
+        <Suspense fallback={
+          <div className="flex-grow flex items-center justify-center">
+            <LoadingSpinner label="Loading page..." size="lg" />
+          </div>
+        }>
+          <Routes>
+            <Route path="/" element={<RootHandler />} />
+            <Route path="/vacation-planner" element={<LandingPage type="vacation" />} />
+            <Route path="/doodle-alternative" element={<LandingPage type="doodle" />} />
+            <Route path="/when2meet-alternative" element={<LandingPage type="when2meet" />} />
+            <Route path="/find-a-date-for-dinner" element={<LandingPage type="dinner" />} />
+            <Route path="/group-event-planner" element={<LandingPage type="event" />} />
+            <Route path="/team-scheduling" element={<LandingPage type="team" />} />
+            <Route path="/party-planner" element={<LandingPage type="party" />} />
+            <Route path="/game-night-planner" element={<LandingPage type="gamenight" />} />
+            <Route path="/docs" element={<DocumentationPage onBack={() => navigate('/')} />} />
+            <Route path="/privacy" element={<PrivacyPolicy onBack={() => navigate('/')} />} />
+            <Route path="/terms" element={<TermsOfService onBack={() => navigate('/')} />} />
+          </Routes>
+        </Suspense>
+      </main>
+      <Footer
+        onNavigateDocs={() => navigate('/docs')}
+        onNavigatePrivacy={() => navigate('/privacy')}
+        onNavigateTerms={() => navigate('/terms')}
+      />
+      <StorageConsent onNavigate={(path) => navigate(path)} />
+    </div>
+  );
+}
+
+function App() {
+  return <MainLayout />;
 }
 
 export default App;

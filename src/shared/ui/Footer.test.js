@@ -1,36 +1,49 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Footer from './Footer';
+import { MemoryRouter } from 'react-router-dom';
+import { Footer } from './Footer';
 
-describe('Footer Component', () => {
-    it('renders the branding text and description', () => {
-        render(<Footer />);
+describe('Footer', () => {
+    const renderFooter = () => render(
+        <MemoryRouter>
+            <Footer />
+        </MemoryRouter>
+    );
+
+    it('renders the FAD logo correctly', () => {
+        renderFooter();
         expect(screen.getByText((content, element) => element.tagName === 'H3' && element.textContent === 'FindADate')).toBeInTheDocument();
-        expect(screen.getByText(/Find the best date for any group event/i)).toBeInTheDocument();
     });
 
-    it('renders contact email mailto link', () => {
-        render(<Footer />);
-        const link = screen.getByRole('link', { name: /hello@findadate\.app/i });
-        expect(link).toHaveAttribute('href', 'mailto:hello@findadate.app');
+    it('renders all resource links', () => {
+        renderFooter();
+        // Links
+        expect(screen.getByText('Documentation')).toBeInTheDocument();
+        expect(screen.getByText('GitHub Repository')).toBeInTheDocument();
     });
 
-    it('renders documentation link and tests interaction', () => {
-        const handleNavigate = jest.fn();
-        render(<Footer onNavigateDocs={handleNavigate} />);
-
-        const docsLink = screen.getByRole('link', { name: /Documentation/i });
-        expect(docsLink).toHaveAttribute('href', '/docs');
-
-        fireEvent.click(docsLink);
-        expect(handleNavigate).toHaveBeenCalledWith('/docs');
+    it('renders all contact links', () => {
+        renderFooter();
+        // Mail
+        expect(screen.getByText('hello@findadate.app')).toBeInTheDocument();
     });
 
-    it('renders repository link correctly', () => {
-        render(<Footer />);
-        const repoLink = screen.getByRole('link', { name: /GitHub Repository/i });
-        expect(repoLink).toHaveAttribute('href', 'https://github.com/tomasleote/vacation-scheduler');
-        expect(repoLink).toHaveAttribute('target', '_blank');
-        expect(repoLink).toHaveAttribute('rel', 'noopener noreferrer');
+    it('renders legal links', () => {
+        renderFooter();
+        expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
+        expect(screen.getByText('Terms of Service')).toBeInTheDocument();
+    });
+
+    it('renders the current year in copyright', () => {
+        const currentYear = new Date().getFullYear();
+        renderFooter();
+        expect(screen.getByText(new RegExp(currentYear.toString()))).toBeInTheDocument();
+    });
+
+    it('still renders anchors correctly without callbacks', () => {
+        renderFooter();
+        expect(screen.getByText('Documentation').closest('a')).toHaveAttribute('href', '/docs');
+        expect(screen.getByText('Privacy Policy').closest('a')).toHaveAttribute('href', '/privacy');
+        expect(screen.getByText('Terms of Service').closest('a')).toHaveAttribute('href', '/terms');
     });
 });

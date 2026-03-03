@@ -8,6 +8,8 @@ const maxWidthMap = {
   lg: 'max-w-lg',
 };
 
+const PANEL_CLASSES = "bg-dark-900 border border-dark-700 rounded-2xl p-5 md:p-6 w-full shadow-2xl max-h-[calc(100vh-2rem)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]";
+
 /**
  * Shared Modal component — replaces duplicated overlay wrappers.
  *
@@ -27,7 +29,7 @@ function Modal({ open, onClose, title, maxWidth = 'md', animated = false, childr
       onClick={onClose}
     >
       <div
-        className={`bg-dark-900 border border-dark-700 rounded-2xl p-6 w-full ${widthClass} shadow-2xl`}
+        className={`${PANEL_CLASSES} ${widthClass}`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -35,7 +37,7 @@ function Modal({ open, onClose, title, maxWidth = 'md', animated = false, childr
         aria-label={!title ? "Modal dialog" : undefined}
       >
         {title && (
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-4">
             <h2 id="modal-title" className="text-xl font-bold text-gray-50">{title}</h2>
             <button
               type="button"
@@ -65,7 +67,7 @@ function Modal({ open, onClose, title, maxWidth = 'md', animated = false, childr
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 24, scale: 0.96 }}
         transition={{ duration: 0.2 }}
-        className={`bg-dark-900 border border-dark-700 rounded-2xl p-6 w-full ${widthClass} shadow-2xl`}
+        className={`${PANEL_CLASSES} ${widthClass}`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -73,7 +75,7 @@ function Modal({ open, onClose, title, maxWidth = 'md', animated = false, childr
         aria-label={!title ? "Modal dialog" : undefined}
       >
         {title && (
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-4">
             <h2 id="modal-title" className="text-xl font-bold text-gray-50">{title}</h2>
             <button
               type="button"

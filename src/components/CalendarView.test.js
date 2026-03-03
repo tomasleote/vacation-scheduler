@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import CalendarView from './CalendarView';
 import { useNotification } from '../context/NotificationContext';
 
@@ -33,7 +34,11 @@ const defaultProps = {
 };
 
 const renderCalendar = (overrides = {}) => {
-  return render(<CalendarView {...defaultProps} {...overrides} />);
+  return render(
+    <MemoryRouter>
+      <CalendarView {...defaultProps} {...overrides} />
+    </MemoryRouter>
+  );
 };
 
 describe('CalendarView rendering', () => {
