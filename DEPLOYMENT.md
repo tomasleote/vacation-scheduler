@@ -1,247 +1,94 @@
-# Deployment Guide
+# Deployment Guide 🚢
 
-## Prerequisites
+This guide will walk you through deploying **Find A Day** to **Vercel** and **Firebase**.
 
-- Firebase CLI installed: `npm install -g firebase-tools`
-- Active Firebase project
-- Node.js 18+
+## 🏗️ Prerequisites
 
-## Step 1: Create Firebase Project
+-   [Node.js](https://nodejs.org/) (version 18 or higher)
+-   [Vercel CLI](https://vercel.com/docs/cli) (optional, but recommended)
+-   [Firebase CLI](https://firebase.google.com/docs/cli) (optional, if using Firebase Hosting)
 
-1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Click "Create a project"
-3. Name it (e.g., "vacation-scheduler")
-4. Enable Google Analytics (optional)
-5. Create project
+---
 
-## Step 2: Set Up Firebase Services
+## ☁️ Step 1: Set Up Firebase
 
-### Realtime Database
+1.  **Create Project**: Go to [Firebase Console](https://console.firebase.google.com/) and create a new project.
+2.  **Enable Realtime Database**: 
+    -   Select "Realtime Database" in the sidebar.
+    -   Click "Create Database" and follow the steps.
+    -   Choose a location and start in **Test Mode** (you should update the rules later using `database.rules.json` from this project).
+3.  **Get Configuration**:
+    -   Go to **Project Settings** → **General**.
+    -   Click the **Web App** icon to register your app.
+    -   Copy the `firebaseConfig` object values. You will need these for your environment variables.
 
-1. In Firebase Console, go to **Realtime Database**
-2. Click **Create Database**
-3. Choose region (closest to your users)
-4. Start in **Test Mode** (for development)
-5. Copy the database URL (you'll need this)
+---
 
-### Authentication (Optional, for future enhancements)
+## 🔑 Step 2: Environment Variables
 
-1. Go to **Authentication**
-2. Click **Set up sign-in method**
-3. Enable methods you want (Google, Email/Password, etc.)
-
-## Step 3: Configure Project Locally
+Create a file named `.env.local` for local development or add these keys to your deployment platform (Vercel/Netlify):
 
 ```bash
-# Navigate to project
-cd vacation-scheduler
+# Firebase Frontend SDK (Required)
+REACT_APP_FIREBASE_API_KEY="AIzaSyA..."
+REACT_APP_FIREBASE_AUTH_DOMAIN="find-a-day.firebaseapp.com"
+REACT_APP_FIREBASE_DATABASE_URL="https://find-a-day-default-rtdb.firebaseio.com"
+REACT_APP_FIREBASE_PROJECT_ID="find-a-day"
+REACT_APP_FIREBASE_STORAGE_BUCKET="find-a-day.appspot.com"
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID="12345678"
+REACT_APP_FIREBASE_APP_ID="1:12345678:web:abcdef1234"
 
-# Login to Firebase
-firebase login
+# Google Places (Optional, for location features)
+REACT_APP_GOOGLE_PLACES_API_KEY="AIzaSyB..."
 
-# Link to your Firebase project
-firebase use --add
-# Choose your project and give it an alias (e.g., "default")
+# Serverless Email Config (API/Nodemailer)
+EMAIL_SERVICE="gmail"        # Or your service of choice
+EMAIL_USER="your-email@gmail.com"
+EMAIL_PASSWORD="your-app-password"
 ```
 
-## Step 4: Set Environment Variables
+---
 
-```bash
-# Copy example config
-cp .env.example .env.local
+## 🔼 Step 3: Deploying to Vercel (Recommended)
 
-# Edit .env.local with your Firebase credentials
-# Go to Project Settings → Web App → Firebase SDK snippet
-# Copy the config values
-```
+**Find A Day** is optimized for Vercel out-of-the-box due to its serverless `/api` routes.
 
-**Your .env.local should look like:**
+1.  Push your code to **GitHub/GitLab/Bitbucket**.
+2.  Import the repository into **Vercel**.
+3.  Add all environment variables from Step 2.
+4.  Vercel will automatically detect the React build script and the `/api` folder.
+5.  Click **Deploy**.
 
-```
-REACT_APP_FIREBASE_API_KEY=AIzaSyD...
-REACT_APP_FIREBASE_AUTH_DOMAIN=vacation-scheduler-xxx.firebaseapp.com
-REACT_APP_FIREBASE_PROJECT_ID=vacation-scheduler-xxx
-REACT_APP_FIREBASE_STORAGE_BUCKET=vacation-scheduler-xxx.appspot.com
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID=123456789
-REACT_APP_FIREBASE_DATABASE_URL=https://vacation-scheduler-xxx.firebaseio.com
-```
+---
 
-## Step 5: Test Locally
+## 🔥 Step 4: Deploying to Firebase Hosting
 
-```bash
-# Install dependencies
-npm install
+If you prefer to host both the app and functions on Firebase:
 
-# Install Cloud Functions dependencies
-cd functions && npm install && cd ..
+1.  Initialize Firebase in your project:
+    ```bash
+    firebase init
+    ```
+    Choose **Hosting**, **Realtime Database**, and **Functions**.
+2.  Update your `firebase.json` if needed (the project already contains one).
+3.  Deploy:
+    ```bash
+    firebase deploy
+    ```
 
-# Start development server
-npm start
-```
+---
 
-Visit `http://localhost:3000` and test the app locally.
+## 🚀 Post-Deployment Checklist
 
-## Step 6: Prepare for Deployment
+- [ ] **Check Realtime Database Rules**: Apply the rules in `database.rules.json` to secure your data.
+- [ ] **Verify APIs**: Test group creation to ensure the `/api/send-welcome` emails are delivering.
+- [ ] **Verify Location**: Ensure the Google Places dropdown works in production (requires billing and authorized domain in Google Cloud).
+- [ ] **Test Admin Access**: Confirm that recovering an admin link via email works correctly.
 
-```bash
-# Build the React app
-npm run build
+---
 
-# Check the build output
-ls -la build/
-```
+## 🛡️ Security Best Practices
 
-## Step 7: Deploy to Firebase
-
-### Option A: Deploy Everything
-
-```bash
-firebase deploy
-```
-
-This deploys:
-- Hosting (React app)
-- Functions (email reminders)
-- Database rules
-
-### Option B: Deploy Separately
-
-```bash
-# Deploy only hosting
-firebase deploy --only hosting
-
-# Deploy only functions
-firebase deploy --only functions
-
-# Deploy only database rules
-firebase deploy --only database
-```
-
-### Option C: Preview Before Deploy
-
-```bash
-# Deploy to preview channel
-firebase hosting:channel:deploy preview
-
-# Get preview URL from output
-```
-
-## Step 8: Verify Deployment
-
-1. Visit your Firebase hosting URL (shown after deployment)
-2. Test the app:
-   - Create a group
-   - Add participants
-   - Verify data appears in Firebase Realtime Database
-   - Test CSV export
-
-## Step 9: Set Up Email Reminders (Optional)
-
-### Using Gmail
-
-1. Enable 2-Factor Authentication on your Gmail account
-2. Generate App Password at [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-3. Set Firebase environment variables:
-
-```bash
-firebase functions:config:set \
-  email.service="gmail" \
-  email.user="your-email@gmail.com" \
-  email.password="your-app-password"
-```
-
-4. Redeploy functions:
-
-```bash
-firebase deploy --only functions
-```
-
-## Step 10: Monitor Your Deployment
-
-```bash
-# View function logs
-firebase functions:log
-
-# View hosting logs
-firebase hosting:log
-
-# View real-time database
-# Visit Firebase Console → Realtime Database → Data tab
-```
-
-## Production Checklist
-
-- [ ] Firebase project created
-- [ ] Realtime Database configured
-- [ ] Environment variables set
-- [ ] Build successful (`npm run build`)
-- [ ] Local testing passed
-- [ ] App deployed to Firebase Hosting
-- [ ] Email configuration (if using reminders)
-- [ ] Database backup strategy
-- [ ] Custom domain (optional)
-- [ ] Security rules reviewed
-
-## Security Rules (Production)
-
-For production, update `database.rules.json`:
-
-```json
-{
-  "rules": {
-    "groups": {
-      "$groupId": {
-        ".read": "data.child('id').val() === $groupId",
-        ".write": "data.child('id').val() === $groupId",
-        "participants": {
-          ".read": "root.child('groups').child($groupId).exists()",
-          ".write": "newData.child('id').exists()"
-        }
-      }
-    }
-  }
-}
-```
-
-Then redeploy:
-
-```bash
-firebase deploy --only database
-```
-
-## Troubleshooting
-
-### "Cannot find module 'firebase-functions'"
-
-```bash
-cd functions && npm install && cd ..
-firebase deploy --only functions
-```
-
-### Database URL not found
-
-Check your `.env.local` file has the correct `REACT_APP_FIREBASE_DATABASE_URL`.
-
-### Email not sending
-
-- Verify email credentials in Cloud Functions config
-- Check function logs: `firebase functions:log`
-- Ensure Gmail has 2FA enabled and app password is used
-
-### Slow deployment
-
-Firebase deployment can take 5-10 minutes. Wait for completion before checking results.
-
-## After Deployment
-
-1. **Share your app**: Give participants the Firebase hosting URL
-2. **Monitor usage**: Check Firebase Console for database growth
-3. **Backup**: Enable Firebase backups in settings
-4. **Scale**: Firebase free tier supports ~100 concurrent users
-5. **Analytics**: Enable Analytics in Firebase Console
-
-## Support
-
-- Firebase Docs: https://firebase.google.com/docs
-- React Docs: https://react.dev
-- GitHub Issues: Create an issue in your repo
+-   **Restrict API Keys**: Go to the Google Cloud Console and restrict your API keys to only work on your domain.
+-   **Email Security**: For high-volume production, switch from Gmail App Passwords to professional providers like SendGrid or Resend.
+-   **Database**: Periodically backup your Firebase Realtime Database using the Firebase scheduled backups feature.

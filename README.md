@@ -1,108 +1,110 @@
-# Find A Day
+# Find A Day 📅
 
-A web application designed to eliminate the headache of scheduling group vacations. Built with React and Firebase, this tool automatically calculates the optimal travel dates by finding the best overlap based on every participant's unique availability and desired trip duration.
+**Find A Day** is a zero-friction, privacy-first web application designed to eliminate the headache of scheduling group events—from week-long vacations to single-day dinners. 
 
-## ✨ Core Features
+Unlike Doodle or When2Meet, **Find A Day** is built specifically for **date ranges**, features a modern mobile-first UI, and requires **no account or sign-up** for organizers or participants.
 
-✅ **Smart Overlap Engine**  
-Automatically analyzes all participant calendars to find the absolute best travel windows (ranked by highest availability percentage).
+![Find A Day Preview](https://findaday.app/logo.png)
 
-✅ **Flexible Scheduling Options**  
-Participants can choose exact dates or indicate they need a continuous block of time (e.g., any 3, 4, or 5 consecutive days within a month).
+## ✨ Why Find A Day?
 
-✅ **Admin Dashboard & Management**  
-Group creators get an exclusive Admin Panel to edit group details, remove participants, copy personal invite links, or send email reminders with a single click.
+*   🚀 **Zero Friction**: No accounts, no sign-ups, no ads. Create a poll and share a link in under 30 seconds.
+*   📊 **Visual Heatmaps**: Instantly see which dates work for the most people with an intuitive, color-coded availability grid.
+*   📍 **Location Smart**: Integrated with Google Places. Add a restaurant, park, or city with autocomplete to help everyone plan better.
+*   🗓️ **Built for Ranges**: Perfect for vacations and retreats. Participants paint their availability on a custom calendar, not a messy list of time slots.
+*   📱 **Mobile-First**: Designed to work perfectly in your group chat. Every feature is optimized for the phone in your hand.
+*   🔐 **Secure Admin**: Manage your group via a unique admin link. Recover access anytime using a secure passphrase or email.
 
-✅ **Real-Time Synchronization**  
-Powered by Firebase Realtime Database, once a participant saves their availability, the group's results update instantly for any Admin or participant viewing the dashboard.
+## 🛠️ Technology Stack
 
-✅ **Robust Access Recovery**  
-Lost your admin link? Recover access securely via a hashed passphrase or an email link. You can also securely search for all groups tied to your email.
+*   **Frontend**: React 18, Tailwind CSS, Framer Motion (Animations), Lucide Icons.
+*   **Database**: Firebase Realtime Database (Real-time updates without page refreshes).
+*   **APIs**: 
+    *   **Google Places (New) API**: For location autocomplete and address formatting.
+    *   **Vercel Serverless Functions**: For secure backend operations (Express-like `/api` routes).
+*   **Email**: Nodemailer (via Vercel functions for invites and recovery).
+*   **SEO**: React Helmet Async for dynamic metadata and social previews.
 
-✅ **Data Export & Analytics**  
-Export participant lists, individual availability, and the top overlap periods directly to CSV for offline coordination.
-
-✅ **Offline Resistance & Error Handling**  
-Built with resilient offline detection, optimistic UI updates, and strict error boundaries. You won't lose your data if your network drops on a train or a plane.
-
-## 🛠️ Tech Stack
-
-- **Frontend**: React 18, Tailwind CSS, Lucide Icons, Framer Motion
-- **Database**: Firebase Realtime Database
-- **API & Serverless**: Vercel Serverless Functions (`/api/*` routes)
-- **Emails**: Nodemailer (via Serverless API endpoints)
-- **Data Export**: PapaParse
-
-## 🚀 How It Works
-
-### 1. Create a Group (Admin Flow)
-- Set a **Group Name**, **Start Date**, and **End Date** (the total possible window for the trip).
-- Provide an **Admin Email** and **Passphrase** (highly recommended for recovering your admin privileges later).
-- Share the generated **Group ID** or **Invite Link** with your friends.
-
-### 2. Add Availability (Participant Flow)
-- Users join via the group link.
-- They enter their name and email (optional).
-- Using the interactive calendar, they paint the days they are free to travel.
-
-### 3. Review Results & Finalize
-- The admin accesses the dashboard and views the **Overlap Results** tab.
-- The system highlights the top periods where the highest percentage of the group can travel together.
-- Once a date is decided, the Admin can export the data to CSV and book the trip!
-
-## 💻 Local Setup & Development
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- npm or yarn
-- A Firebase project (Realtime Database enabled)
-- A Gmail account with App Passwords (for email notifications)
 
-### 1. Clone & Install
-```bash
-git clone https://github.com/your-repo/vacation-scheduler.git
-cd vacation-scheduler
-npm install
-```
+*   Node.js 18.x or higher
+*   A Firebase project (Realtime Database enabled)
+*   Google Cloud Project (with Places API enabled)
+*   Gmail account with App Password (for email features)
 
-### 2. Environment Variables
-Create a `.env.local` file in the root directory and populate it with your Firebase and Email credentials:
+### Local Installation
 
-```env
-REACT_APP_FIREBASE_API_KEY="your-api-key"
-REACT_APP_FIREBASE_AUTH_DOMAIN="your-app.firebaseapp.com"
-REACT_APP_FIREBASE_DATABASE_URL="https://your-app-default-rtdb.firebaseio.com"
-REACT_APP_FIREBASE_PROJECT_ID="your-project-id"
-REACT_APP_FIREBASE_STORAGE_BUCKET="your-app.appspot.com"
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID="123456789"
-REACT_APP_FIREBASE_APP_ID="1:123456789:web:abcdef123456"
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/tomasleote/vacation-scheduler.git
+    cd vacation-scheduler
+    ```
 
-# Email Configuration (for API routes)
-EMAIL_SERVICE="gmail"
-EMAIL_USER="your-email@gmail.com"
-EMAIL_PASSWORD="your-app-password"
-```
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-### 3. Run the Development Server
-```bash
-npm start
-```
-The app will be available at `http://localhost:3000`. API routes (like `/api/send-invite`) will run via `react-scripts` proxy if configured, or can be tested natively when deployed.
+3.  **Environment Setup**:
+    Create a `.env.local` file in the root directory:
+    ```env
+    # Firebase Configuration
+    REACT_APP_FIREBASE_API_KEY="your_api_key"
+    REACT_APP_FIREBASE_AUTH_DOMAIN="your_app.firebaseapp.com"
+    REACT_APP_FIREBASE_DATABASE_URL="https://your_app-default-rtdb.firebaseio.com"
+    REACT_APP_FIREBASE_PROJECT_ID="your_project_id"
+    REACT_APP_FIREBASE_STORAGE_BUCKET="your_app.appspot.com"
+    REACT_APP_FIREBASE_MESSAGING_SENDER_ID="your_sender_id"
+    REACT_APP_FIREBASE_APP_ID="your_app_id"
+
+    # Google Places
+    REACT_APP_GOOGLE_PLACES_API_KEY="your_google_maps_key"
+
+    # Email (for serverless functions)
+    EMAIL_SERVICE="gmail"
+    EMAIL_USER="your-email@gmail.com"
+    EMAIL_PASSWORD="your-app-password"
+    ```
+
+4.  **Start development server**:
+    ```bash
+    npm start
+    ```
+    The app will run at `http://localhost:3000`.
 
 ## 🚢 Deployment
 
-This application is optimized for deployment on **Vercel** or **Netlify**, as it relies on Serverless Functions located in the `api/` directory.
+The project is optimized for **Vercel** with zero-config serverless function support.
 
-### Deploying to Vercel
-1. Push your code to GitHub.
-2. Import the repository into Vercel.
-3. Add all the environment variables from your `.env.local` file into the Vercel project settings.
-4. Deploy! Vercel will automatically host the React frontend and map the `api/` folder to serverless endpoints.
+1.  Push your code to GitHub.
+2.  Connect your repository to Vercel.
+3.  Add the environment variables in the Vercel Dashboard.
+4.  Deploy!
+
+## 🧪 Testing
+
+The codebase includes integration and unit tests using Jest and React Testing Library.
+
+```bash
+npm test
+```
 
 ## 📄 License
 
-MIT License. See the `LICENSE` file for more details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Support & Contributions
+## 🤝 Contributing
 
-Found a bug or want to suggest an improvement? Please open an issue or submit a pull request!
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+*Made with ❤️ for better group planning.*
