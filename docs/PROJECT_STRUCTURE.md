@@ -4,7 +4,7 @@ Complete file organization and purpose of each file.
 
 ## Directory Tree
 
-```
+```text
 vacation-scheduler/
 │
 ├── src/                          # React application source code
@@ -199,7 +199,7 @@ vacation-scheduler/
 ## Environment Variables
 
 ### Development (.env.local)
-```
+```env
 REACT_APP_FIREBASE_API_KEY=...
 REACT_APP_FIREBASE_AUTH_DOMAIN=...
 REACT_APP_FIREBASE_PROJECT_ID=...
@@ -209,7 +209,7 @@ REACT_APP_FIREBASE_DATABASE_URL=...
 ```
 
 ### Cloud Functions (Set via Firebase CLI)
-```
+```env
 EMAIL_SERVICE=gmail
 EMAIL_USER=...
 EMAIL_PASSWORD=...
@@ -231,7 +231,7 @@ EMAIL_PASSWORD=...
 
 When you run `npm run build`, this creates:
 
-```
+```text
 build/
 ├── index.html          # Main entry point
 ├── static/
@@ -269,7 +269,7 @@ This is what gets deployed to Firebase Hosting.
 
 ## Testing Structure (Recommended)
 
-```
+```text
 src/
 ├── __tests__/
 │   ├── utils/
@@ -284,7 +284,7 @@ src/
 
 ## Deploy Workflow
 
-```
+```text
 Local Development
   ↓
 npm install (dependencies)

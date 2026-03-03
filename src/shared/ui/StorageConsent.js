@@ -5,8 +5,14 @@ export function StorageConsent({ onNavigate }) {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        // Check if user has already dismissed or declined the banner
-        const consent = localStorage.getItem('vacation_storage_consent');
+        let consent = null;
+        if (typeof window !== 'undefined') {
+            try {
+                consent = localStorage.getItem('vacation_storage_consent');
+            } catch (e) {
+                console.warn('[StorageConsent] Failed to read consent:', e);
+            }
+        }
         if (!consent) {
             // Delay showing it slightly for better UX
             const timer = setTimeout(() => setIsVisible(true), 1500);

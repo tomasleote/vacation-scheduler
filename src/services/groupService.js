@@ -8,7 +8,9 @@ export const createGroup = async (groupData) => {
     const description = String(groupData.description || '').trim().slice(0, 1000);
     const startDate = String(groupData.startDate || '').slice(0, 10);
     const endDate = String(groupData.endDate || '').slice(0, 10);
-    const eventType = String(groupData.eventType || 'vacation').trim().slice(0, 50);
+    const ALLOWED_EVENT_TYPES = ['vacation', 'dinner', 'party', 'gamenight', 'team', 'other'];
+    const incomingEventType = String(groupData.eventType || '').trim().toLowerCase();
+    const eventType = ALLOWED_EVENT_TYPES.includes(incomingEventType) ? incomingEventType : 'vacation';
     const adminEmail = String(groupData.adminEmail || '').trim().slice(0, 255);
     const recoveryPasswordHash = groupData.recoveryPasswordHash
       ? String(groupData.recoveryPasswordHash).slice(0, 64)

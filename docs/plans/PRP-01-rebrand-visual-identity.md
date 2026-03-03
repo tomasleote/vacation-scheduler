@@ -257,7 +257,9 @@ try {
       localStorage.removeItem(key);
     }
   });
-} catch {}
+} catch (error) {
+  console.error("localStorage migration vacation_admin_/vacation_p_ -> fad_admin_/fad_p_ failed:", error);
+}
 ```
 
 Then update ALL localStorage references:

@@ -84,18 +84,20 @@ export function Footer({ onNavigateDocs, onNavigatePrivacy, onNavigateTerms }) {
             <div className="max-w-6xl mx-auto pt-6 border-t border-dark-800 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500">
                 <p>&copy; {currentYear} Vacation Scheduler. All rights reserved.</p>
                 <div className="flex space-x-4 mt-2 md:mt-0">
-                    <button
+                    <a
+                        href="/privacy"
                         onClick={handlePrivacyClick}
                         className="hover:text-blue-400 transition-colors"
                     >
                         Privacy Policy
-                    </button>
-                    <button
+                    </a>
+                    <a
+                        href="/terms"
                         onClick={handleTermsClick}
                         className="hover:text-blue-400 transition-colors"
                     >
                         Terms of Service
-                    </button>
+                    </a>
                 </div>
             </div>
         </footer>

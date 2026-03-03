@@ -78,6 +78,9 @@ export function useGroupData(groupId, adminToken, onBack) {
           if (isSingleDayEvent(data.eventType)) {
             setDurationFilter('1');
             setAdminDuration('1');
+          } else {
+            setDurationFilter('3');
+            setAdminDuration('3');
           }
         } else {
           setGroup(null);

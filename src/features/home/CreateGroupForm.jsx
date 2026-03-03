@@ -64,18 +64,21 @@ function CreateGroupForm({ onSuccess, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 mb-4">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 mb-4" role="radiogroup" aria-label="Event Type">
         {Object.values(EVENT_TYPES).map((type) => (
           <button
             key={type.key}
             type="button"
+            role="radio"
+            aria-checked={eventType === type.key}
+            aria-label={type.label}
             onClick={() => setEventType(type.key)}
             className={`p-2 flex flex-col items-center justify-center rounded-lg border text-center transition-colors ${eventType === type.key
-                ? 'border-blue-500 bg-blue-500/10 text-blue-400'
-                : 'border-dark-700 bg-dark-800 text-gray-400 hover:border-gray-500'
+              ? 'border-blue-500 bg-blue-500/10 text-blue-400'
+              : 'border-dark-700 bg-dark-800 text-gray-400 hover:border-gray-500'
               }`}
           >
-            <span className="mb-1">{type.icon}</span>
+            <span className="mb-1" aria-hidden="true">{type.icon}</span>
             <span className="text-[10px] font-medium leading-tight">{type.label}</span>
           </button>
         ))}

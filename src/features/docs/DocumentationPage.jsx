@@ -236,7 +236,6 @@ export default function DocumentationPage({ onBack }) {
                                     className="text-blue-500 hover:text-blue-400 font-bold"
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        if (onBack) onBack();
                                         window.history.pushState({}, '', '/privacy');
                                         window.dispatchEvent(new Event('popstate'));
                                     }}
