@@ -3,7 +3,28 @@ import { getDatesBetween, formatDateRange, getTopFilteredOverlaps } from '../uti
 import { Calendar as CalendarIcon, Users, Edit2, Play, ChevronLeft, ChevronRight, XIcon, PartyPopper, UserX, TrendingUp } from 'lucide-react';
 import { TruncatedText } from '../shared/ui';
 
-function SlidingOverlapCalendar({ startDate, endDate, participants, duration, overlaps, onDurationChange, singleDay = false }) {
+/**
+ * SlidingOverlapCalendar component displays a visual heatmap of availability
+ * and allows users to select an overlap period.
+ * 
+ * @param {Object} props
+ * @param {Date|string} props.startDate - The start date of the date range
+ * @param {Date|string} props.endDate - The end date of the date range
+ * @param {Array} props.participants - List of participants with their availableDays
+ * @param {number|string} props.duration - The requested event duration in days
+ * @param {Array} props.overlaps - The calculated overlap periods
+ * @param {Function} [props.onDurationChange] - Callback when duration changes
+ * @param {boolean} [props.singleDay=false] - Whether this is a single day selection mode
+ * @param {Function} [props.renderSelectedAction] - Optional render prop for a custom action button or content.
+ *   Signature: `(selection) => ReactNode`
+ *   The `selection` object contains:
+ *   - `startDate` {string|Date}: The start date of the selected block
+ *   - `endDate` {string|Date}: The end date of the selected block
+ *   - `availableCount` {number}: The number of participants available for this block
+ *   Note: This function is only called when a selection is locked (i.e. not null).
+ *   Expected return type: React Node.
+ */
+function SlidingOverlapCalendar({ startDate, endDate, participants, duration, overlaps, onDurationChange, singleDay = false, renderSelectedAction }) {
     const [currentMonth, setCurrentMonth] = useState(new Date(startDate).getMonth());
     const [currentYear, setCurrentYear] = useState(new Date(startDate).getFullYear());
     const [hoveredDate, setHoveredDate] = useState(null);
@@ -362,7 +383,12 @@ function SlidingOverlapCalendar({ startDate, endDate, participants, duration, ov
                         </div>
 
                         {lockedDate && (
-                            <div className="pt-4 mt-auto border-t border-dark-700">
+                            <div className="pt-4 mt-auto border-t border-dark-700 space-y-3">
+                                {renderSelectedAction && renderSelectedAction({
+                                    startDate: blockDetails.start,
+                                    endDate: blockDetails.end,
+                                    availableCount: blockDetails.available.length
+                                })}
                                 <button
                                     onClick={() => setLockedDate(null)}
                                     className="w-full py-2.5 bg-dark-800 hover:bg-dark-700 text-gray-300 font-bold rounded-lg border border-dark-700 transition"
