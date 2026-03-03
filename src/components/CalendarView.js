@@ -252,75 +252,72 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
           </p>
 
           {!singleDay && (
-            <>
-              {/* Duration Pill */}
-              <div className="flex items-center gap-1.5 bg-dark-800 px-3 py-1.5 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500 transition-all shrink-0">
-                <Clock size={16} className="text-gray-500" />
+            <div className="flex items-center gap-1.5 bg-dark-800 px-3 py-1.5 rounded-full border border-dark-700 focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:border-blue-500 transition-all shrink-0">
+              <Clock size={16} className="text-gray-500" />
+              <input
+                type="number"
+                min="1"
+                max={dateRange.length}
+                value={localDuration}
+                onChange={(e) => setLocalDuration(e.target.value)}
+                onBlur={() => {
+                  let val = parseInt(localDuration);
+                  if (isNaN(val) || val < 1) val = 1;
+                  if (val > dateRange.length) val = dateRange.length;
+                  const strVal = String(val);
+                  setLocalDuration(strVal);
+                  setDuration(strVal);
+                }}
+                className="w-8 text-center bg-transparent font-bold text-gray-50 focus:outline-none p-0"
+              />
+              <span className="text-gray-400 font-medium pr-2 text-sm">days trip</span>
+            </div>
+          )}
+
+          {/* Segmented Control - Selection Mode */}
+          <div className="flex items-center bg-dark-800 p-1 rounded-full border border-dark-700 shrink-0">
+            <button
+              type="button"
+              onClick={() => setBlockType('flexible')}
+              className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${blockType === 'flexible'
+                ? 'bg-dark-700 text-blue-400 shadow-sm ring-1 ring-blue-500/20'
+                : 'text-gray-500 hover:text-gray-300'
+                }`}
+            >
+              <Sparkles size={16} className={blockType === 'flexible' ? 'text-blue-400' : 'text-gray-500'} />
+              Flexible
+            </button>
+            <button
+              type="button"
+              onClick={() => setBlockType('custom')}
+              className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${blockType !== 'flexible'
+                ? 'bg-dark-700 text-blue-400 shadow-sm ring-1 ring-blue-500/20'
+                : 'text-gray-500 hover:text-gray-300'
+                }`}
+            >
+              <CalendarRange size={16} className={blockType !== 'flexible' ? 'text-blue-400' : 'text-gray-500'} />
+              Block
+
+              {/* Embedded Block Size Input */}
+              {blockType !== 'flexible' && (
                 <input
                   type="number"
                   min="1"
                   max={dateRange.length}
-                  value={localDuration}
-                  onChange={(e) => setLocalDuration(e.target.value)}
+                  value={customBlockSize}
+                  onChange={(e) => setCustomBlockSize(e.target.value)}
                   onBlur={() => {
-                    let val = parseInt(localDuration);
+                    let val = parseInt(customBlockSize);
                     if (isNaN(val) || val < 1) val = 1;
                     if (val > dateRange.length) val = dateRange.length;
-                    const strVal = String(val);
-                    setLocalDuration(strVal);
-                    setDuration(strVal);
+                    setCustomBlockSize(String(val));
                   }}
-                  className="w-8 text-center bg-transparent font-bold text-gray-50 focus:outline-none p-0"
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-8 text-center bg-blue-500/10 font-bold text-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 rounded-md p-0"
                 />
-                <span className="text-gray-400 font-medium pr-2 text-sm">days trip</span>
-              </div>
-
-              {/* Segmented Control - Selection Mode */}
-              <div className="flex items-center bg-dark-800 p-1 rounded-full border border-dark-700 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setBlockType('flexible')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${blockType === 'flexible'
-                    ? 'bg-dark-700 text-blue-400 shadow-sm ring-1 ring-blue-500/20'
-                    : 'text-gray-500 hover:text-gray-300'
-                    }`}
-                >
-                  <Sparkles size={16} className={blockType === 'flexible' ? 'text-blue-400' : 'text-gray-500'} />
-                  Flexible
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setBlockType('custom')}
-                  className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${blockType !== 'flexible'
-                    ? 'bg-dark-700 text-blue-400 shadow-sm ring-1 ring-blue-500/20'
-                    : 'text-gray-500 hover:text-gray-300'
-                    }`}
-                >
-                  <CalendarRange size={16} className={blockType !== 'flexible' ? 'text-blue-400' : 'text-gray-500'} />
-                  Block
-
-                  {/* Embedded Block Size Input */}
-                  {blockType !== 'flexible' && (
-                    <input
-                      type="number"
-                      min="1"
-                      max={dateRange.length}
-                      value={customBlockSize}
-                      onChange={(e) => setCustomBlockSize(e.target.value)}
-                      onBlur={() => {
-                        let val = parseInt(customBlockSize);
-                        if (isNaN(val) || val < 1) val = 1;
-                        if (val > dateRange.length) val = dateRange.length;
-                        setCustomBlockSize(String(val));
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-8 text-center bg-blue-500/10 font-bold text-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 rounded-md p-0"
-                    />
-                  )}
-                </button>
-              </div>
-            </>
-          )}
+              )}
+            </button>
+          </div>
 
           {/* Save Details Only Pill */}
           <button
@@ -400,7 +397,7 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
 
       </div>
       {/* --- END CALENDAR GRID AREA --- */}
-    </form>
+    </form >
   );
 }
 
