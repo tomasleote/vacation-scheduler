@@ -29,6 +29,30 @@ describe('calendarEvent Utilities', () => {
             });
             expect(url).toContain('dates=20261225%2F20261226');
         });
+
+        it('handles special characters in title and description', () => {
+            const url = generateGoogleCalendarUrl({
+                title: 'Party: Food, Drinks & Fun',
+                description: 'Bring snacks;\nand friends\\family.',
+                startDate: '2026-06-10',
+                endDate: '2026-06-10',
+            });
+            const params = new URL(url).searchParams;
+            expect(params.get('text')).toBe('Party: Food, Drinks & Fun');
+            expect(params.get('details')).toBe('Bring snacks;\nand friends\\family.');
+        });
+
+        it('includes location when provided', () => {
+            const url = generateGoogleCalendarUrl({
+                title: 'Meeting',
+                description: 'Sync up',
+                startDate: '2026-06-10',
+                endDate: '2026-06-10',
+                location: '123 Tech Lane, NY',
+            });
+            const params = new URL(url).searchParams;
+            expect(params.get('location')).toBe('123 Tech Lane, NY');
+        });
     });
 
     describe('generateICSContent', () => {
@@ -47,6 +71,39 @@ describe('calendarEvent Utilities', () => {
             expect(ics).toContain('SUMMARY:Lunch');
             expect(ics).toContain('END:VEVENT');
             expect(ics).toContain('END:VCALENDAR');
+        });
+
+        it('handles special characters with correct ICS escaping', () => {
+            const ics = generateICSContent({
+                title: 'Meeting\\Party, "Fun"; yes',
+                description: 'Line 1\nLine 2, and 3; cool\\right?',
+                startDate: '2026-07-04',
+                endDate: '2026-07-04',
+            });
+            expect(ics).toContain('SUMMARY:Meeting\\\\Party\\, \\"Fun\\"\\; yes');
+            expect(ics).toContain('DESCRIPTION:Line 1\\nLine 2\\, and 3\\; cool\\\\right?');
+        });
+
+        it('includes location when provided', () => {
+            const ics = generateICSContent({
+                title: 'Lunch',
+                description: 'With team',
+                startDate: '2026-07-04',
+                endDate: '2026-07-04',
+                location: 'Central Park, NY',
+            });
+            expect(ics).toContain('LOCATION:Central Park\\, NY');
+        });
+
+        it('produces valid ICS structure for multi-day events', () => {
+            const ics = generateICSContent({
+                title: 'Vacation',
+                description: 'Away',
+                startDate: '2026-08-01',
+                endDate: '2026-08-05',
+            });
+            expect(ics).toContain('DTSTART;VALUE=DATE:20260801');
+            expect(ics).toContain('DTEND;VALUE=DATE:20260806');
         });
     });
 

@@ -87,10 +87,11 @@ export function generateICSContent({ title, description, startDate, endDate, loc
     const icsEnd = toGCalDate(addDays(endDate, 1));
 
     // ICS requires specific line folding and escaping
-    const escapeICS = (str) => str.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+    const escapeICS = (str) => str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 
-    const now = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-    const uid = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}@findadate.app`;
+    const dtNow = new Date();
+    const now = dtNow.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const uid = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}@findadate.app`;
 
     const lines = [
         'BEGIN:VCALENDAR',
