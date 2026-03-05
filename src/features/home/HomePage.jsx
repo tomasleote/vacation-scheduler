@@ -192,7 +192,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 { title: 'The Weekend Getaway', desc: 'Finding overlap for a 3-day cabin trip among 8 busy friends.' },
-                { title: 'The Dinner Club', desc: 'Picking the single best evening this month for your recurring supper crew.' },
+                { title: 'The Christmas Dinner', desc: 'Coordinating the single best holiday evening for your entire extended family.' },
                 { title: 'The Remote Team', desc: 'Finding a week where the entire distributed startup can fly in for a company offsite.' }
               ].map((uc, i) => (
                 <motion.div
