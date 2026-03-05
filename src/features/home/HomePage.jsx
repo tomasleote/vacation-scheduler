@@ -83,12 +83,11 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
           transition={{ duration: 0.5 }}
           className="text-center max-w-2xl"
         >
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-50 mb-4">
-            Find the best day for{' '}
-            <span className="text-brand-400">anything.</span>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-50 mb-4 leading-tight">
+            Find the Best Day For Your <span className="text-brand-400">Group Event.</span>
           </h1>
-          <p className="text-lg text-gray-400 mb-8 max-w-lg mx-auto">
-            Vacation. Dinner. Party. Game night. Everyone marks their dates. We find the overlap.
+          <p className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
+            The easiest group date finder. Everyone marks when they're free, and we show you the overlap. No sign-up, no ads.
           </p>
 
           {/* Use case pills */}
@@ -108,7 +107,7 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
               onClick={() => { setShowCreate(true); setShowJoin(false); setShowRecover(false); }}
               className="flex items-center gap-2"
             >
-              Create Event <ArrowRight size={18} />
+              Start Planning Now <ArrowRight size={18} />
             </Button>
             <Button
               variant="secondary"
@@ -149,6 +148,55 @@ function HomePage({ onCreateGroup, onJoinGroup, onRecoverAdmin }) {
             </motion.div>
           ))}
         </motion.div>
+
+        {/* Enhanced SEO Sections */}
+        <div className="w-full max-w-5xl mx-auto mt-32 space-y-24 px-4 text-left">
+          {/* Problem Section */}
+          <section>
+            <h2 className="text-3xl font-bold text-white mb-6">The Universal Scheduling Problem</h2>
+            <div className="space-y-4 text-lg text-gray-400 leading-relaxed">
+              <p>You want to get a group together. You drop the inevitable "when is everyone free?" into the group chat. What follows is a chaotic spiral of conflicting answers. Three people can do Friday, two say Saturday, and four haven't replied at all. Trying to coordinate a group schedule manually becomes a full-time job for the organizer. The larger the group, the harder it is to find a day that actually works for everyone.</p>
+              <p>Traditional group availability tools haven't evolved. Some force you to create accounts before you can launch a poll. Others bombard your friends with intrusive ads just to submit their availability. And most are built for one-hour corporate meetings, making them completely useless if you're trying to schedule a multi-day trip or an open-ended weekend.</p>
+            </div>
+          </section>
+
+          {/* Use Cases */}
+          <section>
+            <h2 className="text-3xl font-bold text-white mb-8">Built for Every Kind of Event</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { title: 'The Weekend Getaway', desc: 'Finding overlap for a 3-day cabin trip among 8 busy friends.' },
+                { title: 'The Dinner Club', desc: 'Picking the single best evening this month for your recurring supper crew.' },
+                { title: 'The Remote Team', desc: 'Finding a week where the entire distributed startup can fly in for a company offsite.' }
+              ].map((uc, i) => (
+                <div key={i} className="bg-dark-900 border border-dark-800 p-6 rounded-2xl relative overflow-hidden group hover:border-dark-700 transition-colors">
+                  <h3 className="text-xl font-bold text-white mb-3 text-brand-400">{uc.title}</h3>
+                  <p className="text-gray-400 leading-relaxed">{uc.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Home FAQ */}
+          <section className="max-w-3xl mx-auto pb-32">
+            <h2 className="text-3xl font-bold text-white mb-10 text-center">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              {[
+                { q: 'How does this group availability tool work?', a: 'Create your event by selecting a range of possible dates. Share the generated link in your group chat. Everyone clicks the link and taps the days they are free. The app instantly generates a visual heatmap showing which date has the most overlap.' },
+                { q: 'Is it really free, or are there hidden ads?', a: 'Find A Day is 100% free group scheduling. There are no paywalls, no participant limits, and absolutely no ads to interrupt your friends when they respond to your invite.' },
+                { q: 'Do my friends need to create an account?', a: 'No. One of our core philosophies is zero friction. Participants do not need to download an app, create an account, or log in. They just enter their name, select their dates, and submit.' },
+                { q: 'Can I use this for multi-day events like vacations?', a: 'Yes! Unlike old-school tools built for 30-minute time slots, Find A Day specializes in multi-day scheduling. You can find the best 4-day stretch for a group vacation just as easily as finding one evening for dinner.' },
+                { q: 'How many people can join an event?', a: 'There is no hard limit on participants. Whether you are finding a date for a 4-person D&D group or querying availability for a 50-person family reunion, the heatmap handles the data seamlessly.' },
+                { q: 'Will this work on mobile phones?', a: 'Yes, the entire interface is optimized for mobile tapping. Since most scheduling happens via links dropped in iMessage or WhatsApp, we ensured the availability grid is highly responsive on all screen sizes.' }
+              ].map((faq, i) => (
+                <div key={i} className="bg-dark-900 border border-dark-800 rounded-2xl overflow-hidden p-6">
+                  <h3 className="font-bold text-gray-200 text-lg mb-2">{faq.q}</h3>
+                  <p className="text-gray-400 leading-relaxed text-base md:text-lg">{faq.a}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
 
       {/* Modal Overlays */}

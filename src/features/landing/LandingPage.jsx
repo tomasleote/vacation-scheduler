@@ -97,7 +97,7 @@ export default function LandingPage({ type }) {
                         className="flex flex-col sm:flex-row items-center justify-center gap-4"
                     >
                         <Link to="/" className="w-full sm:w-auto px-8 py-4 rounded-full bg-brand-500 text-white text-lg font-bold shadow-xl shadow-brand-500/20 hover:-translate-y-1 hover:shadow-brand-500/40 active:translate-y-0 transition-all flex items-center justify-center gap-2 group">
-                            Create an Event — Free
+                            {content.ctaText || 'Create an Event — Free'}
                             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </motion.div>
@@ -111,22 +111,54 @@ export default function LandingPage({ type }) {
                     </motion.p>
                 </section>
 
-                {/* Problem Section */}
+                {/* Problem Section & Context */}
                 <section className="w-full bg-dark-900 py-20 border-y border-dark-800">
                     <div className="max-w-3xl mx-auto px-6">
-                        <div className="space-y-6">
-                            {content.problemSection.map((p, i) => (
-                                <motion.p
-                                    key={i}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
+                        <div className="space-y-16">
+                            <div className="space-y-6">
+                                {content.problemSection.map((p, i) => (
+                                    <motion.p
+                                        key={i}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        whileInView={{ opacity: 1, x: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: i * 0.1 }}
+                                        className={`text-lg leading-relaxed ${i === 0 ? 'text-gray-200 font-medium text-xl border-l-4 border-brand-500 pl-6 py-2' : 'text-gray-400'}`}
+                                    >
+                                        {p}
+                                    </motion.p>
+                                ))}
+                            </div>
+
+                            {content.whyToolsFail && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ delay: i * 0.1 }}
-                                    className={`text-lg leading-relaxed ${i === 0 ? 'text-gray-200 font-medium text-xl border-l-4 border-brand-500 pl-6 py-2' : 'text-gray-400'}`}
+                                    className="bg-dark-800/50 p-8 rounded-2xl border border-dark-700"
                                 >
-                                    {p}
-                                </motion.p>
-                            ))}
+                                    <h3 className="text-2xl font-bold text-white mb-4">Why Existing Tools Fail</h3>
+                                    <p className="text-lg text-gray-400 leading-relaxed">{content.whyToolsFail}</p>
+                                </motion.div>
+                            )}
+
+                            {content.useCases && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                >
+                                    <h3 className="text-2xl font-bold text-white mb-6">Use Case Scenarios</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {content.useCases.map((uc, i) => (
+                                            <div key={i} className="bg-dark-950 p-6 rounded-xl border border-dark-800 hover:border-dark-700 transition-colors">
+                                                <strong className="block text-brand-400 text-lg mb-2">{uc.title}</strong>
+                                                <span className="text-gray-400 leading-relaxed">{uc.description}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -192,7 +224,7 @@ export default function LandingPage({ type }) {
                         <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6">Ready to stop guessing?</h2>
                         <p className="text-xl text-gray-300 mb-10">Create your event link and let the algorithm do the work.</p>
                         <Link to="/" className="px-10 py-5 rounded-full bg-white text-brand-600 text-lg font-bold shadow-2xl hover:scale-105 active:scale-95 transition-transform inline-flex items-center gap-3">
-                            Start Planning
+                            {content.ctaText || 'Start Planning'}
                             <ArrowRight size={20} />
                         </Link>
                     </div>
