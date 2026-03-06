@@ -2,69 +2,73 @@ import { useState, useCallback, useMemo } from 'react';
 import { getDatesBetween } from '../utils/overlap';
 
 /**
- * Hook for standard calendar range selection.
- * Click a start date, click an end date → all days between are selected.
- * Click the same date twice → single day selected.
- * Click a new date after a completed range → resets and starts new range.
- * Reverse selection (end before start) is auto-normalized.
+ * Hook for multi-range calendar selection.
+ * Click an unselected date → starts a new range (or single-day select).
+ * Click a second unselected date → completes the range, adds all days to selection.
+ * Click a selected date → deselects that single day.
+ * Multiple non-contiguous ranges accumulate additively.
+ * Output is always a flat sorted array of ISO date strings.
  */
 export function useRangeSelection(allowedDateRange, initialDays = []) {
+  const [selectedSet, setSelectedSet] = useState(() => new Set(initialDays));
   const [rangeStart, setRangeStart] = useState(null);
-  const [rangeEnd, setRangeEnd] = useState(null);
-  const [selectedDays, setSelectedDays] = useState(initialDays);
-  const [hasCompletedRange, setHasCompletedRange] = useState(initialDays.length > 0);
 
   const allowedSet = useMemo(() => new Set(allowedDateRange), [allowedDateRange]);
 
-  const computeRangeDays = useCallback((start, end) => {
-    if (!start) return [];
-    if (!end) return allowedSet.has(start) ? [start] : [];
-
-    // Normalize: ensure start <= end
-    const [normalizedStart, normalizedEnd] = start <= end ? [start, end] : [end, start];
-    const rangeDays = getDatesBetween(normalizedStart, normalizedEnd);
-    return rangeDays.filter(d => allowedSet.has(d));
-  }, [allowedSet]);
+  const selectedDays = useMemo(() => [...selectedSet].sort(), [selectedSet]);
 
   const handleDayClick = useCallback((dateStr) => {
     if (!allowedSet.has(dateStr)) return;
 
-    if (!rangeStart || hasCompletedRange) {
-      // Starting a new range
-      setRangeStart(dateStr);
-      setRangeEnd(null);
-      setSelectedDays([dateStr]);
-      setHasCompletedRange(false);
-    } else {
-      // Completing the range (second click)
-      setRangeEnd(dateStr);
-      const days = computeRangeDays(rangeStart, dateStr);
-      setSelectedDays(days);
-      setHasCompletedRange(true);
+    // Clicking an already-selected day → deselect it
+    if (selectedSet.has(dateStr)) {
+      setSelectedSet(prev => {
+        const next = new Set(prev);
+        next.delete(dateStr);
+        return next;
+      });
+      // If this was the pending range start, clear it
+      if (rangeStart === dateStr) {
+        setRangeStart(null);
+      }
+      return;
     }
-  }, [rangeStart, hasCompletedRange, allowedSet, computeRangeDays]);
+
+    // No pending range start → begin a new range
+    if (rangeStart === null) {
+      setRangeStart(dateStr);
+      setSelectedSet(prev => new Set(prev).add(dateStr));
+      return;
+    }
+
+    // Second click → complete the range
+    const [normStart, normEnd] = rangeStart <= dateStr
+      ? [rangeStart, dateStr]
+      : [dateStr, rangeStart];
+    const rangeDays = getDatesBetween(normStart, normEnd).filter(d => allowedSet.has(d));
+
+    setSelectedSet(prev => {
+      const next = new Set(prev);
+      for (const d of rangeDays) next.add(d);
+      return next;
+    });
+    setRangeStart(null);
+  }, [allowedSet, selectedSet, rangeStart]);
 
   const syncFromSaved = useCallback((savedDays) => {
     if (!savedDays || savedDays.length === 0) {
-      setSelectedDays([]);
+      setSelectedSet(new Set());
       setRangeStart(null);
-      setRangeEnd(null);
-      setHasCompletedRange(false);
       return;
     }
-    const sorted = [...savedDays].sort();
-    setSelectedDays(sorted);
-    setRangeStart(sorted[0]);
-    setRangeEnd(sorted.length > 1 ? sorted[sorted.length - 1] : null);
-    setHasCompletedRange(true);
+    setSelectedSet(new Set(savedDays));
+    setRangeStart(null);
   }, []);
 
   return {
     selectedDays,
     rangeStart,
-    rangeEnd,
     handleDayClick,
     syncFromSaved,
-    hasCompletedRange,
   };
 }

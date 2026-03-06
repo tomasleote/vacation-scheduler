@@ -71,7 +71,7 @@ describe('CalendarView rendering', () => {
 
   test('renders range selection hint', () => {
     renderCalendar();
-    expect(screen.getByText('Click a start date, then an end date to select a range')).toBeInTheDocument();
+    expect(screen.getByText('Click a date to start a range. Click a selected day to deselect it.')).toBeInTheDocument();
   });
 
   test('pre-fills initial values', () => {
@@ -132,19 +132,15 @@ describe('CalendarView interactions', () => {
     expect(dayButton.className).toContain('text-white');
   });
 
-  test('clicking the same day twice selects only that day', () => {
+  test('clicking the same day twice deselects it (toggle)', () => {
     renderCalendar();
 
     const dayButton = screen.getByTestId('day-2024-06-10');
-    fireEvent.click(dayButton); // start
-    fireEvent.click(dayButton); // end (same day)
+    fireEvent.click(dayButton); // select
+    fireEvent.click(dayButton); // deselect (toggle)
 
-    // Day should still be selected (single-day range)
-    expect(dayButton.className).toContain('text-white');
-
-    // Counter should show 1
-    const counter = screen.getByTestId('day-count');
-    expect(counter.textContent).toMatch(/1/);
+    // Day should be deselected
+    expect(dayButton.className).not.toContain('text-white');
   });
 
   test('range selection: clicking start then end selects all days between', () => {
@@ -181,7 +177,7 @@ describe('CalendarView interactions', () => {
     }
   });
 
-  test('selection resets when clicking a new date after completed range', () => {
+  test('new range is additive — does not clear previous selection', () => {
     renderCalendar();
 
     // Select range 10-15
@@ -191,18 +187,18 @@ describe('CalendarView interactions', () => {
     // Verify range is selected
     expect(screen.getByTestId('day-2024-06-12').className).toContain('text-white');
 
-    // Click a new date to reset
+    // Click a new start date
     fireEvent.click(screen.getByTestId('day-2024-06-20'));
 
-    // Old range should be cleared
-    expect(screen.getByTestId('day-2024-06-12').className).not.toContain('text-white');
+    // Old range should still be selected (additive)
+    expect(screen.getByTestId('day-2024-06-12').className).toContain('text-white');
 
-    // New start should be selected
+    // New start should also be selected
     expect(screen.getByTestId('day-2024-06-20').className).toContain('text-white');
 
-    // Counter should show 1
+    // Counter should show 7 (6 from old range + 1 new start)
     const counter = screen.getByTestId('day-count');
-    expect(counter.textContent).toMatch(/1/);
+    expect(counter.textContent).toMatch(/7/);
   });
 
   test('days outside range are disabled', () => {
@@ -229,7 +225,7 @@ describe('CalendarView interactions', () => {
     expect(screen.getByTestId('day-2024-06-16').className).toContain('text-white');
   });
 
-  test('saved days reset when new range started', () => {
+  test('saved days persist when new range started (additive)', () => {
     renderCalendar({
       savedDays: ['2024-06-15', '2024-06-16']
     });
@@ -237,11 +233,11 @@ describe('CalendarView interactions', () => {
     const savedDayBtn = screen.getByTestId('day-2024-06-15');
     expect(savedDayBtn.className).toContain('text-white');
 
-    // Click a new start date (resets range)
+    // Click a new start date
     fireEvent.click(screen.getByTestId('day-2024-06-20'));
 
-    // Old saved days should be cleared since new range started
-    expect(savedDayBtn.className).not.toContain('text-white');
+    // Saved days should still be selected (additive)
+    expect(savedDayBtn.className).toContain('text-white');
   });
 
   test('shows day count including saved and new days', () => {
@@ -253,12 +249,12 @@ describe('CalendarView interactions', () => {
     expect(counter).toBeInTheDocument();
     expect(counter.textContent).toMatch(/1/);
 
-    // Select a range starting from saved day
-    fireEvent.click(screen.getByTestId('day-2024-06-15'));
-    fireEvent.click(screen.getByTestId('day-2024-06-17'));
+    // Select a new range (additive to saved day)
+    fireEvent.click(screen.getByTestId('day-2024-06-20'));
+    fireEvent.click(screen.getByTestId('day-2024-06-22'));
 
-    // Should show 3 days (15, 16, 17)
-    expect(screen.getByTestId('day-count').textContent).toMatch(/3/);
+    // Should show 4 days (15 saved + 20, 21, 22 new)
+    expect(screen.getByTestId('day-count').textContent).toMatch(/4/);
   });
 
   test('submit button is enabled when savedDays exist but no new days selected', () => {
