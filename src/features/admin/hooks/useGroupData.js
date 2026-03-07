@@ -18,10 +18,12 @@ export function useGroupData(groupId, adminToken, onBack) {
   const [adminName, setAdminName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [adminDuration, setAdminDuration] = useState('3');
+  const [poll, setPoll] = useState(null);
 
   useEffect(() => {
     let unsubGroup = () => { };
     let unsubParts = () => { };
+    let unsubPoll = () => { };
     let isMounted = true;
 
     const initAdmin = async () => {
@@ -103,6 +105,14 @@ export function useGroupData(groupId, adminToken, onBack) {
         setError(err.message || 'Failed to load participants.');
         onLoad();
       });
+
+      const { subscribeToPoll } = require('../../../services/pollService');
+      unsubPoll = subscribeToPoll(groupId, (pollData) => {
+        if (!isMounted) return;
+        setPoll(pollData);
+      }, (err) => {
+        console.error('[useGroupData] poll subscription error:', err);
+      });
     };
 
     setLoading(true);
@@ -112,6 +122,7 @@ export function useGroupData(groupId, adminToken, onBack) {
       isMounted = false;
       unsubGroup();
       unsubParts();
+      unsubPoll();
     };
   }, [groupId, adminToken, onBack]);
 
@@ -139,5 +150,6 @@ export function useGroupData(groupId, adminToken, onBack) {
     adminName, setAdminName,
     adminEmail, setAdminEmail,
     adminDuration, setAdminDuration,
+    poll, setPoll,
   };
 }
