@@ -45,7 +45,7 @@ The admin reviews the availability heatmap, selects 2–5 fixed date ranges as c
 
 New node under `groups/{groupId}/poll/`:
 
-```
+```text
 poll/
   id: string                      # UUID
   status: 'active' | 'closed'
@@ -128,7 +128,7 @@ votingMode?: {
 **Spotlight effect (general, not voting-specific):**
 
 When `activeBlock.length > 0`, all non-highlighted in-range cells add:
-```
+```css
 opacity-30 transition-opacity duration-200
 ```
 Highlighted cells retain full opacity + existing ring/glow.
@@ -137,7 +137,7 @@ Highlighted cells retain full opacity + existing ring/glow.
 
 Renders inside the details panel when a candidate period is selected during an active poll:
 
-```
+```text
 [Date Range heading — existing]
 [Availability count — existing]
 [Who can make it — existing]
@@ -227,13 +227,25 @@ Shown in the admin view when a poll is active or closed:
 ```json
 "poll": {
   ".read": true,
+  ".write": "data.parent().child('adminToken').val() === newData.parent().child('adminToken').val() || newData.parent().child('adminToken').val() === null",
+  "status": {
+    ".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'closed')"
+  },
+  "mode": {
+    ".validate": "newData.isString() && (newData.val() === 'single' || newData.val() === 'multi')"
+  },
   "candidates": {
-    ".write": "auth == null"  // admin token validated client-side
+    "$candidateId": {
+      "startDate": { ".validate": "newData.isString()" },
+      "endDate": { ".validate": "newData.isString()" },
+      "label": { ".validate": "newData.isNumber()" }
+    }
   },
   "votes": {
     "$participantId": {
       ".write": true,  // any participant can write their own vote
-      ".validate": "newData.hasChildren(['candidateIds', 'votedAt'])"
+      "candidateIds": { ".validate": "newData.hasChildren() || !newData.exists()" },
+      "votedAt": { ".validate": "newData.isString() || !newData.exists()" }
     }
   }
 }

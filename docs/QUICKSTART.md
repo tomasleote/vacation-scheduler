@@ -94,7 +94,7 @@ Visit `http://localhost:3000`
 1. **Set up voting candidates** (Admin only):
    - Click on a period in the heatmap (the availability results)
    - Click "Add as Candidate" to propose date ranges
-   - Add 2-4 candidate periods
+   - Add 2-5 candidate periods
    - Click "Start Poll" to open voting
 
 2. **Vote on candidates** (Participant):

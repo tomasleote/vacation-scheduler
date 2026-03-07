@@ -56,12 +56,14 @@ function AdminPage({ onBack }) {
   const participantActions = useParticipantActions(groupId, group, participants, setParticipants);
 
   // Auto-scroll to heatmap when poll starts
+  const prevPollIdRef = useRef(poll?.id);
   useEffect(() => {
-    if (poll && heatmapRef.current) {
+    if (poll && heatmapRef.current && poll.id !== prevPollIdRef.current) {
       setTimeout(() => {
         heatmapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         addNotification({ type: 'info', title: 'Configure Poll', message: 'View live voting results below.' });
       }, 100);
+      prevPollIdRef.current = poll.id;
     }
   }, [poll, addNotification]);
 
@@ -181,6 +183,7 @@ function AdminPage({ onBack }) {
       addNotification({ type: 'success', title: 'Poll Started', message: 'Participants can now vote.' });
     } catch (err) {
       addNotification({ type: 'error', title: 'Error', message: err.message });
+      throw err;
     }
   }, [groupId, addNotification]);
 
@@ -218,6 +221,7 @@ function AdminPage({ onBack }) {
         method: 'POST',
         body: JSON.stringify({
           groupId,
+          adminToken,
           groupName: group.name,
           participants: participants.filter(p => p?.email).map(p => ({ email: p.email, id: p.id })),
           baseUrl: window.location.origin,
@@ -237,12 +241,16 @@ function AdminPage({ onBack }) {
         ...c,
         count: Object.values(votes).filter(v => v.candidateIds?.includes(id)).length,
       }));
-      const winner = voteCounts.sort((a, b) => b.count - a.count)[0];
+      const winner = voteCounts.sort((a, b) => {
+        if (b.count !== a.count) return b.count - a.count;
+        return a.label - b.label; // Deterministic tie-breaker
+      })[0];
 
       await apiCall('/api/send-vote-result', {
         method: 'POST',
         body: JSON.stringify({
           groupId,
+          adminToken,
           groupName: group.name,
           winnerStartDate: winner?.startDate,
           winnerEndDate: winner?.endDate,
@@ -399,19 +407,19 @@ function AdminPage({ onBack }) {
         ) : poll ? (
           <div ref={heatmapRef}>
             <VotingResults
-            group={group}
-            participants={participants}
-            overlaps={overlaps}
-            durationFilter={durationFilter}
-            onDurationChange={setDurationFilter}
-            poll={poll}
-            adminParticipantId={adminParticipantId}
-            onClosePoll={handleClosePoll}
-            onDeletePoll={handleDeletePoll}
-            onVote={handleAdminVote}
-            onSendInvites={handleSendVoteInvites}
-            onSendResult={handleSendVoteResult}
-          />
+              group={group}
+              participants={participants}
+              overlaps={overlaps}
+              durationFilter={durationFilter}
+              onDurationChange={setDurationFilter}
+              poll={poll}
+              adminParticipantId={adminParticipantId}
+              onClosePoll={handleClosePoll}
+              onDeletePoll={handleDeletePoll}
+              onVote={handleAdminVote}
+              onSendInvites={handleSendVoteInvites}
+              onSendResult={handleSendVoteResult}
+            />
           </div>
         ) : (
           <OverlapResults

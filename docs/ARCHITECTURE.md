@@ -282,7 +282,7 @@ tallyVotes(poll):
 - `durationFilter`: Selected duration for filtering
 - `overlaps`: Calculated overlap results
 - `poll`: Current poll object (if active) with candidates and votes
-- `votingMode`: Boolean flag for voting UI state
+- `votingMode`: Object containing `{ active, poll, currentParticipantId, isReadOnly }`
 - `candidates`: Array of proposed date ranges for voting
 
 ### Participant View State
@@ -292,7 +292,7 @@ tallyVotes(poll):
 - `participants`: Other participants list
 - `currentParticipantId`: User's participant ID (for voting)
 - `poll`: Current poll object (if active)
-- `votingMode`: Boolean flag for voting UI state
+- `votingMode`: Object containing `{ active, poll, currentParticipantId, isReadOnly }`
 
 ### Calendar View State (Shared between Admin & Participant)
 - `name`: Participant name

@@ -342,12 +342,12 @@ After availability collection, admin triggers a vote on the top N overlapping pe
 {
   "groups/{groupId}/poll": {
     "status": "active|closed",
-    "mode": "single|multiple",
+    "mode": "single|multi",
     "startedAt": "2026-03-07T14:30:00Z",
-    "candidates": [
-      { "id": "cand_1", "startDate": "2026-07-10", "endDate": "2026-07-17" },
-      { "id": "cand_2", "startDate": "2026-07-20", "endDate": "2026-07-27" }
-    ],
+    "candidates": {
+      "cand_1": { "startDate": "2026-07-10", "endDate": "2026-07-17", "label": 1 },
+      "cand_2": { "startDate": "2026-07-20", "endDate": "2026-07-27", "label": 2 }
+    },
     "votes": {
       "participantId_1": { "candidateIds": ["cand_1"], "votedAt": "2026-03-07T14:35:00Z" },
       "participantId_2": { "candidateIds": ["cand_2"], "votedAt": "2026-03-07T14:36:00Z" }

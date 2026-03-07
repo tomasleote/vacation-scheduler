@@ -35,6 +35,8 @@ function VotingSetup({ group, participants, overlaps, durationFilter, onDuration
     setStarting(true);
     try {
       await onStartPoll({ mode, candidates });
+    } catch (err) {
+      console.error('[VotingSetup] Failed to start poll:', err);
     } finally {
       setStarting(false);
     }
@@ -104,8 +106,8 @@ function VotingSetup({ group, participants, overlaps, durationFilter, onDuration
             {candidates.some(c => c.startDate === startDate && c.endDate === endDate)
               ? 'Already added'
               : candidates.length >= 5
-              ? 'Max 5 candidates'
-              : '+ Add as Candidate'}
+                ? 'Max 5 candidates'
+                : '+ Add as Candidate'}
           </button>
         )}
       />
@@ -119,11 +121,10 @@ function VotingSetup({ group, participants, overlaps, durationFilter, onDuration
               <button
                 key={m}
                 onClick={() => setMode(m)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold border transition ${
-                  mode === m
+                className={`px-4 py-2 rounded-lg text-sm font-semibold border transition ${mode === m
                     ? 'bg-brand-500 border-brand-500 text-white'
                     : 'bg-dark-800 border-dark-700 text-gray-400 hover:border-dark-600'
-                }`}
+                  }`}
               >
                 {m === 'single' ? 'Single vote' : 'Multi vote'}
               </button>

@@ -22,6 +22,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
   const [error, setError] = useState('');
   const { addNotification } = useNotification();
   const [participants, setParticipants] = useState([]);
+  const participantsRef = useRef(0);
   const [expandedSection, setExpandedSection] = useState('form');
   const [currentParticipantId, setCurrentParticipantId] = useState(null);
   const [savedDays, setSavedDays] = useState([]);
@@ -59,6 +60,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
     const unsubParts = subscribeToParticipants(groupId, (data) => {
       setError('');
       setParticipants(data || []);
+      participantsRef.current = (data || []).length;
       onLoad();
     }, (err) => {
       setError(err.message || 'Failed to load participants.');
@@ -104,9 +106,9 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
         setPoll(pollData);
 
         // Auto-close: if all participants have voted, close the poll
-        if (pollData?.status === 'active' && participants.length > 0) {
+        if (pollData?.status === 'active' && participantsRef.current > 0) {
           const voterCount = Object.keys(pollData.votes || {}).length;
-          if (voterCount >= participants.length) {
+          if (voterCount >= participantsRef.current) {
             closePoll(groupId).catch(err =>
               console.error('[ParticipantView] auto-close poll failed:', err)
             );
@@ -116,7 +118,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
       (err) => console.error('[ParticipantView] poll subscription error:', err)
     );
     return unsub;
-  }, [groupId, participants.length]);
+  }, [groupId]);
 
   useEffect(() => {
     if (group && participants?.length > 0) {
@@ -371,26 +373,26 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
               } : undefined}
               renderSelectedAction={poll
                 ? ({ candidateId, startDate, endDate }) => {
-                    const candidate = poll?.candidates?.[candidateId];
-                    return (
-                      <div className="space-y-3">
-                        <VotePanel
-                          poll={poll}
-                          candidateId={candidateId}
-                          currentParticipantId={currentParticipantId}
-                          onVote={handleVote}
-                          isReadOnly={poll.status === 'closed' || !currentParticipantId}
-                          participants={participants}
-                          onVoteComplete={() => calendarRef.current?.clearSelection()}
-                        />
-                        <CalendarEventButton
-                          group={group}
-                          overlap={{ startDate: candidate?.startDate, endDate: candidate?.endDate, availableCount: participants.length }}
-                          participantCount={participants.length}
-                        />
-                      </div>
-                    );
-                  }
+                  const candidate = poll?.candidates?.[candidateId];
+                  return (
+                    <div className="space-y-3">
+                      <VotePanel
+                        poll={poll}
+                        candidateId={candidateId}
+                        currentParticipantId={currentParticipantId}
+                        onVote={handleVote}
+                        isReadOnly={poll.status === 'closed' || !currentParticipantId}
+                        participants={participants}
+                        onVoteComplete={() => calendarRef.current?.clearSelection()}
+                      />
+                      <CalendarEventButton
+                        group={group}
+                        overlap={{ startDate: candidate?.startDate, endDate: candidate?.endDate, availableCount: participants.length }}
+                        participantCount={participants.length}
+                      />
+                    </div>
+                  );
+                }
                 : undefined
               }
             />

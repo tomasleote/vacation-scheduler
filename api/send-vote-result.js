@@ -1,8 +1,39 @@
 // Vercel Serverless Function — POST /api/send-vote-result
 // Sends result email with a Google Calendar ICS attachment.
-// Required env vars: EMAIL_USER, EMAIL_PASSWORD
+// Required env vars: EMAIL_USER, EMAIL_PASSWORD, REACT_APP_FIREBASE_DATABASE_URL
 
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
+const DB_URL = process.env.REACT_APP_FIREBASE_DATABASE_URL;
+
+function hashPhrase(text) {
+  if (!text) return '';
+  return crypto.createHash('sha256').update(text).digest('hex');
+}
+
+function timingSafeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+async function getGroup(groupId) {
+  if (!DB_URL || !groupId) return null;
+  const url = `${DB_URL.replace(/\/$/, '')}/groups/${groupId}.json`;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error('[send-vote-result] Failed to fetch group:', err.message);
+    return null;
+  }
+}
 
 function formatICSDate(dateStr) {
   // dateStr is YYYY-MM-DD; convert to YYYYMMDD for ICS all-day format
@@ -42,31 +73,72 @@ function formatDate(d) {
   });
 }
 
+function escapeHtml(unsafe) {
+  if (typeof unsafe !== 'string') return '';
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { groupId, groupName, winnerStartDate, winnerEndDate, participants, baseUrl } = req.body ?? {};
+  const { groupId, adminToken, winnerStartDate, winnerEndDate, baseUrl } = req.body ?? {};
 
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
     return res.status(500).json({ error: 'Email service is not configured' });
+  }
+
+  if (!groupId || !adminToken) {
+    return res.status(400).json({ error: 'groupId and adminToken are required' });
   }
 
   if (!winnerStartDate || !winnerEndDate) {
     return res.status(400).json({ error: 'winnerStartDate and winnerEndDate are required' });
   }
 
-  const allParticipants = Array.isArray(participants) ? participants : [];
+  // 1. Fetch group data securely from Firebase
+  const group = await getGroup(groupId);
+  if (!group) {
+    return res.status(404).json({ error: 'Group not found' });
+  }
+
+  // 2. Verify admin ownership
+  if (!group.adminTokenHash || !timingSafeEqual(hashPhrase(adminToken), group.adminTokenHash)) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid admin token' });
+  }
+
+  // 3. Sanitize and validate logic
+  const candidates = group.poll?.candidates;
+  if (!candidates) {
+    return res.status(400).json({ error: 'No active poll candidates found for this group' });
+  }
+  const isValidCandidate = Object.values(candidates).some(
+    c => c.startDate === winnerStartDate && c.endDate === winnerEndDate
+  );
+  if (!isValidCandidate) {
+    return res.status(400).json({ error: 'Provided winner dates do not match any candidate in the current poll' });
+  }
+
+  const groupName = escapeHtml(group.name || 'Your event');
+
+  // Extract participants purely server-side
+  const rawParticipants = group.participants ? Object.values(group.participants) : [];
   const recipients = [...new Set(
-    allParticipants.filter(p => p.email && p.email.includes('@')).map(p => p.email)
+    rawParticipants.filter(p => typeof p.email === 'string' && p.email.includes('@')).map(p => p.email)
   )];
 
   if (recipients.length === 0) {
     return res.status(400).json({ error: 'No participants with email addresses' });
   }
 
-  const origin = baseUrl || 'https://vacation-scheduler.vercel.app';
+  // Derive origin
+  const origin = process.env.APP_BASE_URL || baseUrl || 'https://vacation-scheduler.vercel.app';
   const groupLink = `${origin}?group=${groupId}`;
 
   const dateDisplay = winnerStartDate === winnerEndDate
@@ -74,7 +146,7 @@ module.exports = async function handler(req, res) {
     : `${formatDate(winnerStartDate)} – ${formatDate(winnerEndDate)}`;
 
   const icsContent = generateICS({
-    title: groupName || 'Group Event',
+    title: group.name || 'Group Event',
     startDate: winnerStartDate,
     endDate: winnerEndDate,
     description: `Scheduled via Find A Day. ${groupLink}`,
@@ -88,7 +160,7 @@ module.exports = async function handler(req, res) {
       </div>
       <div style="padding:32px;">
         <h2 style="margin:0 0 8px;font-size:20px;color:#f1f5f9;">
-          🎉 "${groupName || 'Your event'}" is happening!
+          🎉 "${groupName}" is happening!
         </h2>
         <p style="color:#f97316;font-size:24px;font-weight:700;margin:0 0 24px;">${dateDisplay}</p>
         <p style="color:#cbd5e1;line-height:1.6;margin:0 0 24px;">
@@ -116,8 +188,9 @@ module.exports = async function handler(req, res) {
 
     await transporter.sendMail({
       from: `"Find A Day" <${process.env.EMAIL_USER}>`,
-      to: recipients,
-      subject: `Date confirmed — "${groupName || 'your event'}"`,
+      to: process.env.EMAIL_USER || 'noreply@findaday.app', // Neutral To
+      bcc: recipients,
+      subject: `Date confirmed — "${groupName}"`,
       html,
       attachments: [
         {
@@ -134,3 +207,4 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to send email', detail: err.message });
   }
 };
+

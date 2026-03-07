@@ -15,7 +15,7 @@ Unlike Doodle or When2Meet, **Find A Day** is built specifically for **date rang
 *   🗓️ **Built for Ranges**: Perfect for vacations and retreats. Participants paint their availability on a custom calendar, not a messy list of time slots.
 *   📱 **Mobile-First**: Designed to work perfectly in your group chat. Every feature is optimized for the phone in your hand.
 *   🔐 **Secure Admin**: Manage your group via a unique admin link. Recover access anytime using a secure passphrase or email.
-*   📅 **Calendar Invites**: Winning date is automatically sent as a calendar invite (ICS file) to all participants—one-click import into any calendar app.
+*   📅 **Calendar Invites**: Admin can send the winning date as a calendar invite (ICS file) to all participants—one-click import into any calendar app.
 
 ## 🛠️ Technology Stack
 

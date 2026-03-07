@@ -4,6 +4,16 @@
 
 const nodemailer = require('nodemailer');
 
+function escapeHtml(unsafe) {
+  if (typeof unsafe !== 'string') return '';
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
@@ -28,6 +38,8 @@ module.exports = async function handler(req, res) {
   const origin = baseUrl || 'https://vacation-scheduler.vercel.app';
   const groupLink = `${origin}?group=${groupId}`;
 
+  const safeGroupName = escapeHtml(groupName || 'your event');
+
   const html = `
     <div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;background:#0f172a;color:#f8fafc;border-radius:12px;overflow:hidden;">
       <div style="background:#1e3a5f;padding:32px 32px 24px;">
@@ -36,7 +48,7 @@ module.exports = async function handler(req, res) {
       </div>
       <div style="padding:32px;">
         <h2 style="margin:0 0 16px;font-size:20px;color:#f1f5f9;">
-          🗳️ Vote on the best date for "${groupName || 'your event'}"
+          🗳️ Vote on the best date for "${safeGroupName}"
         </h2>
         <p style="color:#cbd5e1;line-height:1.6;margin:0 0 24px;">
           The organizer has proposed a few date options and wants your vote.
@@ -64,8 +76,9 @@ module.exports = async function handler(req, res) {
 
     await transporter.sendMail({
       from: `"Find A Day" <${process.env.EMAIL_USER}>`,
-      to: recipients,
-      subject: `Vote now — "${groupName || 'your event'}"`,
+      to: process.env.EMAIL_USER || 'noreply@findaday.app',
+      bcc: recipients,
+      subject: `Vote now — "${safeGroupName}"`,
       html,
     });
 

@@ -17,6 +17,7 @@ function VotingResults({
   const [closingPoll, setClosingPoll] = useState(false);
   const [sendingInvites, setSendingInvites] = useState(false);
   const [sendingResult, setSendingResult] = useState(false);
+  const [deletingPoll, setDeletingPoll] = useState(false);
   const calendarRef = useRef(null);
 
   if (!poll || !group) return null;
@@ -40,6 +41,11 @@ function VotingResults({
   const handleSendResult = async () => {
     setSendingResult(true);
     try { await onSendResult(); } finally { setSendingResult(false); }
+  };
+
+  const handleDeletePoll = async () => {
+    setDeletingPoll(true);
+    try { await onDeletePoll(); } finally { setDeletingPoll(false); }
   };
 
   // Find winning candidate(s)
@@ -175,7 +181,8 @@ function VotingResults({
             <Button
               variant="secondary"
               fullWidth
-              onClick={onDeletePoll}
+              onClick={handleDeletePoll}
+              disabled={deletingPoll}
             >
               Start New Vote
             </Button>

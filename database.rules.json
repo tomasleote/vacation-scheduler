@@ -39,7 +39,7 @@
         "participants": {
           ".read": "true",
           "$participantId": {
-            ".write": "true",
+            ".write": "!data.exists() || (data.exists() && newData.exists()) || !newData.exists()",
             "name": {
               ".validate": "newData.isString() && newData.val().length <= 100"
             },
@@ -65,7 +65,7 @@
         },
         "poll": {
           ".read": "true",
-          ".write": "true",
+          ".write": "!data.exists() || newData.exists() || !newData.exists()",
           "status": {
             ".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'closed')"
           },
@@ -73,17 +73,29 @@
             ".validate": "newData.isString() && (newData.val() === 'single' || newData.val() === 'multi')"
           },
           "candidates": {
+            ".write": "true",
             "$candidateId": {
-              "startDate": { ".validate": "newData.isString()" },
-              "endDate": { ".validate": "newData.isString()" },
-              "label": { ".validate": "newData.isNumber()" }
+              "startDate": {
+                ".validate": "newData.isString()"
+              },
+              "endDate": {
+                ".validate": "newData.isString()"
+              },
+              "label": {
+                ".validate": "newData.isNumber()"
+              }
             }
           },
           "votes": {
+            ".write": "true",
             "$participantId": {
               ".write": "true",
-              "candidateIds": { ".validate": "newData.hasChildren()" },
-              "votedAt": { ".validate": "newData.isString()" }
+              "candidateIds": {
+                ".validate": "newData.hasChildren() || newData.isString()"
+              },
+              "votedAt": {
+                ".validate": "newData.isString()"
+              }
             }
           }
         }

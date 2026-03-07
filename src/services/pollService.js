@@ -1,4 +1,4 @@
-import { ref, set, remove, onValue, off } from 'firebase/database';
+import { ref, set, remove, onValue } from 'firebase/database';
 import { database } from './firebaseConfig';
 
 /**
@@ -83,7 +83,7 @@ export const submitVote = async (groupId, participantId, candidateIds) => {
  */
 export const subscribeToPoll = (groupId, callback, onError) => {
   const pollRef = ref(database, `groups/${groupId}/poll`);
-  const handler = onValue(
+  const unsubscribe = onValue(
     pollRef,
     (snapshot) => callback(snapshot.exists() ? snapshot.val() : null),
     (err) => {
@@ -91,5 +91,5 @@ export const subscribeToPoll = (groupId, callback, onError) => {
       if (onError) onError(err);
     }
   );
-  return () => off(pollRef, 'value', handler);
+  return unsubscribe;
 };

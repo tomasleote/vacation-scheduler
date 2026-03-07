@@ -29,8 +29,9 @@ vacation-scheduler/
 │   │   │   └── VotingResults.jsx # Live vote tracking & results (5 KB)
 │   │   ├── landing/
 │   │   │   └── landingPageContent.js # SEO landing page content (8 KB)
-│   │   └── services/
-│   │       └── pollService.js    # Firebase poll operations (3 KB)
+│   │
+│   ├── services/
+│   │   └── pollService.js        # Firebase poll operations (3 KB)
 │   │
 │   └── utils/                    # Utility functions
 │       ├── overlap.js            # Overlap calculation algorithm (2.4 KB)
@@ -248,7 +249,7 @@ vacation-scheduler/
   - "Send Results" button with email integration
 - **Line Count**: ~200 lines
 
-### src/features/services/pollService.js
+### src/services/pollService.js
 - **Role**: Firebase poll operations
 - **Responsibilities**:
   - Subscribe to active polls

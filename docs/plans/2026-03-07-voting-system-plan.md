@@ -23,8 +23,8 @@ Open `database.rules.json`. Inside the `"$groupId"` block (after the `"participa
 
 ```json
 "poll": {
-  ".read": "true",
-  ".write": "true",
+  ".read": true,
+  ".write": "data.parent().child('adminToken').val() === newData.parent().child('adminToken').val() || newData.parent().child('adminToken').val() === null",
   "status": {
     ".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'closed')"
   },
@@ -40,9 +40,9 @@ Open `database.rules.json`. Inside the `"$groupId"` block (after the `"participa
   },
   "votes": {
     "$participantId": {
-      ".write": "true",
-      "candidateIds": { ".validate": "newData.hasChildren()" },
-      "votedAt": { ".validate": "newData.isString()" }
+      ".write": true,
+      "candidateIds": { ".validate": "newData.hasChildren() || !newData.exists()" },
+      "votedAt": { ".validate": "newData.isString() || !newData.exists()" }
     }
   }
 }
@@ -71,7 +71,7 @@ git commit -m "feat(voting): add Firebase rules for poll node"
 **Step 1: Create the service**
 
 ```js
-import { ref, set, remove, onValue, off } from 'firebase/database';
+import { ref, set, remove, onValue } from 'firebase/database';
 import { database } from './firebaseConfig';
 
 /**
@@ -156,7 +156,7 @@ export const submitVote = async (groupId, participantId, candidateIds) => {
  */
 export const subscribeToPoll = (groupId, callback, onError) => {
   const pollRef = ref(database, `groups/${groupId}/poll`);
-  const handler = onValue(
+  return onValue(
     pollRef,
     (snapshot) => callback(snapshot.exists() ? snapshot.val() : null),
     (err) => {
@@ -164,7 +164,6 @@ export const subscribeToPoll = (groupId, callback, onError) => {
       if (onError) onError(err);
     }
   );
-  return () => off(pollRef, 'value', handler);
 };
 ```
 
@@ -458,14 +457,21 @@ Inside the day button (after the count `<span>`), add:
 
 {/* Vote checkmark */}
 {votingMode?.active && (() => {
-  const cid = candidateDateMap[dateStr];
-  if (!cid) return null;
-  const candidate = votingMode.poll?.candidates?.[cid];
-  if (!candidate || candidate.startDate !== dateStr) return null;
+  const cids = candidateDateMap[dateStr];
+  if (!cids || !Array.isArray(cids) || cids.length === 0) return null;
   const myVote = votingMode.poll?.votes?.[votingMode.currentParticipantId];
-  if (!myVote?.candidateIds?.includes(cid)) return null;
+  if (!myVote?.candidateIds) return null;
+  const votedCids = cids.filter(cid => {
+    const candidate = votingMode.poll?.candidates?.[cid];
+    return candidate && candidate.startDate === dateStr && myVote.candidateIds.includes(cid);
+  });
+  if (votedCids.length === 0) return null;
   return (
-    <span className="absolute top-0.5 right-0.5 text-emerald-400 text-[10px] font-bold z-20">✓</span>
+    <div className="absolute top-0.5 right-0.5 flex gap-0.5 z-20">
+      {votedCids.map(cid => (
+        <span key={cid} className="text-emerald-400 text-[10px] font-bold">✓</span>
+      ))}
+    </div>
   );
 })()}
 ```

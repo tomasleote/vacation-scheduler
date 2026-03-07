@@ -35,7 +35,11 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
     const [hoveredCandidateId, setHoveredCandidateId] = useState(null);
 
     useImperativeHandle(ref, () => ({
-        clearSelection: () => setSelectedCandidateId(null),
+        clearSelection: () => {
+            setSelectedCandidateId(null);
+            setHoveredCandidateId(null);
+            setLockedDate(null);
+        },
     }), []);
 
     const { start, end, dateRange } = useMemo(() => ({
@@ -80,22 +84,25 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
         return counts;
     }, [dateRange, participants]);
 
-    // Maps each date string to its candidateId when voting is active
+    // Maps each date string to an array of its candidateIds when voting is active
     const candidateDateMap = useMemo(() => {
-      if (!votingMode?.active || !votingMode.poll?.candidates) return {};
-      const map = {};
-      Object.entries(votingMode.poll.candidates).forEach(([id, c]) => {
-        getDatesBetween(c.startDate, c.endDate).forEach(d => { map[d] = id; });
-      });
-      return map;
+        if (!votingMode?.active || !votingMode.poll?.candidates) return {};
+        const map = {};
+        Object.entries(votingMode.poll.candidates).forEach(([id, c]) => {
+            getDatesBetween(c.startDate, c.endDate).forEach(d => {
+                if (!map[d]) map[d] = [];
+                map[d].push(id);
+            });
+        });
+        return map;
     }, [votingMode]);
 
     // Ordered array of candidates for display (sorted by label)
     const orderedCandidates = useMemo(() => {
-      if (!votingMode?.active || !votingMode.poll?.candidates) return [];
-      return Object.entries(votingMode.poll.candidates)
-        .map(([id, c]) => ({ id, ...c }))
-        .sort((a, b) => a.label - b.label);
+        if (!votingMode?.active || !votingMode.poll?.candidates) return [];
+        return Object.entries(votingMode.poll.candidates)
+            .map(([id, c]) => ({ id, ...c }))
+            .sort((a, b) => a.label - b.label);
     }, [votingMode]);
 
     // 2. Calendar Pagination Logic
@@ -148,50 +155,52 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
     };
 
     const activeCandidateId = votingMode?.active
-      ? (selectedCandidateId || hoveredCandidateId)
-      : null;
+        ? (selectedCandidateId || hoveredCandidateId)
+        : null;
 
     const activeBlock = (() => {
-      if (votingMode?.active && activeCandidateId) {
-        const candidate = votingMode.poll?.candidates?.[activeCandidateId];
-        return candidate ? getDatesBetween(candidate.startDate, candidate.endDate) : [];
-      }
-      return getHighlightBlock(lockedDate || hoveredDate);
+        if (votingMode?.active && activeCandidateId) {
+            const candidate = votingMode.poll?.candidates?.[activeCandidateId];
+            return candidate ? getDatesBetween(candidate.startDate, candidate.endDate) : [];
+        }
+        return getHighlightBlock(lockedDate || hoveredDate);
     })();
 
     // Unified "is something locked" across both modes
     const isLocked = votingMode?.active ? Boolean(selectedCandidateId) : Boolean(lockedDate);
 
     const clearSelection = () => {
-      if (votingMode?.active) {
-        setSelectedCandidateId(null);
-      } else {
-        setLockedDate(null);
-      }
+        if (votingMode?.active) {
+            setSelectedCandidateId(null);
+        } else {
+            setLockedDate(null);
+        }
     };
 
     const handleDayClick = (dateStr) => {
-      if (votingMode?.active) {
-        const cid = candidateDateMap[dateStr];
-        if (!cid) return;
-        if (selectedCandidateId === cid) {
-          setSelectedCandidateId(null); // toggle off
-        } else {
-          setSelectedCandidateId(cid);
-          setHoveredCandidateId(null);
+        if (votingMode?.active) {
+            const cids = candidateDateMap[dateStr];
+            if (!cids || cids.length === 0) return;
+            // Select the best candidate (default to first, or toggle)
+            const activeIds = cids.filter(cid => cid === selectedCandidateId);
+            if (activeIds.length > 0) {
+                setSelectedCandidateId(null); // toggle off
+            } else {
+                setSelectedCandidateId(cids[0]);
+                setHoveredCandidateId(null);
+            }
+            return;
         }
-        return;
-      }
 
-      // Original logic
-      if (!isDateInRange(dateStr)) return;
-      const block = getHighlightBlock(dateStr);
-      if (block.length < parseInt(duration)) return;
-      if (lockedDate === dateStr) {
-        setLockedDate(null);
-      } else {
-        setLockedDate(dateStr);
-      }
+        // Original logic
+        if (!isDateInRange(dateStr)) return;
+        const block = getHighlightBlock(dateStr);
+        if (block.length < parseInt(duration)) return;
+        if (lockedDate === dateStr) {
+            setLockedDate(null);
+        } else {
+            setLockedDate(dateStr);
+        }
     };
 
     const getHeatmapColor = (count, max) => {
@@ -316,8 +325,8 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
                             const wouldBeValidBlock = getHighlightBlock(dateStr).length === parseInt(duration);
 
                             const effectivelyDisabled = votingMode?.active
-                              ? !candidateDateMap[dateStr]
-                              : (!inRange || !wouldBeValidBlock);
+                                ? (!candidateDateMap[dateStr] || candidateDateMap[dateStr].length === 0)
+                                : (!inRange || !wouldBeValidBlock);
 
                             return (
                                 <div key={i} className="relative aspect-square">
@@ -325,19 +334,19 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
                                         <button
                                             data-testid={dateStr ? `day-${dateStr}` : undefined}
                                             onMouseEnter={() => {
-                                              if (votingMode?.active) {
-                                                const cid = candidateDateMap[dateStr];
-                                                if (cid && !selectedCandidateId) setHoveredCandidateId(cid);
-                                                return;
-                                              }
-                                              inRange && wouldBeValidBlock && !lockedDate && setHoveredDate(dateStr);
+                                                if (votingMode?.active) {
+                                                    const cids = candidateDateMap[dateStr];
+                                                    if (cids && cids.length > 0 && !selectedCandidateId) setHoveredCandidateId(cids[0]);
+                                                    return;
+                                                }
+                                                inRange && wouldBeValidBlock && !lockedDate && setHoveredDate(dateStr);
                                             }}
                                             onMouseLeave={() => {
-                                              if (votingMode?.active) {
-                                                if (!selectedCandidateId) setHoveredCandidateId(null);
-                                                return;
-                                              }
-                                              !lockedDate && setHoveredDate(null);
+                                                if (votingMode?.active) {
+                                                    if (!selectedCandidateId) setHoveredCandidateId(null);
+                                                    return;
+                                                }
+                                                !lockedDate && setHoveredDate(null);
                                             }}
                                             onClick={() => day && handleDayClick(dateStr)}
                                             disabled={effectivelyDisabled}
@@ -346,8 +355,8 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
                          ${effectivelyDisabled ? 'text-gray-600 cursor-not-allowed opacity-20' : 'cursor-pointer hover:ring-2 hover:ring-brand-400 hover:ring-offset-1 hover:ring-offset-dark-800'}
                          ${isHighlighted ? 'ring-2 ring-brand-500 shadow-md transform scale-[1.02] z-10' : ''}
                          ${!votingMode?.active && highlightedCandidates?.some(c => getDatesBetween(c.startDate, c.endDate).includes(dateStr)) && !isHighlighted
-                           ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-dark-800'
-                           : ''}
+                                                    ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-dark-800'
+                                                    : ''}
                          ${!effectivelyDisabled && !isHighlighted ? getHeatmapColor(count, maxParts) : ''}
                          ${activeBlock.length > 0 && !effectivelyDisabled && !isHighlighted ? 'opacity-30' : ''}
                          ${isHighlighted ? 'bg-brand-500 text-white font-bold' : ''}
@@ -362,39 +371,48 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
 
                                             {/* Candidate number label — voting mode active */}
                                             {votingMode?.active && (() => {
-                                              const cid = candidateDateMap[dateStr];
-                                              if (!cid) return null;
-                                              const candidate = votingMode.poll?.candidates?.[cid];
-                                              if (!candidate || candidate.startDate !== dateStr) return null;
-                                              return (
-                                                <span className="absolute top-0.5 left-0.5 w-4 h-4 flex items-center justify-center rounded-full bg-brand-500 text-white text-[9px] font-bold z-20">
-                                                  {candidate.label}
-                                                </span>
-                                              );
+                                                const cids = candidateDateMap[dateStr];
+                                                if (!cids || cids.length === 0) return null;
+                                                return (
+                                                    <div className="absolute top-0.5 left-0.5 flex gap-0.5 pointer-events-none z-20">
+                                                        {cids.map(cid => {
+                                                            const candidate = votingMode.poll?.candidates?.[cid];
+                                                            if (!candidate || candidate.startDate !== dateStr) return null;
+                                                            return (
+                                                                <span key={cid} className="w-4 h-4 flex items-center justify-center rounded-full bg-brand-500 text-white text-[9px] font-bold shadow-[0_0_2px_rgba(0,0,0,0.5)]">
+                                                                    {candidate.label}
+                                                                </span>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                );
                                             })()}
 
                                             {/* Candidate number label — admin setup mode (highlightedCandidates) */}
                                             {!votingMode?.active && highlightedCandidates && (() => {
-                                              const idx = highlightedCandidates.findIndex(c => c.startDate === dateStr);
-                                              if (idx < 0) return null;
-                                              return (
-                                                <span className="absolute top-0.5 left-0.5 w-4 h-4 flex items-center justify-center rounded-full bg-amber-400 text-dark-900 text-[9px] font-bold z-20">
-                                                  {idx + 1}
-                                                </span>
-                                              );
+                                                const idx = highlightedCandidates.findIndex(c => c.startDate === dateStr);
+                                                if (idx < 0) return null;
+                                                return (
+                                                    <span className="absolute top-0.5 left-0.5 w-4 h-4 flex items-center justify-center rounded-full bg-amber-400 text-dark-900 text-[9px] font-bold z-20">
+                                                        {idx + 1}
+                                                    </span>
+                                                );
                                             })()}
 
                                             {/* Vote checkmark */}
                                             {votingMode?.active && (() => {
-                                              const cid = candidateDateMap[dateStr];
-                                              if (!cid) return null;
-                                              const candidate = votingMode.poll?.candidates?.[cid];
-                                              if (!candidate || !getDatesBetween(candidate.startDate, candidate.endDate).includes(dateStr)) return null;
-                                              const myVote = votingMode.poll?.votes?.[votingMode.currentParticipantId];
-                                              if (!myVote?.candidateIds?.includes(cid)) return null;
-                                              return (
-                                                <span className="absolute top-0.5 right-0.5 text-emerald-400 text-[10px] font-bold z-20">✓</span>
-                                              );
+                                                const cids = candidateDateMap[dateStr];
+                                                if (!cids || cids.length === 0) return null;
+                                                const myVote = votingMode.poll?.votes?.[votingMode.currentParticipantId];
+                                                const votedCids = cids.filter(cid => myVote?.candidateIds?.includes(cid) && votingMode.poll?.candidates?.[cid] && getDatesBetween(votingMode.poll.candidates[cid].startDate, votingMode.poll.candidates[cid].endDate).includes(dateStr));
+                                                if (votedCids.length === 0) return null;
+                                                return (
+                                                    <div className="absolute top-0.5 right-0.5 flex gap-0.5 z-20">
+                                                        {votedCids.map(cid => (
+                                                            <span key={cid} className="text-emerald-400 text-[10px] font-bold drop-shadow-md">✓</span>
+                                                        ))}
+                                                    </div>
+                                                );
                                             })()}
                                         </button>
                                     ) : (
@@ -518,8 +536,8 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
                             <div className="pt-4 mt-auto">
                                 <p className="text-xs text-center text-gray-500 font-medium">
                                     {votingMode?.active
-                                      ? 'Click a highlighted period to vote.'
-                                      : 'Click on a date to lock this selection.'}
+                                        ? 'Click a highlighted period to vote.'
+                                        : 'Click on a date to lock this selection.'}
                                 </p>
                             </div>
                         )}
@@ -528,145 +546,143 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
 
                     /* State 2: No block is highlighted */
                     <div className="h-full flex flex-col">
-                    {votingMode?.active ? (
-                      /* Voting mode: show candidates list */
-                      <>
-                        <h4 className="flex items-center gap-2 text-lg font-bold text-gray-50 mb-6 pb-4 border-b border-dark-700">
-                          <Vote size={20} className="text-brand-400" />
-                          {votingMode.poll?.status === 'closed' ? 'Poll Results' : 'Vote on a Period'}
-                        </h4>
-                        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-                          {orderedCandidates.map((candidate) => {
-                            const votes = votingMode.poll?.votes || {};
-                            const voteCount = Object.values(votes).filter(v =>
-                              v.candidateIds?.includes(candidate.id)
-                            ).length;
-                            const totalVoters = Object.keys(votes).length;
-                            const myVote = votes[votingMode.currentParticipantId];
-                            const hasVoted = myVote?.candidateIds?.includes(candidate.id);
-                            const isWinner = votingMode.poll?.status === 'closed' && voteCount === Math.max(
-                              ...Object.entries(votingMode.poll.candidates).map(([id]) =>
-                                Object.values(votes).filter(v => v.candidateIds?.includes(id)).length
-                              )
-                            ) && voteCount > 0;
+                        {votingMode?.active ? (
+                            /* Voting mode: show candidates list */
+                            <>
+                                <h4 className="flex items-center gap-2 text-lg font-bold text-gray-50 mb-6 pb-4 border-b border-dark-700">
+                                    <Vote size={20} className="text-brand-400" />
+                                    {votingMode.poll?.status === 'closed' ? 'Poll Results' : 'Vote on a Period'}
+                                </h4>
+                                <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                                    {orderedCandidates.map((candidate) => {
+                                        const votes = votingMode.poll?.votes || {};
+                                        const voteCount = Object.values(votes).filter(v =>
+                                            v.candidateIds?.includes(candidate.id)
+                                        ).length;
+                                        const totalVoters = Object.keys(votes).length;
+                                        const myVote = votes[votingMode.currentParticipantId];
+                                        const hasVoted = myVote?.candidateIds?.includes(candidate.id);
+                                        const isWinner = votingMode.poll?.status === 'closed' && voteCount === Math.max(
+                                            ...Object.entries(votingMode.poll.candidates).map(([id]) =>
+                                                Object.values(votes).filter(v => v.candidateIds?.includes(id)).length
+                                            )
+                                        ) && voteCount > 0;
 
-                            return (
-                              <button
-                                key={candidate.id}
-                                onClick={() => {
-                                  const month = new Date(candidate.startDate);
-                                  setCurrentMonth(month.getMonth());
-                                  setCurrentYear(month.getFullYear());
-                                  setSelectedCandidateId(candidate.id);
-                                }}
-                                className={`w-full text-left rounded-xl p-4 transition-all duration-200 border ${
-                                  isWinner
-                                    ? 'border-2 border-brand-500/70 bg-brand-500/10'
-                                    : hasVoted
-                                    ? 'border-emerald-500/40 bg-emerald-500/5'
-                                    : 'border-dark-700 bg-dark-800 hover:border-dark-600'
-                                }`}
-                              >
-                                <div className="flex justify-between items-start mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                                      isWinner ? 'bg-brand-500 text-white' : 'bg-dark-700 text-gray-300'
-                                    }`}>
-                                      {candidate.label}
-                                    </span>
-                                    <span className="font-bold text-gray-50 text-sm">
-                                      {formatDateRange(candidate.startDate, candidate.endDate)}
-                                    </span>
-                                  </div>
-                                  {hasVoted && <span className="text-emerald-400 text-xs font-bold">✓ Voted</span>}
-                                  {isWinner && <span className="text-brand-400 text-xs font-bold">Winner</span>}
+                                        return (
+                                            <button
+                                                key={candidate.id}
+                                                onClick={() => {
+                                                    const month = new Date(candidate.startDate);
+                                                    setCurrentMonth(month.getMonth());
+                                                    setCurrentYear(month.getFullYear());
+                                                    setSelectedCandidateId(candidate.id);
+                                                }}
+                                                className={`w-full text-left rounded-xl p-4 transition-all duration-200 border ${isWinner
+                                                        ? 'border-2 border-brand-500/70 bg-brand-500/10'
+                                                        : hasVoted
+                                                            ? 'border-emerald-500/40 bg-emerald-500/5'
+                                                            : 'border-dark-700 bg-dark-800 hover:border-dark-600'
+                                                    }`}
+                                            >
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${isWinner ? 'bg-brand-500 text-white' : 'bg-dark-700 text-gray-300'
+                                                            }`}>
+                                                            {candidate.label}
+                                                        </span>
+                                                        <span className="font-bold text-gray-50 text-sm">
+                                                            {formatDateRange(candidate.startDate, candidate.endDate)}
+                                                        </span>
+                                                    </div>
+                                                    {hasVoted && <span className="text-emerald-400 text-xs font-bold">✓ Voted</span>}
+                                                    {isWinner && <span className="text-brand-400 text-xs font-bold">Winner</span>}
+                                                </div>
+                                                <div className="ml-8">
+                                                    <div className="flex justify-between text-xs text-gray-400 mb-1">
+                                                        <span>{voteCount} vote{voteCount !== 1 ? 's' : ''}</span>
+                                                        <span>{totalVoters > 0 ? Math.round(voteCount / totalVoters * 100) : 0}%</span>
+                                                    </div>
+                                                    <div className="h-1.5 bg-dark-700 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-brand-500 transition-all duration-500"
+                                                            style={{ width: `${totalVoters > 0 ? (voteCount / totalVoters) * 100 : 0}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                    {orderedCandidates.length === 0 && (
+                                        <p className="text-sm text-gray-500 text-center">No candidates yet.</p>
+                                    )}
                                 </div>
-                                <div className="ml-8">
-                                  <div className="flex justify-between text-xs text-gray-400 mb-1">
-                                    <span>{voteCount} vote{voteCount !== 1 ? 's' : ''}</span>
-                                    <span>{totalVoters > 0 ? Math.round(voteCount / totalVoters * 100) : 0}%</span>
-                                  </div>
-                                  <div className="h-1.5 bg-dark-700 rounded-full overflow-hidden">
-                                    <div
-                                      className="h-full bg-brand-500 transition-all duration-500"
-                                      style={{ width: `${totalVoters > 0 ? (voteCount / totalVoters) * 100 : 0}%` }}
-                                    />
-                                  </div>
-                                </div>
-                              </button>
-                            );
-                          })}
-                          {orderedCandidates.length === 0 && (
-                            <p className="text-sm text-gray-500 text-center">No candidates yet.</p>
-                          )}
-                        </div>
-                      </>
-                    ) : (
-                      /* Normal mode: existing Top Overlaps list */
-                      <>
-                        <h4 className="flex items-center gap-2 text-lg font-bold text-gray-50 mb-6 pb-4 border-b border-dark-700">
-                            <TrendingUp size={20} className="text-brand-400" />
-                            {singleDay ? 'Top Overlap Dates' : 'Top Overlap Periods'}
-                        </h4>
+                            </>
+                        ) : (
+                            /* Normal mode: existing Top Overlaps list */
+                            <>
+                                <h4 className="flex items-center gap-2 text-lg font-bold text-gray-50 mb-6 pb-4 border-b border-dark-700">
+                                    <TrendingUp size={20} className="text-brand-400" />
+                                    {singleDay ? 'Top Overlap Dates' : 'Top Overlap Periods'}
+                                </h4>
 
-                        {(() => {
-                            const topFilteredOverlaps = getTopFilteredOverlaps(overlaps);
+                                {(() => {
+                                    const topFilteredOverlaps = getTopFilteredOverlaps(overlaps);
 
-                            if (!topFilteredOverlaps || topFilteredOverlaps.length === 0) {
-                                return (
-                                    <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-dark-800 rounded-xl border border-dashed border-dark-700">
-                                        <CalendarIcon size={48} className="text-gray-600 mb-4" />
-                                        <p className="text-gray-300 font-medium mb-1">No matches &gt; 50% found</p>
-                                        <p className="text-sm text-gray-500">Try lowering the duration or getting more participants to respond.</p>
-                                    </div>
-                                );
-                            }
+                                    if (!topFilteredOverlaps || topFilteredOverlaps.length === 0) {
+                                        return (
+                                            <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-dark-800 rounded-xl border border-dashed border-dark-700">
+                                                <CalendarIcon size={48} className="text-gray-600 mb-4" />
+                                                <p className="text-gray-300 font-medium mb-1">No matches &gt; 50% found</p>
+                                                <p className="text-sm text-gray-500">Try lowering the duration or getting more participants to respond.</p>
+                                            </div>
+                                        );
+                                    }
 
-                            return (
-                                <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-                                    {topFilteredOverlaps.map((overlap, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => {
-                                                const overlapStart = new Date(overlap.startDate);
-                                                setCurrentMonth(overlapStart.getMonth());
-                                                setCurrentYear(overlapStart.getFullYear());
-                                                setLockedDate(overlapStart.toISOString().split('T')[0]);
-                                            }}
-                                            className={`w-full text-left bg-dark-800 border rounded-xl p-4 transition-all duration-200
+                                    return (
+                                        <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+                                            {topFilteredOverlaps.map((overlap, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => {
+                                                        const overlapStart = new Date(overlap.startDate);
+                                                        setCurrentMonth(overlapStart.getMonth());
+                                                        setCurrentYear(overlapStart.getFullYear());
+                                                        setLockedDate(overlapStart.toISOString().split('T')[0]);
+                                                    }}
+                                                    className={`w-full text-left bg-dark-800 border rounded-xl p-4 transition-all duration-200
                                                 ${i === 0 ? 'border-2 border-brand-500/50 shadow-md hover:border-brand-400' : 'border-dark-700 hover:border-dark-700 hover:shadow-sm'}
                                             `}
-                                        >
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold
+                                                >
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold
                                                         ${i === 0 ? 'bg-brand-500 text-white' : 'bg-dark-700 text-gray-300'}
                                                     `}>
-                                                        {i + 1}
-                                                    </span>
-                                                    <span className="font-bold text-gray-50">
-                                                        {formatDateRange(overlap.startDate, overlap.endDate)}
-                                                    </span>
-                                                </div>
-                                                <span className="text-sm font-bold text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full">
-                                                    {overlap.availabilityPercent}%
-                                                </span>
-                                            </div>
+                                                                {i + 1}
+                                                            </span>
+                                                            <span className="font-bold text-gray-50">
+                                                                {formatDateRange(overlap.startDate, overlap.endDate)}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-sm font-bold text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full">
+                                                            {overlap.availabilityPercent}%
+                                                        </span>
+                                                    </div>
 
-                                            <div className="flex items-center gap-4 text-xs text-gray-400 ml-8">
-                                                <span className="flex items-center gap-1"><Users size={12} /> {overlap.availableCount} of {overlap.totalParticipants} available</span>
-                                            </div>
-                                        </button>
-                                    ))}
+                                                    <div className="flex items-center gap-4 text-xs text-gray-400 ml-8">
+                                                        <span className="flex items-center gap-1"><Users size={12} /> {overlap.availableCount} of {overlap.totalParticipants} available</span>
+                                                    </div>
+                                                </button>
+                                            ))}
 
-                                    <p className="text-xs text-center text-gray-500 mt-auto pt-4">
-                                        Hover over the calendar to explore other options.
-                                    </p>
-                                </div>
-                            );
-                        })()}
-                      </>
-                    )}
+                                            <p className="text-xs text-center text-gray-500 mt-auto pt-4">
+                                                Hover over the calendar to explore other options.
+                                            </p>
+                                        </div>
+                                    );
+                                })()}
+                            </>
+                        )}
                     </div>
                 )}
             </div>
