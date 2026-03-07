@@ -10,10 +10,12 @@ Unlike Doodle or When2Meet, **Find A Day** is built specifically for **date rang
 
 *   🚀 **Zero Friction**: No accounts, no sign-ups, no ads. Create a poll and share a link in under 30 seconds.
 *   📊 **Visual Heatmaps**: Instantly see which dates work for the most people with an intuitive, color-coded availability grid.
+*   🗳️ **Democratic Voting**: Admin proposes top candidate dates, participants vote with live results. The option with the most votes wins—transparent and fair.
 *   📍 **Location Smart**: Integrated with Google Places. Add a restaurant, park, or city with autocomplete to help everyone plan better.
 *   🗓️ **Built for Ranges**: Perfect for vacations and retreats. Participants paint their availability on a custom calendar, not a messy list of time slots.
 *   📱 **Mobile-First**: Designed to work perfectly in your group chat. Every feature is optimized for the phone in your hand.
 *   🔐 **Secure Admin**: Manage your group via a unique admin link. Recover access anytime using a secure passphrase or email.
+*   📅 **Calendar Invites**: Admin can send the winning date as a calendar invite (ICS file) to all participants—one-click import into any calendar app.
 
 ## 🛠️ Technology Stack
 

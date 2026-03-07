@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { subscribeToGroup } from '../services/groupService';
 import { addParticipant, updateParticipant, getParticipant, subscribeToParticipants } from '../services/participantService';
 import { getDatesBetween, calculateOverlap, getBestOverlapPeriods } from '../utils/overlap';
@@ -6,9 +6,12 @@ import { ReadOnlyInput, CopyButton, Button, LoadingSpinner, Card, TruncatedText,
 import { useNotification } from '../context/NotificationContext';
 import { useGroupContext } from '../shared/context';
 import { isSingleDayEvent } from '../utils/eventTypes';
+import { subscribeToPoll, submitVote, closePoll } from '../services/pollService';
 
 import CalendarView from './CalendarView';
 import SlidingOverlapCalendar from './SlidingOverlapCalendar';
+import VotePanel from './VotePanel';
+import CalendarEventButton from '../features/admin/CalendarEventButton';
 import SchemaMarkup from '../features/landing/SchemaMarkup';
 import { ChevronDown, ChevronUp, CalendarRange, Users } from 'lucide-react';
 
@@ -19,6 +22,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
   const [error, setError] = useState('');
   const { addNotification } = useNotification();
   const [participants, setParticipants] = useState([]);
+  const participantsRef = useRef(0);
   const [expandedSection, setExpandedSection] = useState('form');
   const [currentParticipantId, setCurrentParticipantId] = useState(null);
   const [savedDays, setSavedDays] = useState([]);
@@ -27,6 +31,8 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
   const [participantDuration, setParticipantDuration] = useState('3');
   const [heatmapDuration, setHeatmapDuration] = useState('3');
   const [overlaps, setOverlaps] = useState([]);
+  const [poll, setPoll] = useState(null);
+  const calendarRef = useRef(null);
 
   useEffect(() => {
     if (!groupId) return;
@@ -54,6 +60,7 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
     const unsubParts = subscribeToParticipants(groupId, (data) => {
       setError('');
       setParticipants(data || []);
+      participantsRef.current = (data || []).length;
       onLoad();
     }, (err) => {
       setError(err.message || 'Failed to load participants.');
@@ -92,6 +99,28 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
   }, [groupId, initialParticipantId]);
 
   useEffect(() => {
+    if (!groupId) return;
+    const unsub = subscribeToPoll(
+      groupId,
+      (pollData) => {
+        setPoll(pollData);
+
+        // Auto-close: if all participants have voted, close the poll
+        if (pollData?.status === 'active' && participantsRef.current > 0) {
+          const voterCount = Object.keys(pollData.votes || {}).length;
+          if (voterCount >= participantsRef.current) {
+            closePoll(groupId).catch(err =>
+              console.error('[ParticipantView] auto-close poll failed:', err)
+            );
+          }
+        }
+      },
+      (err) => console.error('[ParticipantView] poll subscription error:', err)
+    );
+    return unsub;
+  }, [groupId]);
+
+  useEffect(() => {
     if (group && participants?.length > 0) {
       const results = calculateOverlap(
         participants,
@@ -104,6 +133,15 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
       setOverlaps([]);
     }
   }, [group, participants, heatmapDuration]);
+
+  const handleVote = async ({ newCandidateIds }) => {
+    if (!currentParticipantId || !poll) return;
+    try {
+      await submitVote(groupId, currentParticipantId, newCandidateIds);
+    } catch (err) {
+      addNotification({ type: 'error', title: 'Vote Error', message: err.message });
+    }
+  };
 
   const handleSubmit = async (formData) => {
     try {
@@ -293,17 +331,70 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
           </div>
         </div>
 
-        {overlaps?.length > 0 && (
+        {poll && poll.status === 'active' && (
+          <div className="mt-6 bg-brand-500/10 border border-brand-500/30 rounded-xl p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-2.5 w-2.5 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500" />
+              </span>
+              <div>
+                <p className="font-bold text-gray-50 text-sm">Vote on proposed dates!</p>
+                <p className="text-xs text-gray-400">The organizer has opened a poll. Click a highlighted period below to vote.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {poll && poll.status === 'closed' && (
+          <div className="mt-6 bg-dark-800 border border-dark-700 rounded-xl p-4">
+            <p className="font-semibold text-gray-300 text-sm">Poll closed — results are below.</p>
+          </div>
+        )}
+
+        {(overlaps?.length > 0 || poll) && (
           <div className="mt-8">
-            <h2 className="text-xl font-bold text-gray-50 mb-4">Current Group Availability</h2>
+            <h2 className="text-xl font-bold text-gray-50 mb-4">
+              {poll ? (poll.status === 'active' ? 'Vote on Proposed Dates' : 'Poll Results') : 'Current Group Availability'}
+            </h2>
             <SlidingOverlapCalendar
+              ref={calendarRef}
               startDate={group.startDate}
               endDate={group.endDate}
               participants={participants}
               duration={heatmapDuration || '3'}
               overlaps={getBestOverlapPeriods(overlaps, 10)}
-              onDurationChange={setHeatmapDuration}
+              onDurationChange={poll ? undefined : setHeatmapDuration}
               singleDay={isSingleDayEvent(group?.eventType)}
+              votingMode={poll ? {
+                active: true,
+                poll,
+                currentParticipantId: currentParticipantId,
+              } : undefined}
+              renderSelectedAction={poll
+                ? ({ candidateId, startDate, endDate }) => {
+                  const candidate = poll?.candidates?.[candidateId];
+                  return (
+                    <div className="space-y-3">
+                      <VotePanel
+                        poll={poll}
+                        candidateId={candidateId}
+                        currentParticipantId={currentParticipantId}
+                        onVote={handleVote}
+                        isReadOnly={poll.status === 'closed' || !currentParticipantId}
+                        participants={participants}
+                        onVoteComplete={() => calendarRef.current?.clearSelection()}
+                      />
+                      <CalendarEventButton
+                        group={group}
+                        overlap={{ startDate: candidate?.startDate, endDate: candidate?.endDate, availableCount: participants.length }}
+                        participantCount={participants.length}
+                      />
+                    </div>
+                  );
+                }
+                : undefined
+              }
             />
           </div>
         )}

@@ -1,10 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { updateGroup, deleteGroup } from '../../services/groupService';
 import { addParticipant, updateParticipant } from '../../services/participantService';
 import { hashPhrase } from '../../services/adminService';
 import { apiCall } from '../../services/apiService';
 import { exportToCSV } from '../../utils/export';
-import { Download, Mail } from 'lucide-react';
+import { Download, Mail, Vote } from 'lucide-react';
 import { useNotification } from '../../context/NotificationContext';
 import { useGroupContext } from '../../shared/context';
 import { useCopyToClipboard } from '../../hooks/useCopyToClipboard';
@@ -16,6 +16,9 @@ import GroupSettings from './GroupSettings';
 import ParticipantTable from './ParticipantTable';
 import AdminAvailability from './AdminAvailability';
 import OverlapResults from './OverlapResults';
+import VotingSetup from './VotingSetup';
+import VotingResults from './VotingResults';
+import { createPoll, closePoll, deletePoll, submitVote } from '../../services/pollService';
 import SchemaMarkup from '../landing/SchemaMarkup';
 
 function AdminPage({ onBack }) {
@@ -25,6 +28,8 @@ function AdminPage({ onBack }) {
   const [showPassphrase, setShowPassphrase] = useState(false);
   const [reminderSending, setReminderSending] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showVotingSetup, setShowVotingSetup] = useState(false);
+  const heatmapRef = useRef(null);
 
   const baseUrl = window.location.origin;
   const participantLink = `${baseUrl}?group=${groupId}`;
@@ -45,9 +50,22 @@ function AdminPage({ onBack }) {
     adminName, setAdminName,
     adminEmail, setAdminEmail,
     adminDuration, setAdminDuration,
+    poll, setPoll,
   } = useGroupData(groupId, adminToken, onBack);
 
   const participantActions = useParticipantActions(groupId, group, participants, setParticipants);
+
+  // Auto-scroll to heatmap when poll starts
+  const prevPollIdRef = useRef(poll?.id);
+  useEffect(() => {
+    if (poll && heatmapRef.current && poll.id !== prevPollIdRef.current) {
+      setTimeout(() => {
+        heatmapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        addNotification({ type: 'info', title: 'Configure Poll', message: 'View live voting results below.' });
+      }, 100);
+      prevPollIdRef.current = poll.id;
+    }
+  }, [poll, addNotification]);
 
   const handleSaveEdit = useCallback(async () => {
     try {
@@ -158,6 +176,94 @@ function AdminPage({ onBack }) {
     }
   }, [participants, adminParticipantId, groupId, setAdminParticipantId, setAdminSavedDays, setAdminName, setAdminEmail, setAdminDuration, addNotification]);
 
+  const handleStartPoll = useCallback(async ({ mode, candidates }) => {
+    try {
+      await createPoll(groupId, { mode, candidates });
+      setShowVotingSetup(false);
+      addNotification({ type: 'success', title: 'Poll Started', message: 'Participants can now vote.' });
+    } catch (err) {
+      addNotification({ type: 'error', title: 'Error', message: err.message });
+      throw err;
+    }
+  }, [groupId, addNotification]);
+
+  const handleClosePoll = useCallback(async () => {
+    try {
+      await closePoll(groupId);
+      addNotification({ type: 'success', title: 'Poll Closed', message: 'Results are now final.' });
+    } catch (err) {
+      addNotification({ type: 'error', title: 'Error', message: err.message });
+    }
+  }, [groupId, addNotification]);
+
+  const handleDeletePoll = useCallback(async () => {
+    try {
+      await deletePoll(groupId);
+      setPoll(null);
+      addNotification({ type: 'success', title: 'Poll Removed', message: 'You can start a new vote.' });
+    } catch (err) {
+      addNotification({ type: 'error', title: 'Error', message: err.message });
+    }
+  }, [groupId, setPoll, addNotification]);
+
+  const handleAdminVote = useCallback(async ({ newCandidateIds }) => {
+    if (!adminParticipantId) return;
+    try {
+      await submitVote(groupId, adminParticipantId, newCandidateIds);
+    } catch (err) {
+      addNotification({ type: 'error', title: 'Vote Error', message: err.message });
+    }
+  }, [groupId, adminParticipantId, addNotification]);
+
+  const handleSendVoteInvites = useCallback(async () => {
+    try {
+      await apiCall('/api/send-vote-invite', {
+        method: 'POST',
+        body: JSON.stringify({
+          groupId,
+          adminToken,
+          groupName: group.name,
+          participants: participants.filter(p => p?.email).map(p => ({ email: p.email, id: p.id })),
+          baseUrl: window.location.origin,
+        }),
+      });
+      addNotification({ type: 'success', title: 'Invites Sent', message: 'Voting invites delivered.' });
+    } catch (err) {
+      addNotification({ type: 'error', title: 'Error', message: err.message });
+    }
+  }, [groupId, group, participants, addNotification]);
+
+  const handleSendVoteResult = useCallback(async () => {
+    try {
+      const votes = poll?.votes || {};
+      const candidates = poll?.candidates || {};
+      const voteCounts = Object.entries(candidates).map(([id, c]) => ({
+        ...c,
+        count: Object.values(votes).filter(v => v.candidateIds?.includes(id)).length,
+      }));
+      const winner = voteCounts.sort((a, b) => {
+        if (b.count !== a.count) return b.count - a.count;
+        return a.label - b.label; // Deterministic tie-breaker
+      })[0];
+
+      await apiCall('/api/send-vote-result', {
+        method: 'POST',
+        body: JSON.stringify({
+          groupId,
+          adminToken,
+          groupName: group.name,
+          winnerStartDate: winner?.startDate,
+          winnerEndDate: winner?.endDate,
+          participants: participants.filter(p => p?.email).map(p => ({ email: p.email })),
+          baseUrl: window.location.origin,
+        }),
+      });
+      addNotification({ type: 'success', title: 'Result Sent', message: 'Calendar invites delivered.' });
+    } catch (err) {
+      addNotification({ type: 'error', title: 'Error', message: err.message });
+    }
+  }, [groupId, group, participants, poll, addNotification]);
+
   if (loading) {
     return <LoadingSpinner label="Loading..." />;
   }
@@ -243,6 +349,15 @@ function AdminPage({ onBack }) {
                 <Download size={16} className="inline mr-1.5" /> Export CSV
               </Button>
               <Button
+                variant="secondary"
+                fullWidth
+                onClick={() => setShowVotingSetup(true)}
+                disabled={!!poll || showVotingSetup || !overlaps?.length}
+                title={poll ? 'A poll is already active' : !overlaps?.length ? 'No overlap data yet' : ''}
+              >
+                <Vote size={16} className="inline mr-1.5" /> Start Vote
+              </Button>
+              <Button
                 variant="primary"
                 fullWidth
                 onClick={handleSendReminder}
@@ -279,13 +394,42 @@ function AdminPage({ onBack }) {
           actions={participantActions}
         />
 
-        <OverlapResults
-          group={group}
-          participants={participants}
-          overlaps={overlaps}
-          durationFilter={durationFilter}
-          onDurationChange={setDurationFilter}
-        />
+        {showVotingSetup && !poll ? (
+          <VotingSetup
+            group={group}
+            participants={participants}
+            overlaps={overlaps}
+            durationFilter={durationFilter}
+            onDurationChange={setDurationFilter}
+            onStartPoll={handleStartPoll}
+            onCancel={() => setShowVotingSetup(false)}
+          />
+        ) : poll ? (
+          <div ref={heatmapRef}>
+            <VotingResults
+              group={group}
+              participants={participants}
+              overlaps={overlaps}
+              durationFilter={durationFilter}
+              onDurationChange={setDurationFilter}
+              poll={poll}
+              adminParticipantId={adminParticipantId}
+              onClosePoll={handleClosePoll}
+              onDeletePoll={handleDeletePoll}
+              onVote={handleAdminVote}
+              onSendInvites={handleSendVoteInvites}
+              onSendResult={handleSendVoteResult}
+            />
+          </div>
+        ) : (
+          <OverlapResults
+            group={group}
+            participants={participants}
+            overlaps={overlaps}
+            durationFilter={durationFilter}
+            onDurationChange={setDurationFilter}
+          />
+        )}
 
         <AdminAvailability
           group={group}

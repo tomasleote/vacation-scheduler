@@ -1,22 +1,102 @@
 {
   "rules": {
+    ".read": false,
+    ".write": false,
     "groups": {
       "$groupId": {
         ".read": "true",
-        ".write": "true",
-        "adminTokenHash": {
-          ".write": "!data.exists()"
-        },
+        ".write": "!data.exists() || newData.exists()",
         "id": {
           ".write": "!data.exists()"
         },
         "createdAt": {
           ".write": "!data.exists()"
         },
+        "adminTokenHash": {
+          ".write": "!data.exists()"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+        "description": {
+          ".validate": "newData.isString() && newData.val().length <= 1000"
+        },
+        "eventType": {
+          ".validate": "newData.isString()"
+        },
+        "startDate": {
+          ".validate": "newData.isString()"
+        },
+        "endDate": {
+          ".validate": "newData.isString()"
+        },
+        "adminEmail": {
+          ".validate": "newData.isString()"
+        },
+        "location": {
+          ".validate": "newData.hasChildren()"
+        },
         "participants": {
           ".read": "true",
           "$participantId": {
-            ".write": "true"
+            ".write": "!data.exists() || (data.exists() && newData.exists()) || !newData.exists()",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length <= 100"
+            },
+            "email": {
+              ".validate": "newData.isString() && newData.val().length <= 255"
+            },
+            "duration": {
+              ".validate": "newData.isNumber()"
+            },
+            "blockType": {
+              ".validate": "newData.isString()"
+            },
+            "availableDays": {
+              ".validate": "newData.exists()"
+            },
+            "id": {
+              ".validate": "newData.isString()"
+            },
+            "createdAt": {
+              ".write": "!data.exists()"
+            }
+          }
+        },
+        "poll": {
+          ".read": "true",
+          ".write": "!data.exists() || newData.exists() || !newData.exists()",
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'closed')"
+          },
+          "mode": {
+            ".validate": "newData.isString() && (newData.val() === 'single' || newData.val() === 'multi')"
+          },
+          "candidates": {
+            ".write": "true",
+            "$candidateId": {
+              "startDate": {
+                ".validate": "newData.isString()"
+              },
+              "endDate": {
+                ".validate": "newData.isString()"
+              },
+              "label": {
+                ".validate": "newData.isNumber()"
+              }
+            }
+          },
+          "votes": {
+            ".write": "true",
+            "$participantId": {
+              ".write": "true",
+              "candidateIds": {
+                ".validate": "newData.hasChildren() || newData.isString()"
+              },
+              "votedAt": {
+                ".validate": "newData.isString()"
+              }
+            }
           }
         }
       }
