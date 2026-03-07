@@ -8,17 +8,10 @@
     ],
     "rewrites": [
       {
-        "source": "/api/send-reminder",
-        "function": "sendReminder"
-      },
-      {
         "source": "**",
         "destination": "/app.html"
       }
     ]
-  },
-  "functions": {
-    "source": "functions"
   },
   "database": {
     "rules": "database.rules.json"

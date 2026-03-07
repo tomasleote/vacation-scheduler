@@ -21,8 +21,8 @@ module.exports = async function handler(req, res) {
 
   const { groupId, groupName, participants, baseUrl } = req.body ?? {};
 
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-    console.error('[send-vote-invite] EMAIL credentials not set');
+  if (!process.env.RESEND_API_KEY) {
+    console.error('[send-vote-invite] RESEND_API_KEY not set');
     return res.status(500).json({ error: 'Email service is not configured' });
   }
 
@@ -67,16 +67,18 @@ module.exports = async function handler(req, res) {
 
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.resend.com',
+      port: 465,
+      secure: true,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: 'resend',
+        pass: process.env.RESEND_API_KEY,
       },
     });
 
     await transporter.sendMail({
-      from: `"Find A Day" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER || 'noreply@findaday.app',
+      from: `"Find A Day" <${process.env.EMAIL_FROM || 'noreply@findaday.app'}>`,
+      to: process.env.EMAIL_FROM || 'noreply@findaday.app',
       bcc: recipients,
       subject: `Vote now — "${safeGroupName}"`,
       html,

@@ -90,7 +90,7 @@ module.exports = async function handler(req, res) {
 
   const { groupId, adminToken, winnerStartDate, winnerEndDate, baseUrl } = req.body ?? {};
 
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+  if (!process.env.RESEND_API_KEY) {
     return res.status(500).json({ error: 'Email service is not configured' });
   }
 
@@ -179,16 +179,18 @@ module.exports = async function handler(req, res) {
 
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.resend.com',
+      port: 465,
+      secure: true,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: 'resend',
+        pass: process.env.RESEND_API_KEY,
       },
     });
 
     await transporter.sendMail({
-      from: `"Find A Day" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER || 'noreply@findaday.app', // Neutral To
+      from: `"Find A Day" <${process.env.EMAIL_FROM || 'noreply@findaday.app'}>`,
+      to: process.env.EMAIL_FROM || 'noreply@findaday.app', // Neutral To
       bcc: recipients,
       subject: `Date confirmed — "${groupName}"`,
       html,

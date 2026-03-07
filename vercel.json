@@ -10,5 +10,11 @@
       "source": "/(.*)",
       "destination": "/api/og?p=$1"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron-cleanup",
+      "schedule": "0 0 1,15 * *"
+    }
   ]
 }

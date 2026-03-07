@@ -11,8 +11,8 @@ module.exports = async function handler(req, res) {
 
   const { groupId, groupName, startDate, participants, baseUrl } = req.body ?? {};
 
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-    console.error('[send-reminder] EMAIL_USER or EMAIL_PASSWORD is not set');
+  if (!process.env.RESEND_API_KEY) {
+    console.error('[send-reminder] RESEND_API_KEY is not set');
     return res.status(500).json({ error: 'Email service is not configured' });
   }
 
@@ -73,15 +73,17 @@ module.exports = async function handler(req, res) {
 
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.resend.com',
+      port: 465,
+      secure: true,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: 'resend',
+        pass: process.env.RESEND_API_KEY,
       },
     });
 
     await transporter.sendMail({
-      from: `"Vacation Scheduler" <${process.env.EMAIL_USER}>`,
+      from: `"Vacation Scheduler" <${process.env.EMAIL_FROM || 'noreply@findaday.app'}>`,
       to: recipients,
       subject: `Reminder: update your availability for "${groupName || 'the trip'}"`,
       html,

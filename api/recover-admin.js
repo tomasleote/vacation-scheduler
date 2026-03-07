@@ -62,13 +62,15 @@ async function writeNewAdminToken(groupId, newHash) {
 }
 
 async function sendRecoveryEmail(adminEmail, groupName, adminLink) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) return;
+    if (!process.env.RESEND_API_KEY) return;
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
+        host: 'smtp.resend.com',
+        port: 465,
+        secure: true,
+        auth: { user: 'resend', pass: process.env.RESEND_API_KEY },
     });
     await transporter.sendMail({
-        from: `"Vacation Scheduler" <${process.env.EMAIL_USER}>`,
+        from: `"Vacation Scheduler" <${process.env.EMAIL_FROM || 'noreply@findaday.app'}>`,
         to: adminEmail,
         subject: `🔑 Admin link recovered for "${escapeHtml(groupName || 'your group')}"`,
         html: `

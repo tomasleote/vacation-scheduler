@@ -75,7 +75,7 @@ module.exports = async function handler(req, res) {
   if (!DB_URL) {
     return res.status(500).json({ error: 'Database not configured' });
   }
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+  if (!process.env.RESEND_API_KEY) {
     return res.status(500).json({ error: 'Email service is not configured' });
   }
 
@@ -113,11 +113,13 @@ module.exports = async function handler(req, res) {
     // Send a "no groups found" email anyway so the UX feels consistent
     try {
       const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
+        host: 'smtp.resend.com',
+        port: 465,
+        secure: true,
+        auth: { user: 'resend', pass: process.env.RESEND_API_KEY },
       });
       await transporter.sendMail({
-        from: `"Vacation Scheduler" <${process.env.EMAIL_USER}>`,
+        from: `"Find A Day" <${process.env.EMAIL_FROM || 'noreply@findaday.app'}>`,
         to: targetEmail,
         subject: 'No groups found for your email — Vacation Scheduler',
         html: `
@@ -182,11 +184,13 @@ module.exports = async function handler(req, res) {
 
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
+      host: 'smtp.resend.com',
+      port: 465,
+      secure: true,
+      auth: { user: 'resend', pass: process.env.RESEND_API_KEY },
     });
     await transporter.sendMail({
-      from: `"Vacation Scheduler" <${process.env.EMAIL_USER}>`,
+      from: `"Find A Day" <${process.env.EMAIL_FROM || 'noreply@findaday.app'}>`,
       to: targetEmail,
       subject: `Your ${matches.length} Vacation Scheduler group${matches.length !== 1 ? 's' : ''}`,
       html,
