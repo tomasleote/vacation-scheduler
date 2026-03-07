@@ -38,7 +38,7 @@
         },
         "participants": {
           ".read": "auth != null",
-          ".validate": "newData.numChildren() <= 150",
+          ".validate": "newData.numChildren() <= 100",
           "$participantId": {
             ".write": "auth != null && (!data.exists() || (data.exists() && newData.exists()) || !newData.exists())",
             "name": {
@@ -96,12 +96,29 @@
             "$participantId": {
               ".write": "auth != null",
               "candidateIds": {
-                ".validate": "newData.hasChildren() || newData.isString()"
+                ".validate": "(newData.hasChildren() && newData.numChildren() <= 15) || newData.isString()"
               },
               "votedAt": {
                 ".validate": "newData.isString()"
               }
             }
+          }
+        },
+        "availability": {
+          ".read": "auth != null",
+          "$participantId": {
+            ".write": "auth != null",
+            ".validate": "newData.numChildren() <= 400",
+            "$dateStr": {
+              ".validate": "newData.isBoolean()"
+            }
+          }
+        },
+        "dailyCounts": {
+          ".read": "auth != null",
+          ".write": "auth != null",
+          "$dateStr": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
           }
         }
       }

@@ -1,6 +1,7 @@
 import { ref, set, get, update, remove, onValue, off } from 'firebase/database';
 import { database } from './firebaseConfig';
 import { hashPhrase } from './adminService';
+import { MAX_DATE_RANGE_DAYS } from '../utils/constants/validation';
 
 export const createGroup = async (groupData) => {
   try {
@@ -18,6 +19,16 @@ export const createGroup = async (groupData) => {
 
     if (!name || !startDate || !endDate) {
       throw new Error('Name, start date, and end date are required.');
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const rangeDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    if (rangeDays < 1) {
+      throw new Error('End date must be after start date.');
+    }
+    if (rangeDays > MAX_DATE_RANGE_DAYS) {
+      throw new Error(`Date range cannot exceed ${MAX_DATE_RANGE_DAYS} days.`);
     }
 
     const groupId = crypto.randomUUID();

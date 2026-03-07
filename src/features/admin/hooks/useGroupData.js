@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { subscribeToGroup } from '../../../services/groupService';
 import { getParticipant, subscribeToParticipants } from '../../../services/participantService';
+import { subscribeToAvailability } from '../../../services/availabilityService';
+import { subscribeToDailyCounts } from '../../../services/dailyCountsService';
 import { validateAdminToken } from '../../../services/adminService';
 import { calculateOverlap } from '../../../utils/overlap';
 
@@ -11,6 +13,8 @@ export function useGroupData(groupId, adminToken, onBack) {
   const [error, setError] = useState('');
   const [editData, setEditData] = useState({});
   const [durationFilter, setDurationFilter] = useState('3');
+  const [availabilityMap, setAvailabilityMap] = useState({});
+  const [dailyCounts, setDailyCounts] = useState({});
 
   // Admin participant state
   const [adminParticipantId, setAdminParticipantId] = useState(null);
@@ -23,6 +27,8 @@ export function useGroupData(groupId, adminToken, onBack) {
   useEffect(() => {
     let unsubGroup = () => { };
     let unsubParts = () => { };
+    let unsubAvail = () => { };
+    let unsubCounts = () => { };
     let unsubPoll = () => { };
     let isMounted = true;
 
@@ -106,6 +112,20 @@ export function useGroupData(groupId, adminToken, onBack) {
         onLoad();
       });
 
+      unsubAvail = subscribeToAvailability(groupId, (data) => {
+        if (!isMounted) return;
+        setAvailabilityMap(data || {});
+      }, (err) => {
+        console.error('[useGroupData] availability error:', err);
+      });
+
+      unsubCounts = subscribeToDailyCounts(groupId, (data) => {
+        if (!isMounted) return;
+        setDailyCounts(data || {});
+      }, (err) => {
+        console.error('[useGroupData] dailyCounts error:', err);
+      });
+
       const { subscribeToPoll } = require('../../../services/pollService');
       unsubPoll = subscribeToPoll(groupId, (pollData) => {
         if (!isMounted) return;
@@ -122,6 +142,8 @@ export function useGroupData(groupId, adminToken, onBack) {
       isMounted = false;
       unsubGroup();
       unsubParts();
+      unsubAvail();
+      unsubCounts();
       unsubPoll();
     };
   }, [groupId, adminToken, onBack]);
@@ -130,13 +152,14 @@ export function useGroupData(groupId, adminToken, onBack) {
     if (group && participants?.length > 0) {
       return calculateOverlap(
         participants,
+        availabilityMap,
         group.startDate,
         group.endDate,
         parseInt(durationFilter)
       );
     }
     return [];
-  }, [group, participants, durationFilter]);
+  }, [group, participants, availabilityMap, durationFilter]);
 
   return {
     group, setGroup,
@@ -151,5 +174,6 @@ export function useGroupData(groupId, adminToken, onBack) {
     adminEmail, setAdminEmail,
     adminDuration, setAdminDuration,
     poll, setPoll,
+    availabilityMap, dailyCounts,
   };
 }

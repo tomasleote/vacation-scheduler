@@ -21,10 +21,10 @@ import { TruncatedText } from '../shared/ui';
  *   - `startDate` {string|Date}: The start date of the selected block
  *   - `endDate` {string|Date}: The end date of the selected block
  *   - `availableCount` {number}: The number of participants available for this block
- *   Note: This function is only called when a selection is locked (i.e. not null).
- *   Expected return type: React Node.
+ * @param {Object} [props.availabilityMap] - The mapped data for participant availability
+ * @param {Object} [props.dailyCounts] - Granular integer map of counts
  */
-const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ startDate, endDate, participants, duration, overlaps, onDurationChange, singleDay = false, renderSelectedAction, votingMode, highlightedCandidates }, ref) {
+const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ startDate, endDate, participants, availabilityMap = {}, dailyCounts = {}, duration, overlaps, onDurationChange, singleDay = false, renderSelectedAction, votingMode, highlightedCandidates }, ref) {
     const [currentMonth, setCurrentMonth] = useState(new Date(startDate).getMonth());
     const [currentYear, setCurrentYear] = useState(new Date(startDate).getFullYear());
     const [hoveredDate, setHoveredDate] = useState(null);
@@ -71,18 +71,26 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
 
     // 1. Calculate Daily Availability (Heatmap)
     const dailyAvailability = useMemo(() => {
+        // Fallback: If `dailyCounts` doesn't exist yet, we parse via `availabilityMap`
+        // or old `participants` in this transitional period.
+        if (Object.keys(dailyCounts).length > 0) {
+            return dailyCounts;
+        }
+
         const counts = {};
         dateRange.forEach(dateStr => {
             let availableCount = 0;
             participants.forEach(p => {
-                if (p.availableDays?.includes(dateStr)) {
+                const datesObj = availabilityMap[p.id] || {};
+                const hasDate = datesObj[dateStr] === true || (p.availableDays || []).includes(dateStr);
+                if (hasDate) {
                     availableCount++;
                 }
             });
             counts[dateStr] = availableCount;
         });
         return counts;
-    }, [dateRange, participants]);
+    }, [dateRange, participants, availabilityMap, dailyCounts]);
 
     // Maps each date string to an array of its candidateIds when voting is active
     const candidateDateMap = useMemo(() => {
@@ -227,7 +235,10 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
 
         participants.forEach(p => {
             // Check if participant is available for ALL days in the activeBlock
-            const isAvailable = activeBlock.every(day => p.availableDays?.includes(day));
+            const datesObj = availabilityMap[p.id] || {};
+            const availableDays = Object.keys(datesObj).length > 0 ? Object.keys(datesObj).filter(k => datesObj[k]) : (p.availableDays || []);
+
+            const isAvailable = activeBlock.every(day => availableDays.includes(day));
             if (isAvailable && activeBlock.length === reqDuration) {
                 available.push(p);
             } else {
@@ -493,8 +504,10 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
                                 {blockDetails?.unavailable?.length > 0 ? (
                                     <div className="flex flex-col gap-2">
                                         {blockDetails.unavailable.map((p, i) => {
+                                            const datesObj = availabilityMap[p.id] || {};
+                                            const availableDays = Object.keys(datesObj).length > 0 ? Object.keys(datesObj).filter(k => datesObj[k]) : (p.availableDays || []);
                                             // Calculate exactly how many days they are missing for THIS block
-                                            const missingCount = activeBlock.filter(day => !p.availableDays?.includes(day)).length;
+                                            const missingCount = activeBlock.filter(day => !availableDays.includes(day)).length;
                                             return (
                                                 <div key={i} className="flex justify-between items-center bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-2 rounded-lg text-sm">
                                                     <span className="font-medium">
@@ -578,10 +591,10 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
                                                     setSelectedCandidateId(candidate.id);
                                                 }}
                                                 className={`w-full text-left rounded-xl p-4 transition-all duration-200 border ${isWinner
-                                                        ? 'border-2 border-brand-500/70 bg-brand-500/10'
-                                                        : hasVoted
-                                                            ? 'border-emerald-500/40 bg-emerald-500/5'
-                                                            : 'border-dark-700 bg-dark-800 hover:border-dark-600'
+                                                    ? 'border-2 border-brand-500/70 bg-brand-500/10'
+                                                    : hasVoted
+                                                        ? 'border-emerald-500/40 bg-emerald-500/5'
+                                                        : 'border-dark-700 bg-dark-800 hover:border-dark-600'
                                                     }`}
                                             >
                                                 <div className="flex justify-between items-start mb-2">

@@ -1,4 +1,4 @@
-export const calculateOverlap = (participants, startDate, endDate, durationDays) => {
+export const calculateOverlap = (participants, availabilityMap, startDate, endDate, durationDays) => {
   if (!participants?.length) return [];
 
   // Pre-generate all date strings in the range once (O(D) time and space)
@@ -7,11 +7,17 @@ export const calculateOverlap = (participants, startDate, endDate, durationDays)
 
   if (totalDays < durationDays) return [];
 
-  // Pre-process participants: convert availableDays to O(1) lookup Sets
-  // Complexity: O(N * D) where N is participants, D is their configured available days
-  const pSets = participants.map(p => ({
-    availableSet: new Set(p.availableDays || [])
-  }));
+  // Pre-process participants: convert availabilityMap data to O(1) lookup Sets
+  // Fallback to p.availableDays during dual-write transition if map lacks data
+  const pSets = participants.map(p => {
+    const datesObj = availabilityMap?.[p.id] || {};
+    const datesArray = Object.keys(datesObj).filter(k => datesObj[k] === true);
+    // If no availability map data exists yet for this user (before migration), fallback
+    const daysToUse = datesArray.length > 0 ? datesArray : (p.availableDays || []);
+    return {
+      availableSet: new Set(daysToUse)
+    };
+  });
 
   const results = [];
 

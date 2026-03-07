@@ -48,22 +48,22 @@ describe('calculateOverlap', () => {
 
   test('returns empty when duration > total days in range', () => {
     const participants = [makeParticipant('Alice', ['2024-06-01', '2024-06-02'])];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-02', 5);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-02', 5);
     expect(result).toEqual([]);
   });
 
   test('returns empty when no participants', () => {
-    const result = calculateOverlap([], '2024-06-01', '2024-06-10', 3);
+    const result = calculateOverlap([], {}, '2024-06-01', '2024-06-10', 3);
     expect(result).toEqual([]);
   });
 
   test('returns empty when participants is null', () => {
-    const result = calculateOverlap(null, '2024-06-01', '2024-06-10', 3);
+    const result = calculateOverlap(null, {}, '2024-06-01', '2024-06-10', 3);
     expect(result).toEqual([]);
   });
 
   test('returns empty when participants is undefined', () => {
-    const result = calculateOverlap(undefined, '2024-06-01', '2024-06-10', 3);
+    const result = calculateOverlap(undefined, {}, '2024-06-01', '2024-06-10', 3);
     expect(result).toEqual([]);
   });
 
@@ -72,7 +72,7 @@ describe('calculateOverlap', () => {
       makeParticipant('Alice', ['2024-06-01', '2024-06-02', '2024-06-03']),
       makeParticipant('Bob', ['2024-06-01', '2024-06-02', '2024-06-03'])
     ];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-03', 3);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-03', 3);
     expect(result.length).toBe(1);
     expect(result[0].availabilityPercent).toBe(100);
     expect(result[0].availableCount).toBe(2);
@@ -83,7 +83,7 @@ describe('calculateOverlap', () => {
       makeParticipant('Alice', ['2024-06-01', '2024-06-02', '2024-06-03']),
       makeParticipant('Bob', ['2024-06-02', '2024-06-03', '2024-06-04'])
     ];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-04', 2);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-04', 2);
     // Results should be sorted by availability descending
     expect(result[0].availabilityPercent).toBe(100);
   });
@@ -93,7 +93,7 @@ describe('calculateOverlap', () => {
       makeParticipant('Alice', []),
       makeParticipant('Bob', [])
     ];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-05', 1);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-05', 1);
     result.forEach(r => {
       expect(r.availabilityPercent).toBe(0);
     });
@@ -104,7 +104,7 @@ describe('calculateOverlap', () => {
       makeParticipant('Alice', ['2024-06-01', '2024-06-02']),
       makeParticipant('Bob', ['2024-06-03', '2024-06-04'])
     ];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-04', 1);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-04', 1);
     for (let i = 1; i < result.length; i++) {
       expect(result[i - 1].availabilityPercent).toBeGreaterThanOrEqual(result[i].availabilityPercent);
     }
@@ -115,7 +115,7 @@ describe('calculateOverlap', () => {
       makeParticipant('Alice', ['2024-06-01', '2024-06-03']),
       makeParticipant('Bob', ['2024-06-01', '2024-06-02'])
     ];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-03', 1);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-03', 1);
     expect(result.length).toBe(3);
     // June 1 should be 100% (both available)
     const june1 = result.find(r => r.startDate.toISOString().split('T')[0] === '2024-06-01');
@@ -124,7 +124,7 @@ describe('calculateOverlap', () => {
 
   test('handles participant with no availableDays field', () => {
     const participants = [{ name: 'NoData' }];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-03', 1);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-03', 1);
     result.forEach(r => {
       expect(r.availableCount).toBe(0);
     });
@@ -132,7 +132,7 @@ describe('calculateOverlap', () => {
 
   test('handles participant with empty availableDays array', () => {
     const participants = [makeParticipant('Empty', [])];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-03', 1);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-03', 1);
     result.forEach(r => {
       expect(r.availableCount).toBe(0);
     });
@@ -142,7 +142,7 @@ describe('calculateOverlap', () => {
     const participants = [
       makeParticipant('Alice', ['2024-06-01', '2024-06-02', '2024-06-03', '2024-06-04', '2024-06-05'])
     ];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-05', 3);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-05', 3);
     result.forEach(r => {
       expect(r.dayCount).toBe(3);
     });
@@ -154,7 +154,7 @@ describe('calculateOverlap', () => {
       makeParticipant('Bob', ['2024-06-01']),
       makeParticipant('Charlie', ['2024-06-01'])
     ];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-01', 1);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-01', 1);
     expect(result[0].totalParticipants).toBe(3);
   });
 
@@ -168,7 +168,7 @@ describe('calculateOverlap', () => {
     const participants = [
       makeParticipant('Alice', ['2024-06-01', '2024-06-02', '2024-06-03'])
     ];
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-03', 3);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-03', 3);
     expect(result[0].availableCount).toBe(1);
   });
 
@@ -176,7 +176,7 @@ describe('calculateOverlap', () => {
     const participants = Array.from({ length: 50 }, (_, i) =>
       makeParticipant(`P${i}`, ['2024-06-01', '2024-06-02', '2024-06-03'])
     );
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-03', 3);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-03', 3);
     expect(result[0].availableCount).toBe(50);
     expect(result[0].availabilityPercent).toBe(100);
   });
@@ -188,7 +188,7 @@ describe('calculateOverlap', () => {
       makeParticipant('Bob', days.slice(5, 20))
     ];
     const start = Date.now();
-    const result = calculateOverlap(participants, '2024-06-01', '2024-06-30', 5);
+    const result = calculateOverlap(participants, {}, '2024-06-01', '2024-06-30', 5);
     const elapsed = Date.now() - start;
     expect(result.length).toBeGreaterThan(0);
     expect(elapsed).toBeLessThan(5000); // Should complete in under 5s

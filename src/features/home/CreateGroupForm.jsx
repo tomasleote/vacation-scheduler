@@ -4,7 +4,7 @@ import { useNotification } from '../../context/NotificationContext';
 import { Input, Textarea, Label, Button, Card, LocationInput, CalendarPicker } from '../../shared/ui';
 import { todayYMD } from '../../utils/dateUtils';
 import { apiCall } from '../../services/apiService';
-import { MAX_GROUP_NAME_LENGTH } from '../../utils/constants/validation';
+import { MAX_GROUP_NAME_LENGTH, MAX_DATE_RANGE_DAYS } from '../../utils/constants/validation';
 import { EVENT_TYPES, getEventConfig } from '../../utils/eventTypes';
 import { Link } from 'react-router-dom';
 
@@ -33,6 +33,12 @@ function CreateGroupForm({ onSuccess, onCancel }) {
 
     if (new Date(endDate) < new Date(startDate)) {
       addNotification({ type: 'error', message: 'End Date cannot be before Start Date.' });
+      return;
+    }
+
+    const rangeDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
+    if (rangeDays > MAX_DATE_RANGE_DAYS) {
+      addNotification({ type: 'error', message: `Date range cannot exceed ${MAX_DATE_RANGE_DAYS} days.` });
       return;
     }
 
@@ -158,6 +164,13 @@ function CreateGroupForm({ onSuccess, onCancel }) {
           placeholder="End date"
         />
       </div>
+      {startDate && endDate && (() => {
+        const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
+        if (days > MAX_DATE_RANGE_DAYS) {
+          return <p className="text-xs text-rose-400">Date range exceeds the {MAX_DATE_RANGE_DAYS}-day limit ({days} days selected).</p>;
+        }
+        return <p className="text-xs text-gray-500">{days} day{days !== 1 ? 's' : ''} selected (max {MAX_DATE_RANGE_DAYS}).</p>;
+      })()}
 
       <Card variant="info" className="p-3">
         <div className="flex items-start gap-2">

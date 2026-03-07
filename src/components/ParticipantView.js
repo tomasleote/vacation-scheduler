@@ -14,6 +14,7 @@ import VotePanel from './VotePanel';
 import CalendarEventButton from '../features/admin/CalendarEventButton';
 import SchemaMarkup from '../features/landing/SchemaMarkup';
 import { ChevronDown, ChevronUp, CalendarRange, Users } from 'lucide-react';
+import { MAX_PARTICIPANTS_PER_GROUP } from '../utils/constants/validation';
 
 function ParticipantView({ participantId: initialParticipantId, onBack }) {
   const { groupId } = useGroupContext();
@@ -21,8 +22,6 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { addNotification } = useNotification();
-  const [participants, setParticipants] = useState([]);
-  const participantsRef = useRef(0);
   const [expandedSection, setExpandedSection] = useState('form');
   const [currentParticipantId, setCurrentParticipantId] = useState(null);
   const [savedDays, setSavedDays] = useState([]);
@@ -59,8 +58,11 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
 
     const unsubParts = subscribeToParticipants(groupId, (data) => {
       setError('');
-      setParticipants(data || []);
-      participantsRef.current = (data || []).length;
+      // In transitional Phase B, we don't strictly *need* parts here if it's fed by useGroupData,
+      // but ParticipantView hasn't been fully migrated to useGroupData for its internal `participants` state yet.
+      // wait, `useGroupData` provides participants! But ParticipantView itself fetches them again inside.
+      // We will keep its manual subscribeToParticipants intact since that's how it was originally structured.
+      // We'll just fix the missing variables.
       onLoad();
     }, (err) => {
       setError(err.message || 'Failed to load participants.');
@@ -106,9 +108,10 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
         setPoll(pollData);
 
         // Auto-close: if all participants have voted, close the poll
-        if (pollData?.status === 'active' && participantsRef.current > 0) {
+        if (pollData?.status === 'active' && group?.participants) {
+          const partCount = Object.keys(group.participants).length;
           const voterCount = Object.keys(pollData.votes || {}).length;
-          if (voterCount >= participantsRef.current) {
+          if (voterCount >= partCount && partCount > 0) {
             closePoll(groupId).catch(err =>
               console.error('[ParticipantView] auto-close poll failed:', err)
             );
@@ -147,10 +150,11 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
     try {
       setLoading(true);
 
-      // The participants state is already updated via a real-time listener (subscribeToParticipants).
-      // This ensures the `participants` array is always current for checks like duplication.
+      // We check duplication inside addParticipant/updateParticipant server-side logic
+      // But we can still do a basic check here using group.participants if available
+      const storedParticipants = Object.values(group?.participants || {});
       const normalizedName = formData.name.trim().toLowerCase();
-      const isDuplicate = participants.some(
+      const isDuplicate = storedParticipants.some(
         p => p.name.trim().toLowerCase() === normalizedName && p.id !== currentParticipantId
       );
       if (isDuplicate) {
@@ -294,6 +298,13 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
                 group={group}
                 onSubmit={handleSubmit}
               />
+            ) : participants.length >= MAX_PARTICIPANTS_PER_GROUP ? (
+              <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
+                <div className="bg-rose-500/10 border border-rose-500/30 rounded-lg p-4 text-center">
+                  <p className="font-bold text-rose-400 mb-1">This group is full</p>
+                  <p className="text-sm text-gray-400">The maximum of {MAX_PARTICIPANTS_PER_GROUP} participants has been reached.</p>
+                </div>
+              </div>
             ) : (
               <div className="bg-dark-900 rounded-xl border border-dark-700 p-6">
                 <h2 className="text-xl font-bold text-gray-50 mb-4">Select Your Availability</h2>
@@ -313,16 +324,15 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
             <div className="bg-dark-900 rounded-xl border border-dark-700 p-6 sticky top-4">
               <h3 className="text-lg font-bold text-gray-50 mb-4">Participants</h3>
               <div className="space-y-2 text-sm max-h-96 overflow-y-auto">
-                {(!participants || participants.length === 0) ? (
+                {(!group?.participants || Object.keys(group.participants).length === 0) ? (
                   <p className="text-gray-500">Be the first to join!</p>
                 ) : (
-                  participants?.map((p, i) => (
-                    <div key={i} className="bg-dark-800 rounded p-3 border-l-4 border-brand-500">
+                  Object.values(group.participants).map((p, i) => (
+                    <div key={p.id || i} className="bg-dark-800 rounded p-3 border-l-4 border-brand-500">
                       <p className="font-semibold text-gray-50">
                         <TruncatedText text={p.name || 'Anonymous'} maxWidth="100%" />
                       </p>
                       <p className="text-gray-400 text-xs">{p.duration}-day duration</p>
-                      <p className="text-gray-400 text-xs">{(p.availableDays || []).length} days available</p>
                     </div>
                   ))
                 )}
@@ -361,7 +371,9 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
               ref={calendarRef}
               startDate={group.startDate}
               endDate={group.endDate}
-              participants={participants}
+              participants={Object.values(group?.participants || {})}
+              availabilityMap={group?.availabilityMap || {}}
+              dailyCounts={group?.dailyCounts || {}}
               duration={heatmapDuration || '3'}
               overlaps={getBestOverlapPeriods(overlaps, 10)}
               onDurationChange={poll ? undefined : setHeatmapDuration}
@@ -387,8 +399,8 @@ function ParticipantView({ participantId: initialParticipantId, onBack }) {
                       />
                       <CalendarEventButton
                         group={group}
-                        overlap={{ startDate: candidate?.startDate, endDate: candidate?.endDate, availableCount: participants.length }}
-                        participantCount={participants.length}
+                        overlap={{ startDate: candidate?.startDate, endDate: candidate?.endDate, availableCount: Object.keys(group?.participants || {}).length }}
+                        participantCount={Object.keys(group?.participants || {}).length}
                       />
                     </div>
                   );

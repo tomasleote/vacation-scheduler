@@ -1,5 +1,6 @@
 import { ref, set, remove, onValue } from 'firebase/database';
 import { database } from './firebaseConfig';
+import { MAX_POLL_CANDIDATES, MAX_VOTES_PER_PARTICIPANT } from '../utils/constants/validation';
 
 /**
  * Creates a new poll under groups/{groupId}/poll.
@@ -10,6 +11,10 @@ import { database } from './firebaseConfig';
  * @returns {Promise<string>} pollId
  */
 export const createPoll = async (groupId, { mode, candidates }) => {
+  if (candidates.length > MAX_POLL_CANDIDATES) {
+    throw new Error(`Cannot create a poll with more than ${MAX_POLL_CANDIDATES} candidates.`);
+  }
+
   const pollId = crypto.randomUUID();
 
   const candidatesObj = {};
@@ -62,6 +67,10 @@ export const deletePoll = async (groupId) => {
  * @param {string[]} candidateIds
  */
 export const submitVote = async (groupId, participantId, candidateIds) => {
+  if (candidateIds.length > MAX_VOTES_PER_PARTICIPANT) {
+    throw new Error(`Cannot vote for more than ${MAX_VOTES_PER_PARTICIPANT} candidates.`);
+  }
+
   const voteRef = ref(database, `groups/${groupId}/poll/votes/${participantId}`);
   if (candidateIds.length === 0) {
     await remove(voteRef);

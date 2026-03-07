@@ -1,5 +1,8 @@
-import { ref, get, update, remove, runTransaction, onValue, off } from 'firebase/database';
+import { ref, get, update, remove, runTransaction, onValue } from 'firebase/database';
 import { database } from './firebaseConfig';
+import { saveAvailability } from './availabilityService';
+import { updateDailyCounts } from './dailyCountsService';
+import { MAX_PARTICIPANTS_PER_GROUP } from '../utils/constants/validation';
 
 export const addParticipant = async (groupId, participantData) => {
   const name = String(participantData.name || '').trim().slice(0, 100);
@@ -22,6 +25,9 @@ export const addParticipant = async (groupId, participantData) => {
       currentParticipants = {};
     }
     const existing = Object.values(currentParticipants);
+    if (existing.length >= MAX_PARTICIPANTS_PER_GROUP) {
+      return; // Abort — group is full
+    }
     if (existing.some(p => p.name && p.name.trim().toLowerCase() === normalizedNew)) {
       return;
     }
@@ -39,7 +45,15 @@ export const addParticipant = async (groupId, participantData) => {
   });
 
   if (!transactionResult.committed) {
-    throw new Error('A participant with this name already exists. Please choose another name.');
+    throw new Error('Could not add participant. The group may be full or the name may already be taken.');
+  }
+
+  // Phase A: Dual-write availability to new nodes
+  try {
+    await saveAvailability(groupId, participantId, availableDays);
+    await updateDailyCounts(groupId, [], availableDays);
+  } catch (e) {
+    console.error("Failed writing availability/counts:", e);
   }
 
   return participantId;
@@ -53,6 +67,16 @@ export const updateParticipant = async (groupId, participantId, updates) => {
   if (safeUpdates.blockType !== undefined) safeUpdates.blockType = String(safeUpdates.blockType).slice(0, 50);
   if (Array.isArray(safeUpdates.availableDays)) {
     safeUpdates.availableDays = safeUpdates.availableDays.slice(0, 365).map(d => String(d).slice(0, 10));
+  }
+
+  // Fetch old days before updating to compute diff for counts
+  let oldDays = [];
+  if (safeUpdates.availableDays) {
+    const pRef = ref(database, `groups/${groupId}/participants/${participantId}`);
+    const snap = await get(pRef);
+    if (snap.exists() && snap.val().availableDays) {
+      oldDays = snap.val().availableDays;
+    }
   }
 
   if (safeUpdates.name !== undefined) {
@@ -77,6 +101,15 @@ export const updateParticipant = async (groupId, participantId, updates) => {
   } else {
     const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
     await update(participantRef, safeUpdates);
+  }
+
+  if (safeUpdates.availableDays) {
+    try {
+      await saveAvailability(groupId, participantId, safeUpdates.availableDays);
+      await updateDailyCounts(groupId, oldDays, safeUpdates.availableDays);
+    } catch (e) {
+      console.error("Failed updating availability/counts:", e);
+    }
   }
 };
 
