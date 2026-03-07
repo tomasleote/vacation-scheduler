@@ -1,0 +1,332 @@
+
+> find-a-day@1.0.0 test
+> react-scripts test --watchAll=false --runInBand
+
+FAIL src/firebase.test.js
+  ● Console
+
+    console.error
+      Error creating group: Error: Firebase error
+          at Object.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\firebase.test.js:95:35)
+          at Promise.then.completed (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\utils.js:391:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\utils.js:316:10)
+          at _callCircusTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:218:40)
+          at _runTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:155:3)
+          at _runTestsForDescribeBlock (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:66:9)
+          at _runTestsForDescribeBlock (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:60:9)
+          at run (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:25:3)
+          at runAndTransformResultsToJestFormat (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:170:21)
+          at jestAdapter (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:82:19)
+          at runTestInternal (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-runner\build\runTest.js:389:16)
+          at runTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-runner\build\runTest.js:475:34)
+
+    [0m [90m 83 |[39m     [36mreturn[39m { groupId[33m,[39m adminToken }[33m;[39m
+     [90m 84 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 85 |[39m     console[33m.[39merror([32m"Error creating group:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 86 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m`Failed to create group: ${error.message}`[39m)[33m;[39m
+     [90m 87 |[39m   }
+     [90m 88 |[39m }[33m;[39m[0m
+
+      at createGroup (src/services/groupService.js:85:13)
+      at Object.<anonymous> (src/firebase.test.js:97:5)
+
+    console.error
+      Failed to update dailyCounts: TypeError: increment is not a function
+          at updateDailyCounts (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\dailyCountsService.js:37:28)
+          at addParticipant (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\participantService.js:54:5)
+          at Object.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\firebase.test.js:128:20)
+
+    [0m [90m 43 |[39m         [36mawait[39m update(countsRef[33m,[39m updates)[33m;[39m
+     [90m 44 |[39m     } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 45 |[39m         console[33m.[39merror([32m"Failed to update dailyCounts:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 46 |[39m         [36mthrow[39m error[33m;[39m
+     [90m 47 |[39m     }
+     [90m 48 |[39m }[33m;[39m[0m
+
+      at updateDailyCounts (src/services/dailyCountsService.js:45:17)
+      at addParticipant (src/services/participantService.js:54:5)
+      at Object.<anonymous> (src/firebase.test.js:128:20)
+
+    console.error
+      Failed writing availability/counts: TypeError: increment is not a function
+          at updateDailyCounts (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\dailyCountsService.js:37:28)
+          at addParticipant (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\participantService.js:54:5)
+          at Object.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\firebase.test.js:128:20)
+
+    [0m [90m 54 |[39m     [36mawait[39m updateDailyCounts(groupId[33m,[39m [][33m,[39m availableDays)[33m;[39m
+     [90m 55 |[39m   } [36mcatch[39m (e) {
+    [31m[1m>[22m[39m[90m 56 |[39m     console[33m.[39merror([32m"Failed writing availability/counts:"[39m[33m,[39m e)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 57 |[39m   }
+     [90m 58 |[39m
+     [90m 59 |[39m   [36mreturn[39m participantId[33m;[39m[0m
+
+      at addParticipant (src/services/participantService.js:56:13)
+      at Object.<anonymous> (src/firebase.test.js:128:20)
+
+    console.error
+      Error: AggregateError
+          at Object.dispatchError (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:63:19)
+          at Request.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\xhr\XMLHttpRequest-impl.js:655:18)
+          at Request.emit (node:events:520:35)
+          at ClientRequest.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\helpers\http-request.js:121:14)
+          at ClientRequest.emit (node:events:508:28)
+          at emitErrorEvent (node:_http_client:108:11)
+          at Socket.socketErrorListener (node:_http_client:575:5)
+          at Socket.emit (node:events:508:28)
+          at emitErrorNT (node:internal/streams/destroy:170:8)
+          at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+          at processTicksAndRejections (node:internal/process/task_queues:89:21) undefined
+
+      at VirtualConsole.<anonymous> (node_modules/jsdom/lib/jsdom/virtual-console.js:29:45)
+      at Object.dispatchError (node_modules/jsdom/lib/jsdom/living/xhr/xhr-utils.js:66:53)
+      at Request.<anonymous> (node_modules/jsdom/lib/jsdom/living/xhr/XMLHttpRequest-impl.js:655:18)
+      at ClientRequest.<anonymous> (node_modules/jsdom/lib/jsdom/living/helpers/http-request.js:121:14)
+
+    console.error
+      Failed to deleteGroup group1: TypeError: Network request failed
+          at C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\whatwg-fetch\dist\fetch.umd.js:567:18
+          at Timeout.task [as _onTimeout] (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\browser\Window.js:516:19)
+          at listOnTimeout (node:internal/timers:605:17)
+          at processTimers (node:internal/timers:541:7)
+
+    [0m [90m 138 |[39m     }
+     [90m 139 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 140 |[39m     console[33m.[39merror([32m`Failed to deleteGroup ${groupId}:`[39m[33m,[39m error)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 141 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m`Failed to deleteGroup ${groupId}: ${error.message}`[39m)[33m;[39m
+     [90m 142 |[39m   }
+     [90m 143 |[39m }[33m;[39m[0m
+
+      at deleteGroup (src/services/groupService.js:140:13)
+      at Object.<anonymous> (src/firebase.test.js:216:5)
+
+    console.error
+      Error: AggregateError
+          at Object.dispatchError (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\xhr\xhr-utils.js:63:19)
+          at Request.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\xhr\XMLHttpRequest-impl.js:655:18)
+          at Request.emit (node:events:520:35)
+          at ClientRequest.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\helpers\http-request.js:121:14)
+          at ClientRequest.emit (node:events:508:28)
+          at emitErrorEvent (node:_http_client:108:11)
+          at Socket.socketErrorListener (node:_http_client:575:5)
+          at Socket.emit (node:events:508:28)
+          at emitErrorNT (node:internal/streams/destroy:170:8)
+          at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+          at processTicksAndRejections (node:internal/process/task_queues:89:21) undefined
+
+      at VirtualConsole.<anonymous> (node_modules/jsdom/lib/jsdom/virtual-console.js:29:45)
+      at Object.dispatchError (node_modules/jsdom/lib/jsdom/living/xhr/xhr-utils.js:66:53)
+      at Request.<anonymous> (node_modules/jsdom/lib/jsdom/living/xhr/XMLHttpRequest-impl.js:655:18)
+      at ClientRequest.<anonymous> (node_modules/jsdom/lib/jsdom/living/helpers/http-request.js:121:14)
+
+  ● addParticipant › rejects duplicate participant names (case-insensitive)
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "already exists"
+    Received message:   "Could not add participant. The group may be full or the name may already be taken."
+
+        [0m [90m 46 |[39m
+         [90m 47 |[39m   [36mif[39m ([33m![39mtransactionResult[33m.[39mcommitted) {
+        [31m[1m>[22m[39m[90m 48 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m'Could not add participant. The group may be full or the name may already be taken.'[39m)[33m;[39m
+         [90m    |[39m           [31m[1m^[22m[39m
+         [90m 49 |[39m   }
+         [90m 50 |[39m
+         [90m 51 |[39m   [90m// Phase A: Dual-write availability to new nodes[39m[0m
+
+      at addParticipant (src/services/participantService.js:48:11)
+      at Object.<anonymous> (src/firebase.test.js:143:5)
+      at Object.toThrow (node_modules/expect/build/index.js:285:22)
+      at Object.<anonymous> (src/firebase.test.js:145:15)
+
+  ● addParticipant › rejects duplicate names with whitespace differences
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "already exists"
+    Received message:   "Could not add participant. The group may be full or the name may already be taken."
+
+        [0m [90m 46 |[39m
+         [90m 47 |[39m   [36mif[39m ([33m![39mtransactionResult[33m.[39mcommitted) {
+        [31m[1m>[22m[39m[90m 48 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m'Could not add participant. The group may be full or the name may already be taken.'[39m)[33m;[39m
+         [90m    |[39m           [31m[1m^[22m[39m
+         [90m 49 |[39m   }
+         [90m 50 |[39m
+         [90m 51 |[39m   [90m// Phase A: Dual-write availability to new nodes[39m[0m
+
+      at addParticipant (src/services/participantService.js:48:11)
+      at Object.<anonymous> (src/firebase.test.js:151:5)
+      at Object.toThrow (node_modules/expect/build/index.js:285:22)
+      at Object.<anonymous> (src/firebase.test.js:153:15)
+
+  ● deleteGroup › calls remove on group ref
+
+    Failed to deleteGroup group1: Network request failed
+
+    [0m [90m 139 |[39m   } [36mcatch[39m (error) {
+     [90m 140 |[39m     console[33m.[39merror([32m`Failed to deleteGroup ${groupId}:`[39m[33m,[39m error)[33m;[39m
+    [31m[1m>[22m[39m[90m 141 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m`Failed to deleteGroup ${groupId}: ${error.message}`[39m)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m 142 |[39m   }
+     [90m 143 |[39m }[33m;[39m
+     [90m 144 |[39m[0m
+
+      at deleteGroup (src/services/groupService.js:141:11)
+      at Object.<anonymous> (src/firebase.test.js:216:5)
+
+  ● deleteParticipant › calls remove on participant ref
+
+    TypeError: Network request failed
+
+      at node_modules/whatwg-fetch/dist/fetch.umd.js:567:18
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+PASS src/features/recovery/RecoverAdminForm.test.js
+  ● Console
+
+    console.error
+      [Admin Recovery Error] handleSubmit failed: Error: Incorrect recovery passphrase
+          at apiCall (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\apiService.js:32:19)
+          at handleSubmit (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\features\recovery\RecoverAdminForm.jsx:65:26)
+
+    [0m [90m 78 |[39m             onSuccess(groupId[33m.[39mtrim()[33m,[39m data[33m.[39madminToken)[33m;[39m
+     [90m 79 |[39m         } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 80 |[39m             console[33m.[39merror([32m'[Admin Recovery Error] handleSubmit failed:'[39m[33m,[39m err)[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 81 |[39m             addNotification({
+     [90m 82 |[39m                 type[33m:[39m [32m'error'[39m[33m,[39m
+     [90m 83 |[39m                 title[33m:[39m [32m'Error'[39m[33m,[39m[0m
+
+      at handleSubmit (src/features/recovery/RecoverAdminForm.jsx:80:21)
+
+    console.error
+      [Admin Recovery Error] handleSubmit failed: Error: You appear to be offline or the network failed to reach the server.
+          at apiCall (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\apiService.js:40:19)
+          at handleSubmit (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\features\recovery\RecoverAdminForm.jsx:65:26)
+
+    [0m [90m 78 |[39m             onSuccess(groupId[33m.[39mtrim()[33m,[39m data[33m.[39madminToken)[33m;[39m
+     [90m 79 |[39m         } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 80 |[39m             console[33m.[39merror([32m'[Admin Recovery Error] handleSubmit failed:'[39m[33m,[39m err)[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 81 |[39m             addNotification({
+     [90m 82 |[39m                 type[33m:[39m [32m'error'[39m[33m,[39m
+     [90m 83 |[39m                 title[33m:[39m [32m'Error'[39m[33m,[39m[0m
+
+      at handleSubmit (src/features/recovery/RecoverAdminForm.jsx:80:21)
+
+    console.error
+      [Admin Recovery Error] handleSubmit failed: Error: Search failed
+          at apiCall (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\apiService.js:32:19)
+          at handleSubmit (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\features\recovery\RecoverAdminForm.jsx:39:17)
+
+    [0m [90m 78 |[39m             onSuccess(groupId[33m.[39mtrim()[33m,[39m data[33m.[39madminToken)[33m;[39m
+     [90m 79 |[39m         } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 80 |[39m             console[33m.[39merror([32m'[Admin Recovery Error] handleSubmit failed:'[39m[33m,[39m err)[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 81 |[39m             addNotification({
+     [90m 82 |[39m                 type[33m:[39m [32m'error'[39m[33m,[39m
+     [90m 83 |[39m                 title[33m:[39m [32m'Error'[39m[33m,[39m[0m
+
+      at handleSubmit (src/features/recovery/RecoverAdminForm.jsx:80:21)
+
+PASS src/shared/ui/LocationInput.test.js
+PASS src/components/CalendarView.test.js
+PASS src/features/docs/DocumentationPage.test.js
+PASS src/shared/ui/CalendarPicker.test.jsx
+PASS src/components/SlidingOverlapCalendar.test.js
+PASS src/shared/ui/Footer.test.js
+PASS src/components/ResultsDisplay.test.js
+PASS src/shared/ui/LocationDisplay.test.js
+PASS src/shared/ui/TruncatedText.test.js
+PASS src/utils/dateUtils.test.js
+PASS src/utils/overlap.test.js
+PASS src/services/locationService.test.js
+PASS src/utils/export.test.js
+PASS src/utils/participantValidation.test.js
+PASS src/utils/calendarEvent.test.js
+FAIL src/utils/crypto.test.js
+  ● Test suite failed to run
+
+    ReferenceError: ReadableStream is not defined
+
+    [0m [90m 1 |[39m [36mimport[39m { initializeApp } [36mfrom[39m [32m'firebase/app'[39m[33m;[39m
+     [90m 2 |[39m [36mimport[39m { getDatabase } [36mfrom[39m [32m'firebase/database'[39m[33m;[39m
+    [31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m { getAuth[33m,[39m signInAnonymously } [36mfrom[39m [32m'firebase/auth'[39m[33m;[39m
+     [90m   |[39m [31m[1m^[22m[39m
+     [90m 4 |[39m
+     [90m 5 |[39m [36mconst[39m _dbUrl [33m=[39m (() [33m=>[39m {
+     [90m 6 |[39m   [36mif[39m (process[33m.[39menv[33m.[39m[33mREACT_APP_FIREBASE_DATABASE_URL[39m) {[0m
+
+      at Object.<anonymous> (node_modules/undici/lib/web/fetch/response.js:542:3)
+      at Object.<anonymous> (node_modules/undici/lib/web/fetch/index.js:11:5)
+      at Object.<anonymous> (node_modules/undici/index.js:106:19)
+      at Object.<anonymous> (node_modules/firebase/node_modules/@firebase/auth/dist/node/totp-259483a2.js:7:14)
+      at Object.<anonymous> (node_modules/firebase/node_modules/@firebase/auth/dist/node/index.js:5:12)
+      at Object.<anonymous> (node_modules/firebase/auth/dist/index.cjs.js:5:12)
+      at Object.<anonymous> (src/services/firebaseConfig.js:3:1)
+      at Object.<anonymous> (src/firebase.js:10:1)
+      at Object.<anonymous> (src/utils/crypto.test.js:5:24)
+
+FAIL src/components/ParticipantView.test.js
+  ● Test suite failed to run
+
+    ReferenceError: ReadableStream is not defined
+
+    [0m [90m 1 |[39m [36mimport[39m { initializeApp } [36mfrom[39m [32m'firebase/app'[39m[33m;[39m
+     [90m 2 |[39m [36mimport[39m { getDatabase } [36mfrom[39m [32m'firebase/database'[39m[33m;[39m
+    [31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m { getAuth[33m,[39m signInAnonymously } [36mfrom[39m [32m'firebase/auth'[39m[33m;[39m
+     [90m   |[39m [31m[1m^[22m[39m
+     [90m 4 |[39m
+     [90m 5 |[39m [36mconst[39m _dbUrl [33m=[39m (() [33m=>[39m {
+     [90m 6 |[39m   [36mif[39m (process[33m.[39menv[33m.[39m[33mREACT_APP_FIREBASE_DATABASE_URL[39m) {[0m
+
+      at Object.<anonymous> (node_modules/undici/lib/web/fetch/response.js:542:3)
+      at Object.<anonymous> (node_modules/undici/lib/web/fetch/index.js:11:5)
+      at Object.<anonymous> (node_modules/undici/index.js:106:19)
+      at Object.<anonymous> (node_modules/firebase/node_modules/@firebase/auth/dist/node/totp-259483a2.js:7:14)
+      at Object.<anonymous> (node_modules/firebase/node_modules/@firebase/auth/dist/node/index.js:5:12)
+      at Object.<anonymous> (node_modules/firebase/auth/dist/index.cjs.js:5:12)
+      at Object.<anonymous> (src/services/firebaseConfig.js:3:1)
+      at Object.<anonymous> (src/services/availabilityService.js:2:1)
+      at Object.<anonymous> (src/components/ParticipantView.js:7:1)
+      at Object.<anonymous> (src/components/ParticipantView.test.js:5:1)
+
+FAIL src/components/AdminPanel.test.js
+  ● Test suite failed to run
+
+    ReferenceError: ReadableStream is not defined
+
+    [0m [90m 1 |[39m [36mimport[39m { initializeApp } [36mfrom[39m [32m'firebase/app'[39m[33m;[39m
+     [90m 2 |[39m [36mimport[39m { getDatabase } [36mfrom[39m [32m'firebase/database'[39m[33m;[39m
+    [31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m { getAuth[33m,[39m signInAnonymously } [36mfrom[39m [32m'firebase/auth'[39m[33m;[39m
+     [90m   |[39m [31m[1m^[22m[39m
+     [90m 4 |[39m
+     [90m 5 |[39m [36mconst[39m _dbUrl [33m=[39m (() [33m=>[39m {
+     [90m 6 |[39m   [36mif[39m (process[33m.[39menv[33m.[39m[33mREACT_APP_FIREBASE_DATABASE_URL[39m) {[0m
+
+      at Object.<anonymous> (node_modules/undici/lib/web/fetch/response.js:542:3)
+      at Object.<anonymous> (node_modules/undici/lib/web/fetch/index.js:11:5)
+      at Object.<anonymous> (node_modules/undici/index.js:106:19)
+      at Object.<anonymous> (node_modules/firebase/node_modules/@firebase/auth/dist/node/totp-259483a2.js:7:14)
+      at Object.<anonymous> (node_modules/firebase/node_modules/@firebase/auth/dist/node/index.js:5:12)
+      at Object.<anonymous> (node_modules/firebase/auth/dist/index.cjs.js:5:12)
+      at Object.<anonymous> (src/services/firebaseConfig.js:3:1)
+      at Object.<anonymous> (src/services/availabilityService.js:2:1)
+      at Object.<anonymous> (src/features/admin/hooks/useGroupData.js:4:1)
+      at Object.<anonymous> (src/features/admin/AdminPage.jsx:13:1)
+      at Object.<anonymous> (src/components/AdminPanel.js:2:1)
+      at Object.<anonymous> (src/components/AdminPanel.test.js:101:1)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+Test Suites: 4 failed, 16 passed, 20 total
+Tests:       4 failed, 236 passed, 240 total
+Snapshots:   0 total
+Time:        11.684 s, estimated 36 s
+Ran all test suites.

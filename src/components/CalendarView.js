@@ -97,7 +97,8 @@ function CalendarView({ startDate, endDate, onSubmit, savedDays = [], initialNam
     days.push(i);
   }
 
-  const isDateInRange = useCallback((dateStr) => dateRange.includes(dateStr), [dateRange]);
+  const dateRangeSet = useMemo(() => new Set(dateRange), [dateRange]);
+  const isDateInRange = useCallback((dateStr) => dateRangeSet.has(dateStr), [dateRangeSet]);
 
   const selectedSet = useMemo(() => new Set(selectedDays), [selectedDays]);
 

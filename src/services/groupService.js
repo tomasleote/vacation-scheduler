@@ -56,7 +56,7 @@ export const createGroup = async (groupData) => {
     };
 
     const location = sanitizeLocation(groupData.location);
-    const groupRef = ref(database, `groups/${groupId}`);
+    const groupRef = ref(database, `groups/${groupId}/meta`);
     const groupPayload = {
       name,
       description,
@@ -72,6 +72,13 @@ export const createGroup = async (groupData) => {
     if (recoveryPasswordHash) {
       groupPayload.recoveryPasswordHash = recoveryPasswordHash;
     }
+    // Also write top-level static attributes to `groups/${groupId}` for easier listing/deletion and rules
+    const rootUpdates = {
+      [`groups/${groupId}/id`]: groupId,
+      [`groups/${groupId}/createdAt`]: groupPayload.createdAt,
+      [`groups/${groupId}/adminTokenHash`]: adminTokenHash,
+    };
+    await update(ref(database), rootUpdates);
     await set(groupRef, groupPayload);
     return { groupId, adminToken };
   } catch (error) {
@@ -82,7 +89,7 @@ export const createGroup = async (groupData) => {
 
 export const getGroup = async (groupId) => {
   try {
-    const groupRef = ref(database, `groups/${groupId}`);
+    const groupRef = ref(database, `groups/${groupId}/meta`);
     const snapshot = await get(groupRef);
     return snapshot.exists() ? snapshot.val() : null;
   } catch (error) {
@@ -136,7 +143,7 @@ export const deleteGroup = async (groupId, adminToken) => {
 };
 
 export const subscribeToGroup = (groupId, callback, onError) => {
-  const groupRef = ref(database, `groups/${groupId}`);
+  const groupRef = ref(database, `groups/${groupId}/meta`);
   const unsubscribe = onValue(groupRef, (snapshot) => {
     callback(snapshot.exists() ? snapshot.val() : null);
   }, (error) => {

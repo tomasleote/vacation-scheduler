@@ -47,7 +47,7 @@ async function getAllGroups(options = {}) {
   let url = `${DB_URL.replace(/\/$/, '')}/groups.json`;
   const params = new URLSearchParams();
   if (options.adminEmail) {
-    params.append('orderBy', '"adminEmail"');
+    params.append('orderBy', '"meta/adminEmail"');
     params.append('equalTo', `"${options.adminEmail}"`);
   } else if (options.shallow === false) {
     params.append('shallow', 'false');
@@ -105,7 +105,7 @@ module.exports = async function handler(req, res) {
   const origin = process.env.APP_BASE_URL || (req.headers['x-forwarded-host'] ? 'https://' + req.headers['x-forwarded-host'] : req.headers.referer?.replace(/\/$/, '') || 'https://vacation-scheduler.vercel.app');
 
   const matches = Object.values(allGroups || {}).filter(
-    (g) => g && g.adminEmail && g.adminEmail.trim().toLowerCase() === targetEmail
+    (g) => g && g.meta && g.meta.adminEmail && g.meta.adminEmail.trim().toLowerCase() === targetEmail
   );
 
   // Always respond with success to prevent email enumeration attacks
@@ -149,10 +149,10 @@ module.exports = async function handler(req, res) {
       const participantLink = `${origin}?group=${g.id}`;
       return `
         <div style="background:#1e293b;border-radius:8px;padding:16px;margin-bottom:12px;">
-          <h3 style="margin:0 0 6px;font-size:16px;color:#f1f5f9;">${escapeHtml(g.name || 'Unnamed group')}</h3>
-          <p style="margin:0 0 10px;font-size:13px;color:#94a3b8;">${formatDate(g.startDate)} → ${formatDate(g.endDate)}</p>
+          <h3 style="margin:0 0 6px;font-size:16px;color:#f1f5f9;">${escapeHtml(g.meta?.name || 'Unnamed group')}</h3>
+          <p style="margin:0 0 10px;font-size:13px;color:#94a3b8;">${formatDate(g.meta?.startDate)} → ${formatDate(g.meta?.endDate)}</p>
           <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em;">Group ID</p>
-          <code style="display:block;padding:8px 10px;background:#0f172a;border-radius:6px;color:#818cf8;font-size:12px;margin-bottom:10px;">${escapeHtml(g.id)}</code>
+          <code style="display:block;padding:8px 10px;background:#0f172a;border-radius:6px;color:#818cf8;font-size:12px;margin-bottom:10px;">${escapeHtml(g.id || g.meta?.id)}</code>
           <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em;">Participant link</p>
           <a href="${escapeHtml(participantLink)}" style="display:block;padding:8px 10px;background:#0f172a;border-radius:6px;color:#60a5fa;text-decoration:none;font-size:12px;word-break:break-all;">${escapeHtml(participantLink)}</a>
         </div>`;

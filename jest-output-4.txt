@@ -1,0 +1,603 @@
+
+> find-a-day@1.0.0 test
+> react-scripts test --watchAll=false --runInBand
+
+FAIL src/components/AdminPanel.test.js
+  ● Console
+
+    console.error
+      [Admin Panel] handleCreateParticipant failed: Error: Server error
+          at Object.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\components\AdminPanel.test.js:231:46)
+          at Promise.then.completed (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\utils.js:391:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\utils.js:316:10)
+          at _callCircusTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:218:40)
+          at _runTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:155:3)
+          at _runTestsForDescribeBlock (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:66:9)
+          at _runTestsForDescribeBlock (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:60:9)
+          at run (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:25:3)
+          at runAndTransformResultsToJestFormat (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:170:21)
+          at jestAdapter (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:82:19)
+          at runTestInternal (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-runner\build\runTest.js:389:16)
+          at runTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-runner\build\runTest.js:475:34)
+
+    [0m [90m 63 |[39m       setParticipants(prev [33m=>[39m prev[33m.[39mfilter(p [33m=>[39m p[33m.[39mid [33m!==[39m tempId))[33m;[39m
+     [90m 64 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 65 |[39m       console[33m.[39merror([32m'[Admin Panel] handleCreateParticipant failed:'[39m[33m,[39m err)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 66 |[39m       [90m// Revert optimistic participant from list, but KEEP form inputs so user can retry[39m
+     [90m 67 |[39m       setParticipants(prev [33m=>[39m prev[33m.[39mfilter(p [33m=>[39m p[33m.[39mid [33m!==[39m tempId))[33m;[39m
+     [90m 68 |[39m[0m
+
+      at src/features/admin/hooks/useParticipantActions.js:65:15
+
+    console.warn
+      [2026-03-07T19:14:51.259Z]  @firebase/database: FIREBASE WARNING: Firebase error. Please ensure that you have the URL of your Firebase Realtime Database instance configured correctly. (https://vacation-scheduler-demo-default-rtdb.firebaseio.com/)
+
+      at Logger.defaultLogHandler [as _logHandler] (node_modules/@firebase/logger/src/logger.ts:115:57)
+      at Logger.Object.<anonymous>.Logger.warn (node_modules/@firebase/logger/src/logger.ts:206:5)
+      at warn (node_modules/@firebase/database/src/core/util/util.ts:155:13)
+      at Connection.onKill_ (node_modules/@firebase/database/src/core/PersistentConnection.ts:878:15)
+      at Connection.Object.<anonymous>.Connection.onConnectionShutdown_ (node_modules/@firebase/database/src/realtime/Connection.ts:521:12)
+      at Connection.Object.<anonymous>.Connection.onControl_ (node_modules/@firebase/database/src/realtime/Connection.ts:364:14)
+      at Connection.Object.<anonymous>.Connection.onPrimaryMessageReceived_ (node_modules/@firebase/database/src/realtime/Connection.ts:311:12)
+      at WebSocketConnection.onMessage (node_modules/@firebase/database/src/realtime/Connection.ts:210:16)
+      at WebSocketConnection.Object.<anonymous>.WebSocketConnection.appendFrame_ (node_modules/@firebase/database/src/realtime/WebSocketConnection.ts:300:12)
+      at WebSocketConnection.Object.<anonymous>.WebSocketConnection.handleIncomingFrame (node_modules/@firebase/database/src/realtime/WebSocketConnection.ts:352:14)
+      at Client.mySock.onmessage (node_modules/@firebase/database/src/realtime/WebSocketConnection.ts:222:12)
+      at Client.dispatchEvent (node_modules/faye-websocket/lib/faye/websocket/api/event_target.js:24:30)
+      at Client._receiveMessage (node_modules/faye-websocket/lib/faye/websocket/api.js:154:10)
+      at Client.<anonymous> (node_modules/faye-websocket/lib/faye/websocket/api.js:36:49)
+      at Client.<anonymous> (node_modules/websocket-driver/lib/websocket/driver/hybi.js:460:14)
+      at pipe (node_modules/websocket-extensions/lib/pipeline/index.js:37:40)
+      at Pipeline.Object.<anonymous>.Pipeline._loop (node_modules/websocket-extensions/lib/pipeline/index.js:44:3)
+      at Pipeline.Object.<anonymous>.Pipeline.processIncomingMessage (node_modules/websocket-extensions/lib/pipeline/index.js:13:8)
+      at Extensions.processIncomingMessage (node_modules/websocket-extensions/lib/websocket_extensions.js:133:20)
+      at Client._emitMessage (node_modules/websocket-driver/lib/websocket/driver/hybi.js:451:22)
+      at Client._emitFrame (node_modules/websocket-driver/lib/websocket/driver/hybi.js:411:19)
+      at Client.parse (node_modules/websocket-driver/lib/websocket/driver/hybi.js:137:18)
+      at Client.parse (node_modules/websocket-driver/lib/websocket/driver/client.js:63:58)
+      at IO.Object.<anonymous>.IO.write (node_modules/websocket-driver/lib/websocket/streams.js:80:16)
+
+    console.error
+      [Admin Panel] handleEditParticipant failed: Error: A participant with this name already exists.
+          at Object.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\components\AdminPanel.test.js:312:49)
+          at Promise.then.completed (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\utils.js:391:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\utils.js:316:10)
+          at _callCircusTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:218:40)
+          at runNextTicks (node:internal/process/task_queues:64:5)
+          at listOnTimeout (node:internal/timers:567:9)
+          at processTimers (node:internal/timers:541:7)
+          at _runTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:155:3)
+          at _runTestsForDescribeBlock (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:66:9)
+          at _runTestsForDescribeBlock (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:60:9)
+          at run (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:25:3)
+          at runAndTransformResultsToJestFormat (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:170:21)
+          at jestAdapter (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:82:19)
+          at runTestInternal (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-runner\build\runTest.js:389:16)
+          at runTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-runner\build\runTest.js:475:34)
+
+    [0m [90m 121 |[39m       setEditingParticipant([36mnull[39m)[33m;[39m
+     [90m 122 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 123 |[39m       console[33m.[39merror([32m'[Admin Panel] handleEditParticipant failed:'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 124 |[39m       [36mif[39m (originalEntry) {
+     [90m 125 |[39m         setParticipants(prev [33m=>[39m {
+     [90m 126 |[39m           [36mconst[39m exists [33m=[39m prev[33m.[39msome(p [33m=>[39m p[33m.[39mid [33m===[39m editId)[33m;[39m[0m
+
+      at src/features/admin/hooks/useParticipantActions.js:123:15
+
+    console.error
+      [Admin Panel] handleDeleteParticipant failed: Error: Network error
+          at Object.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\components\AdminPanel.test.js:365:49)
+          at Promise.then.completed (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\utils.js:391:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\utils.js:316:10)
+          at _callCircusTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:218:40)
+          at _runTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:155:3)
+          at _runTestsForDescribeBlock (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:66:9)
+          at _runTestsForDescribeBlock (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:60:9)
+          at run (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:25:3)
+          at runAndTransformResultsToJestFormat (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:170:21)
+          at jestAdapter (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:82:19)
+          at runTestInternal (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-runner\build\runTest.js:389:16)
+          at runTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-runner\build\runTest.js:475:34)
+
+    [0m [90m 162 |[39m       setDeletingParticipant([36mnull[39m)[33m;[39m
+     [90m 163 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 164 |[39m       console[33m.[39merror([32m'[Admin Panel] handleDeleteParticipant failed:'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 165 |[39m       setParticipants(prev [33m=>[39m {
+     [90m 166 |[39m         [36mconst[39m exists [33m=[39m prev[33m.[39msome(p [33m=>[39m p[33m.[39mid [33m===[39m deleteId)[33m;[39m
+     [90m 167 |[39m         [36mreturn[39m exists [33m?[39m prev [33m:[39m [[33m...[39mprev[33m,[39m originalEntry][33m;[39m[0m
+
+      at src/features/admin/hooks/useParticipantActions.js:164:15
+
+    console.error
+      [Admin Panel] handleSendInvite failed: Error: Email service error
+          at apiCall (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\apiService.js:32:19)
+          at runNextTicks (node:internal/process/task_queues:64:5)
+          at processTimers (node:internal/timers:538:9)
+          at C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\features\admin\hooks\useParticipantActions.js:200:7
+
+    [0m [90m 211 |[39m       addNotification({ type[33m:[39m [32m'success'[39m[33m,[39m title[33m:[39m [32m'Invite Sent'[39m[33m,[39m message[33m:[39m [32m`Invitation email sent to ${participant.email}.`[39m })[33m;[39m
+     [90m 212 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 213 |[39m       console[33m.[39merror([32m'[Admin Panel] handleSendInvite failed:'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 214 |[39m       addNotification({ type[33m:[39m [32m'error'[39m[33m,[39m title[33m:[39m [32m'Invite Failed'[39m[33m,[39m message[33m:[39m err[33m.[39mmessage [33m||[39m [32m'Failed to send invite.'[39m })[33m;[39m
+     [90m 215 |[39m     } [36mfinally[39m {
+     [90m 216 |[39m       setInviteSendingId([36mnull[39m)[33m;[39m[0m
+
+      at src/features/admin/hooks/useParticipantActions.js:213:15
+
+    console.error
+      [Admin Panel] handleSendInvite failed: Error: You appear to be offline or the network failed to reach the server.
+          at apiCall (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\apiService.js:40:19)
+          at C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\features\admin\hooks\useParticipantActions.js:200:7
+
+    [0m [90m 211 |[39m       addNotification({ type[33m:[39m [32m'success'[39m[33m,[39m title[33m:[39m [32m'Invite Sent'[39m[33m,[39m message[33m:[39m [32m`Invitation email sent to ${participant.email}.`[39m })[33m;[39m
+     [90m 212 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 213 |[39m       console[33m.[39merror([32m'[Admin Panel] handleSendInvite failed:'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 214 |[39m       addNotification({ type[33m:[39m [32m'error'[39m[33m,[39m title[33m:[39m [32m'Invite Failed'[39m[33m,[39m message[33m:[39m err[33m.[39mmessage [33m||[39m [32m'Failed to send invite.'[39m })[33m;[39m
+     [90m 215 |[39m     } [36mfinally[39m {
+     [90m 216 |[39m       setInviteSendingId([36mnull[39m)[33m;[39m[0m
+
+      at src/features/admin/hooks/useParticipantActions.js:213:15
+
+  ● Delete Participant › shows confirmation modal and deletes on confirm
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: "group-123", "p1"
+    Received: "group-123", "token-abc", "p1"
+
+    Number of calls: 1
+
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"min-h-screen p-4 md:p-8"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"max-w-6xl mx-auto"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex justify-between items-start mb-8"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"text-brand-400 hover:text-brand-300 font-semibold"[39m
+                [36m>[39m
+                  [0m← Back to Home[0m
+                [36m</button>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"text-3xl font-bold text-gray-50 flex-1 text-center truncate"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"block truncate "[39m
+                    [33mstyle[39m=[32m"max-width: 100%;"[39m
+                    [33mtitle[39m=[32m"Summer Trip"[39m
+                  [36m>[39m
+                    [0mSummer Trip[0m
+                  [36m</span>[39m
+                [36m</h1>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"w-20"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"md:col-span-2 md:row-span-2"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"bg-dark-900 rounded-xl border border-dark-700 p-6 h-full"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"flex justify-between items-start mb-6"[39m
+                    [36m>[39m
+                      [36m<div>[39m
+                        [36m<h2[39m
+                          [33mclass[39m=[32m"text-2xl font-bold text-gray-50 mb-2"[39m
+                        [36m>[39m
+                          [36m<span[39m
+                            [33mclass[39m=[32m"block truncate "[39m
+                            [33mstyle[39m=[32m"max-width: 100%;"[39m
+                            [33mtitle[39m=[32m"Summer Trip"[39m
+                          [36m>[39m
+                            [0mSummer Trip[0m
+                          [36m</span>[39m
+                        [36m</h2>[39m
+                        [36m<div[39m
+                          [33mclass[39m=[32m"mb-3"[39m
+                        [36m>[39m
+                          [36m<span[39m
+                            [33mclass[39m=[32m"inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 [&>svg]:w-3.5 [&>svg]:h-3.5"[39m
+                          [36m>[39m
+                            [36m<svg[39m
+                              [33mfill[39m=[32m"currentColor"[39m
+                              [33mheight[39m=[32m"20"[39m
+                              [33mstroke[39m=[32m"currentColor"[39m
+                              [33mstroke-width[39m=[32m"0"[39m
+                              [33mviewBox[39m=[32m"0 0 448 512"[39m
+                              [33mwidth[39m=[32m"20"[39m
+                              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                            [36m>[39m
+                              [36m<path[39m
+                                [33md[39m=[32m"M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm320-196c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12h-40c-6.6 0-12-5.4-12-12v-40zm0 128c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12h-40c-6.6 0-12-5.4-12-12v-40zM192 268c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12h-40c-6.6 0-12-5.4-12-12v-40zm0 128c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12h-40c-6.6 0-12-5.4-12-12v-40zM64 268c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12H76c-6.6 0-12-5.4-12-12v-40zm0 128c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12H76c-6.6 0-12-5.4-12-12v-40zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"[39m
+                              [36m/>[39m
+                            [36m</svg>[39m
+                            [0mOther[0m
+                          [36m</span>[39m
+                        [36m</div>[39m
+                        [36m<p[39m
+                          [33mclass[39m=[32m"text-gray-400 text-sm mb-3"[39m
+                        [36m>[39m
+                          [0mBeach vacation[0m
+                        [36m</p>[39m
+                        [36m<div[39m
+                          [33mclass[39m=[32m"flex gap-4 text-sm text-gray-400 flex-wrap mt-1"[39m
+                        [36m>[39m
+                          [36m<span[39m
+                            [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+                          [36m>[39m
+                            [36m<svg[39m
+                              [33mclass[39m=[32m"text-gray-500"[39m
+                              [33mfill[39m=[32m"none"[39m
+                              [33mheight[39m=[32m"16"[39m
+                              [33mstroke[39m=[32m"currentColor"[39m
+                              [33mstroke-linecap[39m=[32m"round"[39m
+                              [33mstroke-linejoin[39m=[32m"round"[39m
+                              [33mstroke-width[39m=[32m"2"[39m
+                              [33mviewBox[39m=[32m"0 0 24 24"[39m
+                              [33mwidth[39m=[32m"16"[39m
+                              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                            [36m>[39m
+                              [36m<rect[39m
+                                [33mheight[39m=[32m"18"[39m
+                                [33mrx[39m=[32m"2"[39m
+                                [33mry[39m=[32m"2"[39m
+                                [33mwidth[39m=[32m"18"[39m
+                                [33mx[39m=[32m"3"[39m
+                                [33my[39m=[32m"4"[39m
+                              [36m/>[39m
+                              [36m<line[39m
+                                [33mx1[39m=[32m"16"[39m
+                                [33mx2[39m=[32m"16"[39m
+                                [33my1[39m=[32m"2"[39m
+                                [33my2[39m=[32m"6"[39m
+                              [36m/>[39m
+                              [36m<line[39m
+                                [33mx1[39m=[32m"8"[39m
+                                [33mx2[39m=[32m"8"[39m
+                                [33my1[39m=[32m"2"[39m
+                                [33my2[39m=[32m"6"[39m
+                              [36m/>[39m
+                              [36m<line[39m
+                                [33mx1[39m=[32m"3"[39m
+                                [33mx2[39m=[32m"21"[39m
+                                [33my1[39m=[32m"10"[39m
+                                [33my2[39m=[32m"10"[39m
+                              [3...
+
+    [0m [90m 344 |[39m
+     [90m 345 |[39m         [36mawait[39m waitFor(() [33m=>[39m {
+    [31m[1m>[22m[39m[90m 346 |[39m             expect(mockDeleteParticipant)[33m.[39mtoHaveBeenCalledWith([32m'group-123'[39m[33m,[39m [32m'p1'[39m)[33m;[39m
+     [90m     |[39m                                           [31m[1m^[22m[39m
+     [90m 347 |[39m             expect(mockAddNotification)[33m.[39mtoHaveBeenCalledWith(expect[33m.[39mobjectContaining({
+     [90m 348 |[39m                 type[33m:[39m [32m'success'[39m[33m,[39m
+     [90m 349 |[39m                 title[33m:[39m [32m'Participant Deleted'[39m[33m,[39m[0m
+
+      at src/components/AdminPanel.test.js:346:43
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+FAIL src/firebase.test.js
+  ● Console
+
+    console.error
+      Error creating group: Error: Firebase error
+          at Object.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\firebase.test.js:106:35)
+          at Promise.then.completed (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\utils.js:391:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\utils.js:316:10)
+          at _callCircusTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:218:40)
+          at _runTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:155:3)
+          at _runTestsForDescribeBlock (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:66:9)
+          at _runTestsForDescribeBlock (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:60:9)
+          at run (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\run.js:25:3)
+          at runAndTransformResultsToJestFormat (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:170:21)
+          at jestAdapter (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:82:19)
+          at runTestInternal (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-runner\build\runTest.js:389:16)
+          at runTest (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jest-runner\build\runTest.js:475:34)
+
+    [0m [90m 83 |[39m     [36mreturn[39m { groupId[33m,[39m adminToken }[33m;[39m
+     [90m 84 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 85 |[39m     console[33m.[39merror([32m"Error creating group:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 86 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m`Failed to create group: ${error.message}`[39m)[33m;[39m
+     [90m 87 |[39m   }
+     [90m 88 |[39m }[33m;[39m[0m
+
+      at createGroup (src/services/groupService.js:85:13)
+      at Object.<anonymous> (src/firebase.test.js:108:5)
+
+    console.error
+      Failed to deleteGroup group1: TypeError: Cannot read properties of undefined (reading 'ok')
+          at deleteGroup (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\groupService.js:135:19)
+          at Object.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\firebase.test.js:227:5)
+
+    [0m [90m 138 |[39m     }
+     [90m 139 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 140 |[39m     console[33m.[39merror([32m`Failed to deleteGroup ${groupId}:`[39m[33m,[39m error)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 141 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m`Failed to deleteGroup ${groupId}: ${error.message}`[39m)[33m;[39m
+     [90m 142 |[39m   }
+     [90m 143 |[39m }[33m;[39m[0m
+
+      at deleteGroup (src/services/groupService.js:140:13)
+      at Object.<anonymous> (src/firebase.test.js:227:5)
+
+  ● updateParticipant › rejects name change to existing name
+
+    expect(received).rejects.toThrow(expected)
+
+    Expected substring: "The group may be full or the name may already be taken"
+    Received message:   "A participant with this name already exists. Please choose another name."
+
+        [0m [90m  97 |[39m
+         [90m  98 |[39m     [36mif[39m ([33m![39mtransactionResult[33m.[39mcommitted) {
+        [31m[1m>[22m[39m[90m  99 |[39m       [36mthrow[39m [36mnew[39m [33mError[39m([32m'A participant with this name already exists. Please choose another name.'[39m)[33m;[39m
+         [90m     |[39m             [31m[1m^[22m[39m
+         [90m 100 |[39m     }
+         [90m 101 |[39m   } [36melse[39m {
+         [90m 102 |[39m     [36mconst[39m participantRef [33m=[39m ref(database[33m,[39m [32m`groups/${groupId}/participants/${participantId}`[39m)[33m;[39m[0m
+
+      at updateParticipant (src/services/participantService.js:99:13)
+      at Object.<anonymous> (src/firebase.test.js:179:5)
+      at Object.toThrow (node_modules/expect/build/index.js:285:22)
+      at Object.<anonymous> (src/firebase.test.js:181:15)
+
+  ● deleteGroup › calls admin API to delete group
+
+    Failed to deleteGroup group1: Cannot read properties of undefined (reading 'ok')
+
+    [0m [90m 139 |[39m   } [36mcatch[39m (error) {
+     [90m 140 |[39m     console[33m.[39merror([32m`Failed to deleteGroup ${groupId}:`[39m[33m,[39m error)[33m;[39m
+    [31m[1m>[22m[39m[90m 141 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m`Failed to deleteGroup ${groupId}: ${error.message}`[39m)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m 142 |[39m   }
+     [90m 143 |[39m }[33m;[39m
+     [90m 144 |[39m[0m
+
+      at deleteGroup (src/services/groupService.js:141:11)
+      at Object.<anonymous> (src/firebase.test.js:227:5)
+
+  ● deleteParticipant › calls admin API to delete participant
+
+    TypeError: Cannot read properties of undefined (reading 'ok')
+
+    [0m [90m 137 |[39m     })
+     [90m 138 |[39m   })[33m;[39m
+    [31m[1m>[22m[39m[90m 139 |[39m   [36mif[39m ([33m![39mresponse[33m.[39mok) {
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m 140 |[39m     [36mconst[39m errorData [33m=[39m [36mawait[39m response[33m.[39mjson()[33m;[39m
+     [90m 141 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m(errorData[33m.[39merror [33m||[39m [32m'Failed to delete participant'[39m)[33m;[39m
+     [90m 142 |[39m   }[0m
+
+      at deleteParticipant (src/services/participantService.js:139:17)
+      at Object.<anonymous> (src/firebase.test.js:236:5)
+
+PASS src/features/recovery/RecoverAdminForm.test.js
+  ● Console
+
+    console.error
+      [Admin Recovery Error] handleSubmit failed: Error: Incorrect recovery passphrase
+          at apiCall (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\apiService.js:32:19)
+          at handleSubmit (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\features\recovery\RecoverAdminForm.jsx:65:26)
+
+    [0m [90m 78 |[39m             onSuccess(groupId[33m.[39mtrim()[33m,[39m data[33m.[39madminToken)[33m;[39m
+     [90m 79 |[39m         } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 80 |[39m             console[33m.[39merror([32m'[Admin Recovery Error] handleSubmit failed:'[39m[33m,[39m err)[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 81 |[39m             addNotification({
+     [90m 82 |[39m                 type[33m:[39m [32m'error'[39m[33m,[39m
+     [90m 83 |[39m                 title[33m:[39m [32m'Error'[39m[33m,[39m[0m
+
+      at handleSubmit (src/features/recovery/RecoverAdminForm.jsx:80:21)
+
+    console.error
+      [Admin Recovery Error] handleSubmit failed: Error: You appear to be offline or the network failed to reach the server.
+          at apiCall (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\apiService.js:40:19)
+          at handleSubmit (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\features\recovery\RecoverAdminForm.jsx:65:26)
+
+    [0m [90m 78 |[39m             onSuccess(groupId[33m.[39mtrim()[33m,[39m data[33m.[39madminToken)[33m;[39m
+     [90m 79 |[39m         } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 80 |[39m             console[33m.[39merror([32m'[Admin Recovery Error] handleSubmit failed:'[39m[33m,[39m err)[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 81 |[39m             addNotification({
+     [90m 82 |[39m                 type[33m:[39m [32m'error'[39m[33m,[39m
+     [90m 83 |[39m                 title[33m:[39m [32m'Error'[39m[33m,[39m[0m
+
+      at handleSubmit (src/features/recovery/RecoverAdminForm.jsx:80:21)
+
+    console.error
+      [Admin Recovery Error] handleSubmit failed: Error: Search failed
+          at apiCall (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\services\apiService.js:32:19)
+          at handleSubmit (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\features\recovery\RecoverAdminForm.jsx:39:17)
+
+    [0m [90m 78 |[39m             onSuccess(groupId[33m.[39mtrim()[33m,[39m data[33m.[39madminToken)[33m;[39m
+     [90m 79 |[39m         } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 80 |[39m             console[33m.[39merror([32m'[Admin Recovery Error] handleSubmit failed:'[39m[33m,[39m err)[33m;[39m
+     [90m    |[39m                     [31m[1m^[22m[39m
+     [90m 81 |[39m             addNotification({
+     [90m 82 |[39m                 type[33m:[39m [32m'error'[39m[33m,[39m
+     [90m 83 |[39m                 title[33m:[39m [32m'Error'[39m[33m,[39m[0m
+
+      at handleSubmit (src/features/recovery/RecoverAdminForm.jsx:80:21)
+
+PASS src/shared/ui/LocationInput.test.js
+PASS src/components/ParticipantView.test.js
+  ● Console
+
+    console.error
+      [Participant Submission Error] handleSubmit failed: Error: A participant with this name already exists. Please choose another name.
+          at onSubmit (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\components\ParticipantView.js:183:15)
+          at handleSubmit (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\components\CalendarView.js:138:13)
+          at HTMLUnknownElement.callCallback (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+          at HTMLUnknownElement.callTheUserObjectsOperation (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+          at innerInvokeEventListeners (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:338:25)
+          at invokeEventListeners (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:274:3)
+          at HTMLUnknownElementImpl._dispatch (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:221:9)
+          at HTMLUnknownElementImpl.dispatchEvent (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:94:17)
+          at HTMLUnknownElement.dispatchEvent (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\generated\EventTarget.js:231:34)
+          at Object.invokeGuardedCallbackDev (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:4213:16)
+          at invokeGuardedCallback (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:4277:31)
+          at invokeGuardedCallbackAndCatchFirstError (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:4291:25)
+          at executeDispatch (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:9041:3)
+          at processDispatchQueueItemsInOrder (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:9073:7)
+          at processDispatchQueue (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:9086:5)
+          at dispatchEventsForPlugins (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:9097:3)
+          at C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:9288:12
+          at batchedUpdates$1 (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:26179:12)
+          at batchedUpdates (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:3991:12)
+          at dispatchEventForPluginEventSystem (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:9287:3)
+          at dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:6465:5)
+          at dispatchEvent (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:6457:5)
+          at dispatchDiscreteEvent (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react-dom\cjs\react-dom.development.js:6430:5)
+          at HTMLDivElement.callTheUserObjectsOperation (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+          at innerInvokeEventListeners (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:338:25)
+          at invokeEventListeners (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:274:3)
+          at HTMLFormElementImpl._dispatch (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:221:9)
+          at fireAnEvent (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\helpers\events.js:18:36)
+          at HTMLFormElementImpl.submit (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\nodes\HTMLFormElement-impl.js:84:10)
+          at HTMLFormElementImpl._doSubmit (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\nodes\HTMLFormElement-impl.js:80:10)
+          at HTMLButtonElementImpl._activationBehavior (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\nodes\HTMLButtonElement-impl.js:23:14)
+          at HTMLButtonElementImpl._dispatch (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:240:26)
+          at HTMLButtonElementImpl.dispatchEvent (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:94:17)
+          at HTMLButtonElement.dispatchEvent (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\jsdom\lib\jsdom\living\generated\EventTarget.js:231:34)
+          at C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\@testing-library\dom\dist\events.js:19:20
+          at C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\@testing-library\react\dist\pure.js:107:16
+          at C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\@testing-library\react\dist\act-compat.js:47:24
+          at act (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\react\cjs\react.development.js:2512:16)
+          at C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\@testing-library\react\dist\act-compat.js:46:25
+          at Object.eventWrapper (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\@testing-library\react\dist\pure.js:106:28)
+          at fireEvent (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\@testing-library\dom\dist\events.js:12:35)
+          at fireEvent.<computed> [as click] (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\@testing-library\dom\dist\events.js:110:36)
+          at fireEvent.click (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\node_modules\@testing-library\react\dist\fire-event.js:15:52)
+          at Object.<anonymous> (C:\Users\leotm\Desktop\Projetos\Programming\vacation-scheduler\src\components\ParticipantView.test.js:86:19)
+          at runNextTicks (node:internal/process/task_queues:64:5)
+          at listOnTimeout (node:internal/timers:567:9)
+          at processTimers (node:internal/timers:541:7)
+
+    [0m [90m 230 |[39m       })[33m;[39m
+     [90m 231 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 232 |[39m       console[33m.[39merror([32m'[Participant Submission Error] handleSubmit failed:'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 233 |[39m       addNotification({
+     [90m 234 |[39m         type[33m:[39m [32m'error'[39m[33m,[39m
+     [90m 235 |[39m         title[33m:[39m [32m'Error'[39m[33m,[39m[0m
+
+      at onSubmit (src/components/ParticipantView.js:232:15)
+      at handleSubmit (src/components/CalendarView.js:138:13)
+      at HTMLUnknownElement.callCallback (node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+      at HTMLUnknownElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:338:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:274:3)
+      at HTMLUnknownElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:221:9)
+      at HTMLUnknownElementImpl.dispatchEvent (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:94:17)
+      at HTMLUnknownElement.dispatchEvent (node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:231:34)
+      at Object.invokeGuardedCallbackDev (node_modules/react-dom/cjs/react-dom.development.js:4213:16)
+      at invokeGuardedCallback (node_modules/react-dom/cjs/react-dom.development.js:4277:31)
+      at invokeGuardedCallbackAndCatchFirstError (node_modules/react-dom/cjs/react-dom.development.js:4291:25)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom.development.js:9041:3)
+      at processDispatchQueueItemsInOrder (node_modules/react-dom/cjs/react-dom.development.js:9073:7)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom.development.js:9086:5)
+      at dispatchEventsForPlugins (node_modules/react-dom/cjs/react-dom.development.js:9097:3)
+      at node_modules/react-dom/cjs/react-dom.development.js:9288:12
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom.development.js:26179:12)
+      at batchedUpdates (node_modules/react-dom/cjs/react-dom.development.js:3991:12)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom.development.js:9287:3)
+      at dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay (node_modules/react-dom/cjs/react-dom.development.js:6465:5)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom.development.js:6457:5)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom.development.js:6430:5)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:338:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:274:3)
+      at HTMLFormElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:221:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLFormElementImpl.submit (node_modules/jsdom/lib/jsdom/living/nodes/HTMLFormElement-impl.js:84:10)
+      at HTMLFormElementImpl._doSubmit (node_modules/jsdom/lib/jsdom/living/nodes/HTMLFormElement-impl.js:80:10)
+      at HTMLButtonElementImpl._activationBehavior (node_modules/jsdom/lib/jsdom/living/nodes/HTMLButtonElement-impl.js:23:14)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:240:26)
+      at HTMLButtonElementImpl.dispatchEvent (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:94:17)
+      at HTMLButtonElement.dispatchEvent (node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:231:34)
+      at node_modules/@testing-library/dom/dist/events.js:19:20
+      at node_modules/@testing-library/react/dist/pure.js:107:16
+      at node_modules/@testing-library/react/dist/act-compat.js:47:24
+      at act (node_modules/react/cjs/react.development.js:2512:16)
+      at node_modules/@testing-library/react/dist/act-compat.js:46:25
+      at Object.eventWrapper (node_modules/@testing-library/react/dist/pure.js:106:28)
+      at fireEvent (node_modules/@testing-library/dom/dist/events.js:12:35)
+      at fireEvent.<computed> [as click] (node_modules/@testing-library/dom/dist/events.js:110:36)
+      at fireEvent.click (node_modules/@testing-library/react/dist/fire-event.js:15:52)
+      at Object.<anonymous> (src/components/ParticipantView.test.js:86:19)
+
+PASS src/components/CalendarView.test.js
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "[2026-03-07T19:15:00.875Z]  @firebase/database: FIREBASE WARNING: Firebase error. Please ensure that you have the URL of your Firebase Realtime Database instance configured correctly. (https://vacation-scheduler-demo-default-rtdb.firebaseio.com/) ".
+
+      at console.warn (node_modules/@jest/console/build/BufferedConsole.js:244:10)
+      at Logger.defaultLogHandler [as _logHandler] (node_modules/@firebase/logger/src/logger.ts:115:57)
+      at Logger.Object.<anonymous>.Logger.warn (node_modules/@firebase/logger/src/logger.ts:206:5)
+      at warn (node_modules/@firebase/database/src/core/util/util.ts:155:13)
+      at Connection.onKill_ (node_modules/@firebase/database/src/core/PersistentConnection.ts:878:15)
+      at Connection.Object.<anonymous>.Connection.onConnectionShutdown_ (node_modules/@firebase/database/src/realtime/Connection.ts:521:12)
+      at Connection.Object.<anonymous>.Connection.onControl_ (node_modules/@firebase/database/src/realtime/Connection.ts:364:14)
+      at Connection.Object.<anonymous>.Connection.onPrimaryMessageReceived_ (node_modules/@firebase/database/src/realtime/Connection.ts:311:12)
+      at WebSocketConnection.onMessage (node_modules/@firebase/database/src/realtime/Connection.ts:210:16)
+      at WebSocketConnection.Object.<anonymous>.WebSocketConnection.appendFrame_ (node_modules/@firebase/database/src/realtime/WebSocketConnection.ts:300:12)
+      at WebSocketConnection.Object.<anonymous>.WebSocketConnection.handleIncomingFrame (node_modules/@firebase/database/src/realtime/WebSocketConnection.ts:352:14)
+      at Client.mySock.onmessage (node_modules/@firebase/database/src/realtime/WebSocketConnection.ts:222:12)
+      at Client.dispatchEvent (node_modules/faye-websocket/lib/faye/websocket/api/event_target.js:24:30)
+      at Client._receiveMessage (node_modules/faye-websocket/lib/faye/websocket/api.js:154:10)
+      at Client.<anonymous> (node_modules/faye-websocket/lib/faye/websocket/api.js:36:49)
+      at Client.<anonymous> (node_modules/websocket-driver/lib/websocket/driver/hybi.js:460:14)
+      at pipe (node_modules/websocket-extensions/lib/pipeline/index.js:37:40)
+      at Pipeline.Object.<anonymous>.Pipeline._loop (node_modules/websocket-extensions/lib/pipeline/index.js:44:3)
+      at Pipeline.Object.<anonymous>.Pipeline.processIncomingMessage (node_modules/websocket-extensions/lib/pipeline/index.js:13:8)
+      at Extensions.processIncomingMessage (node_modules/websocket-extensions/lib/websocket_extensions.js:133:20)
+      at Client._emitMessage (node_modules/websocket-driver/lib/websocket/driver/hybi.js:451:22)
+      at Client._emitFrame (node_modules/websocket-driver/lib/websocket/driver/hybi.js:411:19)
+      at Client.parse (node_modules/websocket-driver/lib/websocket/driver/hybi.js:137:18)
+      at Client.parse (node_modules/websocket-driver/lib/websocket/driver/client.js:63:58)
+      at IO.Object.<anonymous>.IO.write (node_modules/websocket-driver/lib/websocket/streams.js:80:16)
+
+PASS src/features/docs/DocumentationPage.test.js
+PASS src/shared/ui/CalendarPicker.test.jsx
+PASS src/components/SlidingOverlapCalendar.test.js
+PASS src/shared/ui/Footer.test.js
+PASS src/components/ResultsDisplay.test.js
+PASS src/shared/ui/LocationDisplay.test.js
+PASS src/shared/ui/TruncatedText.test.js
+PASS src/utils/crypto.test.js
+PASS src/utils/overlap.test.js
+PASS src/utils/calendarEvent.test.js
+PASS src/utils/participantValidation.test.js
+PASS src/utils/export.test.js
+PASS src/services/locationService.test.js
+PASS src/utils/dateUtils.test.js
+
+Test Suites: 2 failed, 18 passed, 20 total
+Tests:       4 failed, 261 passed, 265 total
+Snapshots:   0 total
+Time:        12.503 s, estimated 42 s
+Ran all test suites.

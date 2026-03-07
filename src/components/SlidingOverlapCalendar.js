@@ -1,4 +1,4 @@
-import React, { useState, useMemo, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { getDatesBetween, formatDateRange, getTopFilteredOverlaps } from '../utils/overlap';
 import { Calendar as CalendarIcon, Users, Edit2, Play, ChevronLeft, ChevronRight, XIcon, PartyPopper, UserX, TrendingUp, Vote } from 'lucide-react';
 import { TruncatedText } from '../shared/ui';
@@ -77,16 +77,17 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
             return dailyCounts;
         }
 
+        // Pre-convert each participant's available days to a Set for O(1) lookups
+        const pSets = participants.map(p => {
+            const datesObj = availabilityMap[p.id] || {};
+            const datesFromMap = Object.keys(datesObj).filter(k => datesObj[k]);
+            return new Set(datesFromMap.length > 0 ? datesFromMap : (p.availableDays || []));
+        });
+
         const counts = {};
         dateRange.forEach(dateStr => {
             let availableCount = 0;
-            participants.forEach(p => {
-                const datesObj = availabilityMap[p.id] || {};
-                const hasDate = datesObj[dateStr] === true || (p.availableDays || []).includes(dateStr);
-                if (hasDate) {
-                    availableCount++;
-                }
-            });
+            pSets.forEach(s => { if (s.has(dateStr)) availableCount++; });
             counts[dateStr] = availableCount;
         });
         return counts;
@@ -149,16 +150,19 @@ const SlidingOverlapCalendar = forwardRef(function SlidingOverlapCalendar({ star
     const monthName = monthYear.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
     // 3. Highlight Logic
-    const isDateInRange = (dateStr) => dateRange.includes(dateStr);
+    const dateRangeSet = useMemo(() => new Set(dateRange), [dateRange]);
+    const dateIndexMap = useMemo(() => {
+        const map = new Map();
+        dateRange.forEach((d, i) => map.set(d, i));
+        return map;
+    }, [dateRange]);
+
+    const isDateInRange = useCallback((dateStr) => dateRangeSet.has(dateStr), [dateRangeSet]);
 
     const getHighlightBlock = (startStr) => {
         if (!startStr) return [];
-
-        // Find index of startStr in dateRange
-        const startIndex = dateRange.indexOf(startStr);
-        if (startIndex === -1) return [];
-
-        // Return up to `duration` days from that index
+        const startIndex = dateIndexMap.get(startStr);
+        if (startIndex === undefined) return [];
         return dateRange.slice(startIndex, startIndex + parseInt(duration));
     };
 

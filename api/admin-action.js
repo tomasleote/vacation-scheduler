@@ -34,32 +34,43 @@ module.exports = async function handler(req, res) {
     try {
         const db = admin.database();
         const groupRef = db.ref(`groups/${groupId}`);
-        const snapshot = await groupRef.get();
 
-        if (!snapshot.exists()) {
-            return res.status(404).json({ error: 'Group not found' });
+        // Fetch only the hash to prevent downloading entire massive subtrees
+        let adminTokenHash = null;
+        const rootHashSnap = await groupRef.child('adminTokenHash').get();
+        if (rootHashSnap.exists()) {
+            adminTokenHash = rootHashSnap.val();
+        } else {
+            // Fallback for transition phase before all nodes have root hashes synced
+            const metaHashSnap = await groupRef.child('meta/adminTokenHash').get();
+            if (metaHashSnap.exists()) {
+                adminTokenHash = metaHashSnap.val();
+            } else {
+                // Pre-PRP3 old locations
+                const oldHashSnap = await groupRef.child('adminTokenHash').get();
+                if (oldHashSnap.exists()) adminTokenHash = oldHashSnap.val();
+            }
         }
 
-        const group = snapshot.val();
-        if (!group.adminTokenHash) {
-            return res.status(500).json({ error: 'Group is missing admin token hash' });
+        if (!adminTokenHash) {
+            return res.status(404).json({ error: 'Group not found or missing admin token hash' });
         }
 
         const providedHash = hashPhrase(adminToken);
 
         // Constant-time string comparison to prevent timing attacks
-        if (providedHash.length !== group.adminTokenHash.length ||
-            !crypto.timingSafeEqual(Buffer.from(providedHash), Buffer.from(group.adminTokenHash))) {
+        if (providedHash.length !== adminTokenHash.length ||
+            !crypto.timingSafeEqual(Buffer.from(providedHash), Buffer.from(adminTokenHash))) {
             return res.status(403).json({ error: 'Invalid admin token' });
         }
 
         // Token is valid, perform the requested action bypassing Client RTDB rules
         if (action === 'updateGroup') {
-            const { adminTokenHash, ...safeUpdates } = payload || {};
+            const { adminTokenHash: _unused, ...safeUpdates } = payload || {};
             if (Object.keys(safeUpdates).length === 0) {
                 return res.status(400).json({ error: 'No updates provided' });
             }
-            await groupRef.update(safeUpdates);
+            await groupRef.child('meta').update(safeUpdates);
             return res.status(200).json({ success: true });
 
         } else if (action === 'deleteGroup') {
@@ -71,6 +82,16 @@ module.exports = async function handler(req, res) {
             if (!participantId) {
                 return res.status(400).json({ error: 'Missing participantId for deleteParticipant' });
             }
+
+            // Read participant data first to release name reservation
+            const partSnap = await db.ref(`groups/${groupId}/participants/${participantId}`).get();
+            if (partSnap.exists() && partSnap.val().name) {
+                const normalizedName = partSnap.val().name.trim().toLowerCase();
+                if (normalizedName) {
+                    await db.ref(`groups/${groupId}/participantNames/${normalizedName}`).remove();
+                }
+            }
+
             await db.ref(`groups/${groupId}/participants/${participantId}`).remove();
             return res.status(200).json({ success: true });
 

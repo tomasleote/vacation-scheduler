@@ -18,35 +18,40 @@ export const addParticipant = async (groupId, participantData) => {
   const participantId = crypto.randomUUID();
   const normalizedNew = name.toLowerCase();
 
-  const participantsRef = ref(database, `groups/${groupId}/participants`);
+  // Step 1: Reserve the name atomically via the lightweight index node
+  const nameRef = ref(database, `groups/${groupId}/participantNames/${normalizedNew}`);
+  const nameResult = await runTransaction(nameRef, (current) => {
+    if (current !== null) return; // Name already taken, abort
+    return participantId;
+  }, { applyLocally: false });
 
-  const transactionResult = await runTransaction(participantsRef, (currentParticipants) => {
-    if (!currentParticipants) {
-      currentParticipants = {};
-    }
-    const existing = Object.values(currentParticipants);
-    if (existing.length >= MAX_PARTICIPANTS_PER_GROUP) {
-      return; // Abort — group is full
-    }
-    if (existing.some(p => p.name && p.name.trim().toLowerCase() === normalizedNew)) {
-      return;
-    }
-
-    currentParticipants[participantId] = {
-      name,
-      email,
-      duration,
-      blockType,
-      availableDays,
-      id: participantId,
-      createdAt: new Date().toISOString()
-    };
-    return currentParticipants;
-  });
-
-  if (!transactionResult.committed) {
+  if (!nameResult.committed) {
     throw new Error('Could not add participant. The group may be full or the name may already be taken.');
   }
+
+  // Check group capacity limits loosely here (capacity is rarely an exact race condition issue, name reuse is more critical)
+  try {
+    const participantsRef = ref(database, `groups/${groupId}/participants`);
+    const snap = await get(participantsRef);
+    if (snap.exists() && Object.keys(snap.val()).length >= MAX_PARTICIPANTS_PER_GROUP) {
+      // Rollback name reservation if full
+      await remove(nameRef);
+      throw new Error(`Group is full (max ${MAX_PARTICIPANTS_PER_GROUP} participants).`);
+    }
+  } catch (e) { /* Ignore non-existent snapshot */ }
+
+
+  // Step 2: Write participant data payload directly (no transaction spanning everyone's data)
+  const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
+  await update(participantRef, {
+    name,
+    email,
+    duration,
+    blockType,
+    availableDays,
+    id: participantId,
+    createdAt: new Date().toISOString()
+  });
 
   // Phase A: Dual-write availability to new nodes
   try {
@@ -79,29 +84,45 @@ export const updateParticipant = async (groupId, participantId, updates) => {
     }
   }
 
+  const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
+
+  let didRename = false;
+  let oldNormalizedName = null;
+
   if (safeUpdates.name !== undefined) {
     const normalizedNew = safeUpdates.name.toLowerCase();
-    const participantsRef = ref(database, `groups/${groupId}/participants`);
 
-    const transactionResult = await runTransaction(participantsRef, (currentParticipants) => {
-      if (!currentParticipants) return currentParticipants;
-      const existing = Object.values(currentParticipants);
-      if (existing.some(p => p.name && p.name.trim().toLowerCase() === normalizedNew && p.id !== participantId)) {
-        return;
-      }
-      if (currentParticipants[participantId]) {
-        currentParticipants[participantId] = { ...currentParticipants[participantId], ...safeUpdates };
-      }
-      return currentParticipants;
-    });
-
-    if (!transactionResult.committed) {
-      throw new Error('A participant with this name already exists. Please choose another name.');
+    // Check if the name actually changed from existing
+    const snap = await get(participantRef);
+    if (snap.exists() && snap.val().name) {
+      oldNormalizedName = snap.val().name.trim().toLowerCase();
     }
-  } else {
-    const participantRef = ref(database, `groups/${groupId}/participants/${participantId}`);
-    await update(participantRef, safeUpdates);
+
+    if (oldNormalizedName !== normalizedNew) {
+      didRename = true;
+      // Reserve new name
+      const nameRef = ref(database, `groups/${groupId}/participantNames/${normalizedNew}`);
+      const nameResult = await runTransaction(nameRef, (current) => {
+        if (current !== null) return;
+        return participantId;
+      }, { applyLocally: false });
+
+      if (!nameResult.committed) {
+        throw new Error('A participant with this name already exists. Please choose another name.');
+      }
+
+      // Release old name index
+      if (oldNormalizedName) {
+        await remove(ref(database, `groups/${groupId}/participantNames/${oldNormalizedName}`));
+      }
+    }
   }
+
+  // Use optimistic concurrency for updating the payload itself so fields don't accidentally overwrite concurrent incoming updates
+  await runTransaction(participantRef, (current) => {
+    if (!current) return current; // Participant deleted -- abort
+    return { ...current, ...safeUpdates };
+  }, { applyLocally: false });
 
   if (safeUpdates.availableDays) {
     try {

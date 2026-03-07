@@ -44,7 +44,9 @@ module.exports = async function handler(req, res) {
         // We want to delete groups older than 90 days.
         const cutoffDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
-        const snapshot = await db.ref('groups').get();
+        // Query only the metadata nodes to avoid downloading massive participant arrays
+        // for every group in the database during the cron sweep
+        const snapshot = await db.ref('groups').orderByChild('meta/createdAt').endAt(cutoffDate.toISOString()).get();
 
         const updates = {};
         let deletedCount = 0;
@@ -52,7 +54,8 @@ module.exports = async function handler(req, res) {
         if (snapshot.exists()) {
             snapshot.forEach((child) => {
                 const group = child.val();
-                if (group && group.createdAt && new Date(group.createdAt) < cutoffDate) {
+                const createdAt = group.meta?.createdAt || group.createdAt;
+                if (createdAt && new Date(createdAt) < cutoffDate) {
                     updates[child.key] = null; // Setting a node to null deletes it in RTDB
                     deletedCount++;
                 }

@@ -35,7 +35,9 @@
     "build": "react-scripts build && node scripts/prerender.mjs && node scripts/build-sw.mjs",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "firebase deploy"
+    "deploy": "firebase deploy",
+    "test:stress": "react-scripts test --watchAll=false --testPathPattern=\"src/tests/stress\" --verbose",
+    "test:stress:integration": "firebase emulators:exec 'react-scripts test --watchAll=false --testPathPattern=concurrent-writes --verbose'"
   },
   "browserslist": {
     "production": [

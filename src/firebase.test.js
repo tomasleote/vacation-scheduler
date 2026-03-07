@@ -33,6 +33,7 @@ jest.mock('firebase/database', () => ({
   update: (...args) => mockUpdate(...args),
   remove: (...args) => mockRemove(...args),
   runTransaction: (...args) => mockRunTransaction(...args),
+  increment: jest.fn(() => ({ __increment: true })),
   onValue: jest.fn(),
   off: jest.fn(),
   child: jest.fn()
@@ -60,12 +61,24 @@ beforeEach(() => {
   // Ensure digest always returns the array buffer, even if reset
   global.crypto.subtle.digest = jest.fn().mockResolvedValue(new Uint8Array(32).fill(0xab).buffer);
 
+  if (global.fetch.mockClear) {
+    global.fetch.mockClear();
+  }
+
   // createGroup calls randomUUID twice: first for groupId, then for adminToken
   // addParticipant calls it once for participantId
   mockRandomUUID
     .mockReturnValueOnce('test-group-uuid')
     .mockReturnValueOnce('test-admin-token-uuid')
     .mockReturnValue('test-uuid-fallback');
+});
+
+// Mock fetch for admin API calls
+beforeEach(() => {
+  global.fetch = jest.fn(() => Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ success: true })
+  }));
 });
 
 describe('createGroup', () => {
@@ -142,7 +155,7 @@ describe('addParticipant', () => {
 
     await expect(
       addParticipant('group1', { name: 'alice', email: '', duration: 3 })
-    ).rejects.toThrow('already exists');
+    ).rejects.toThrow('The group may be full or the name may already be taken');
   });
 
   test('rejects duplicate names with whitespace differences', async () => {
@@ -150,13 +163,25 @@ describe('addParticipant', () => {
 
     await expect(
       addParticipant('group1', { name: '  Alice  ', email: '', duration: 3 })
-    ).rejects.toThrow('already exists');
+    ).rejects.toThrow('The group may be full or the name may already be taken');
   });
 });
 
 describe('updateParticipant', () => {
+  beforeEach(() => {
+    // Provide a default mock for get() so evaluating old names doesn't throw
+    mockGet.mockResolvedValue({
+      exists: () => true,
+      val: () => ({ name: 'OldName' })
+    });
+  });
+
   test('updates participant data', async () => {
-    mockRunTransaction.mockResolvedValueOnce({ committed: true });
+    mockRunTransaction
+      // first transaction is name release
+      .mockResolvedValueOnce({ committed: true })
+      // second transaction is the payload
+      .mockResolvedValueOnce({ committed: true });
 
     await updateParticipant('group1', 'p1', { name: 'Alice Updated' });
     expect(mockRunTransaction).toHaveBeenCalled();
@@ -167,10 +192,16 @@ describe('updateParticipant', () => {
 
     await expect(
       updateParticipant('group1', 'p1', { name: 'Bob' })
-    ).rejects.toThrow('already exists');
+    ).rejects.toThrow('A participant with this name already exists');
   });
 
   test('allows keeping same name on update', async () => {
+    // If the name is exactly the same, it skips the index transaction
+    mockGet.mockResolvedValueOnce({
+      exists: () => true,
+      val: () => ({ name: 'Alice' })
+    });
+
     mockRunTransaction.mockResolvedValueOnce({ committed: true });
 
     // Same participant updating their own name (no change) should work
@@ -180,9 +211,10 @@ describe('updateParticipant', () => {
   });
 
   test('skips transaction check when name not in updates', async () => {
+    mockRunTransaction.mockResolvedValueOnce({ committed: true });
     await updateParticipant('group1', 'p1', { duration: 5 });
-    // Should call standard update when only other fields change
-    expect(mockUpdate).toHaveBeenCalled();
+    // Should call runTransaction for the payload update, bypassing the name check
+    expect(mockRunTransaction).toHaveBeenCalled();
   });
 });
 
@@ -212,16 +244,20 @@ describe('getParticipants', () => {
 });
 
 describe('deleteGroup', () => {
-  test('calls remove on group ref', async () => {
-    await deleteGroup('group1');
-    expect(mockRemove).toHaveBeenCalled();
+  test('calls admin API to delete group', async () => {
+    await deleteGroup('group1', 'admin-token');
+    expect(global.fetch).toHaveBeenCalledWith('/api/admin-action', expect.objectContaining({
+      method: 'POST'
+    }));
   });
 });
 
 describe('deleteParticipant', () => {
-  test('calls remove on participant ref', async () => {
-    await deleteParticipant('group1', 'p1');
-    expect(mockRemove).toHaveBeenCalled();
+  test('calls admin API to delete participant', async () => {
+    await deleteParticipant('group1', 'p1', 'admin-token');
+    expect(global.fetch).toHaveBeenCalledWith('/api/admin-action', expect.objectContaining({
+      method: 'POST'
+    }));
   });
 });
 

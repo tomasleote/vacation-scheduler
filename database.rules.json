@@ -3,9 +3,55 @@
     ".read": false,
     ".write": false,
     "groups": {
+      ".indexOn": [],
       "$groupId": {
         ".read": "auth != null",
         ".write": "auth != null && (!data.exists() || newData.exists())",
+        "participantNames": {
+          ".read": "auth != null",
+          "$normalizedName": {
+            ".write": "auth != null",
+            ".validate": "newData.isString()"
+          }
+        },
+        "meta": {
+          ".read": "true",
+          ".write": "auth != null && (!data.exists() || newData.exists())",
+          ".indexOn": [
+            "adminEmail",
+            "createdAt"
+          ],
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 100"
+          },
+          "description": {
+            ".validate": "newData.isString() && newData.val().length <= 1000"
+          },
+          "eventType": {
+            ".validate": "newData.isString()"
+          },
+          "startDate": {
+            ".validate": "newData.isString()"
+          },
+          "endDate": {
+            ".validate": "newData.isString()"
+          },
+          "adminEmail": {
+            ".validate": "newData.isString()"
+          },
+          "location": {
+            ".validate": "newData.hasChildren()"
+          },
+          "createdAt": {
+            ".write": "!data.exists()"
+          },
+          "id": {
+            ".write": "!data.exists()"
+          },
+          "adminTokenHash": {
+            ".write": "!data.exists()"
+          }
+        },
         "id": {
           ".write": "!data.exists()"
         },
@@ -14,27 +60,6 @@
         },
         "adminTokenHash": {
           ".write": "!data.exists()"
-        },
-        "name": {
-          ".validate": "newData.isString() && newData.val().length <= 100"
-        },
-        "description": {
-          ".validate": "newData.isString() && newData.val().length <= 1000"
-        },
-        "eventType": {
-          ".validate": "newData.isString()"
-        },
-        "startDate": {
-          ".validate": "newData.isString()"
-        },
-        "endDate": {
-          ".validate": "newData.isString()"
-        },
-        "adminEmail": {
-          ".validate": "newData.isString()"
-        },
-        "location": {
-          ".validate": "newData.hasChildren()"
         },
         "participants": {
           ".read": "auth != null",

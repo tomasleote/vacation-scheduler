@@ -44,8 +44,13 @@ export const createPoll = async (groupId, { mode, candidates }) => {
  * Marks the poll as closed.
  */
 export const closePoll = async (groupId) => {
-  await set(ref(database, `groups/${groupId}/poll/status`), 'closed');
-  await set(ref(database, `groups/${groupId}/poll/closedAt`), new Date().toISOString());
+  const pollRef = ref(database, `groups/${groupId}/poll`);
+  await import('firebase/database').then(({ update }) => {
+    update(pollRef, {
+      status: 'closed',
+      closedAt: new Date().toISOString()
+    });
+  });
 };
 
 /**

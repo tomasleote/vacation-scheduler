@@ -343,7 +343,7 @@ describe('Delete Participant', () => {
         fireEvent.click(screen.getByTestId('delete-confirm'));
 
         await waitFor(() => {
-            expect(mockDeleteParticipant).toHaveBeenCalledWith('group-123', 'p1');
+            expect(mockDeleteParticipant).toHaveBeenCalledWith('group-123', 'token-abc', 'p1');
             expect(mockAddNotification).toHaveBeenCalledWith(expect.objectContaining({
                 type: 'success',
                 title: 'Participant Deleted',
