@@ -166,6 +166,13 @@ function RootHandler() {
           />
         </ErrorBoundary>
       )}
+      {currentPage === 'admin' && (
+        <ErrorBoundary>
+          <AdminPanel
+            onBack={handleBackHome}
+          />
+        </ErrorBoundary>
+      )}
       {currentPage === 'participant' && (
         <ErrorBoundary>
           <ParticipantView
