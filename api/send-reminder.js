@@ -16,8 +16,24 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Email service is not configured' });
   }
 
-  const allParticipants = Array.isArray(participants) ? participants : [];
-  console.log('[send-reminder] received', allParticipants.length, 'participants:', JSON.stringify(allParticipants));
+  const DB_URL = process.env.REACT_APP_FIREBASE_DATABASE_URL;
+
+  // Fetch participants from RTDB instead of trusting client-provided data
+  let allParticipants = [];
+  if (DB_URL && groupId) {
+    try {
+      const url = `${DB_URL.replace(/\/$/, '')}/groups/${groupId}/participants.json`;
+      const dbRes = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      if (dbRes.ok) {
+        const data = await dbRes.json();
+        allParticipants = data ? Object.values(data) : [];
+      }
+    } catch (err) {
+      console.error('[send-reminder] Failed to fetch participants from RTDB:', err.message);
+    }
+  }
+
+  console.log(`[send-reminder] group="${groupName || groupId}", recipientCount=${allParticipants.filter(p => p.email && p.email.includes('@')).length}`);
   const recipients = [...new Set(
     allParticipants.filter((p) => p.email && p.email.includes('@')).map((p) => p.email)
   )];
@@ -25,7 +41,6 @@ module.exports = async function handler(req, res) {
   if (recipients.length === 0) {
     return res.status(400).json({
       error: 'No participants with email addresses found',
-      debug: `Received ${allParticipants.length} participant(s), none had valid emails`,
     });
   }
 

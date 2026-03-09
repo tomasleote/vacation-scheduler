@@ -37,5 +37,5 @@ yarn-error.log*
 .vercel
 .env*.local
 
-# Claude CLI Local Machine Overrides
-.claude/settings.local.json
+# Claude
+.claude/
