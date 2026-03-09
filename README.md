@@ -4,7 +4,7 @@
 
 Unlike Doodle or When2Meet, **Find A Day** is built specifically for **date ranges**, features a modern mobile-first UI, and requires **no account or sign-up** for organizers or participants.
 
-![Find A Day Preview](https://findaday.app/logo.png)
+![Find A Day Homepage](screenshots/homepage.png)
 
 ## ✨ Why Find A Day?
 
@@ -16,6 +16,8 @@ Unlike Doodle or When2Meet, **Find A Day** is built specifically for **date rang
 *   📱 **Mobile-First**: Designed to work perfectly in your group chat. Every feature is optimized for the phone in your hand.
 *   🔐 **Secure Admin**: Manage your group via a unique admin link. Recover access anytime using a secure passphrase or email.
 *   📅 **Calendar Invites**: Admin can send the winning date as a calendar invite (ICS file) to all participants—one-click import into any calendar app.
+
+![Availability Heatmap](screenshots/findADay-availabilityHeatmap.png)
 
 ## 🛠️ Technology Stack
 
